@@ -158,14 +158,27 @@ VWorld 지도 타일(WMTS)을 요청할 때 브라우저 콘솔에 **CORS 에러
 | `maxZoom` | `number` | `16` | 병합을 해제할 최대 줌 레벨 |
 | `renderMarker` | `(point) => ReactNode` | **필수** | 개별 마커 렌더링 함수 |
 
-### 3. `<RouteLine>`
-복수의 좌표를 이어 선을 그립니다. MapLibre의 비동기 로딩 타이밍을 자동으로 제어합니다.
+### 3. `<PolygonArea>`
+국립공원, 읍면동 등 폴리곤(다각형) 형태의 영역을 렌더링하고 클릭/호버 이벤트를 처리합니다.
 | 속성 (Prop) | 타입 (Type) | 기본값 (Default) | 설명 |
 |---|---|---|---|
 | `id` | `string` | **필수** | 레이어 식별용 고유 ID |
-| `coordinates` | `[number, number][]`| **필수** | 연결할 좌표들의 배열 |
+| `data` | `GeoJSON \| string` | **필수** | GeoJSON Polygon/MultiPolygon 객체 또는 URL |
+| `fillColor` | `string` | `'rgba(33, 150, 243, 0.4)'` | 영역 내부 색상 |
+| `outlineColor` | `string` | `'#2196F3'` | 영역 테두리 색상 |
+| `onClick` | `function` | `undefined` | 영역 클릭 이벤트 콜백 |
+| `onMouseEnter` | `function` | `undefined` | 영역 마우스 진입 이벤트 콜백 |
+
+### 4. `<RouteLine>`
+복수의 좌표나 GeoJSON LineString 데이터를 받아 선(등산로, 트래킹 코스 등)을 그립니다.
+| 속성 (Prop) | 타입 (Type) | 기본값 (Default) | 설명 |
+|---|---|---|---|
+| `id` | `string` | **필수** | 레이어 식별용 고유 ID |
+| `coordinates` | `[number, number][]`| `undefined` | 연결할 좌표들의 배열 |
+| `data` | `GeoJSON \| string` | `undefined` | GeoJSON LineString 객체 또는 URL |
 | `color` | `string` | `'#2196F3'` | 선 색상 (Hex 코드) |
 | `lineDasharray`| `number[]` | `undefined` | 점선 속성 (예: `[4, 4]`) |
+| `onClick` | `function` | `undefined` | 선 클릭 이벤트 콜백 |
 
 ---
 
