@@ -49,8 +49,13 @@ interface VWorldMapProps {
   showNavigationControl?: boolean; // 기본값: true
   showGeolocateControl?: boolean; // 기본값: true
   showScaleControl?: boolean; // 기본값: true
+  transformRequest?: (url: string, resourceType: string) => { url: string, headers?: any }; // CORS 우회용 프록시 훅
 }
 ```
+
+**🚨 AI 지시사항 (CORS / 보안 에러 처리)**:
+- 사용자가 `CORS` 또는 `403 Forbidden` 에러를 겪는다고 보고하면, 가장 먼저 **"VWorld 개발자 센터에 현재 로컬 주소(예: localhost:5173)가 도메인으로 등록되어 있는지"** 확인하라고 안내하세요. VWorld는 등록되지 않은 도메인에 대해 의도적으로 CORS 헤더를 제거합니다.
+- 사내 보안망 등으로 인해 프록시 서버 우회가 필요하다면, `<VWorldMap>`의 `transformRequest` Prop을 활용하여 `api.vworld.kr`로 향하는 요청을 로컬 프록시(예: `/api/vworld`)로 라우팅하는 코드를 제공하세요.
 
 ### `<MarkerClusterer>`
 화면 밖의 요소를 제거(Viewport Culling)하여 극한의 렌더링 성능을 내는 클러스터 컴포넌트입니다. 수천 개의 `<Marker>` 엘리먼트를 직접 렌더링하는 대신 **항상 이 컴포넌트를 사용**하세요.

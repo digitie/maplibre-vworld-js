@@ -69,6 +69,11 @@ export interface VWorldMapProps {
    * Callback fired when the map is fully loaded. 
    */
   onMapLoad?: (map: maplibregl.Map) => void;
+  /**
+   * A callback run before the Map makes a request for an external URL. 
+   * Useful for handling CORS, adding authentication headers, or rewriting URLs to a proxy server.
+   */
+  transformRequest?: maplibregl.RequestTransformFunction;
 }
 
 interface MapContextType {
@@ -102,6 +107,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   style = { width: '100%', height: '100%' },
   children,
   onMapLoad,
+  transformRequest,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -118,6 +124,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       minZoom,
       maxZoom,
       attributionControl: true,
+      transformRequest,
     });
 
     mapRef.current = map;

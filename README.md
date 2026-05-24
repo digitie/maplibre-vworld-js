@@ -109,6 +109,32 @@ export default function MapPage() {
 
 ---
 
+## 🔒 CORS 및 VWorld API 보안/도메인 에러 해결
+
+VWorld 지도 타일(WMTS)을 요청할 때 브라우저 콘솔에 **CORS 에러** 또는 **403 Forbidden** 에러가 발생한다면 다음을 확인하세요.
+
+1. **VWorld 개발자 센터 도메인 등록**: API Key를 발급받은 VWorld 개발자 센터에서 `허용 도메인`에 현재 개발 중인 로컬 주소(예: `http://localhost:5173` 또는 `http://127.0.0.1:5173`) 및 상용 배포 도메인을 정확히 입력해야 합니다. 도메인이 일치하지 않으면 VWorld 서버가 의도적으로 CORS 헤더를 내려주지 않거나 403 에러를 반환합니다.
+2. **프록시 우회 (`transformRequest`)**: 사내망이나 특정 보안 정책으로 인해 브라우저에서 직접 외부 API 호출이 막혀 있는 경우, 프록시 서버를 통해 호출해야 합니다. 이때 `<VWorldMap>`의 `transformRequest` Prop을 사용하여 요청 URL을 가로채고 수정할 수 있습니다.
+
+```tsx
+<VWorldMap 
+  apiKey={API_KEY}
+  transformRequest={(url, resourceType) => {
+    // VWorld API 요청을 로컬 프록시 서버로 우회
+    if (url.includes('api.vworld.kr')) {
+      return {
+        url: url.replace('https://api.vworld.kr', '/api/vworld-proxy'),
+        // 필요한 경우 인증 헤더 추가
+        // headers: { 'Authorization': 'Bearer ...' }
+      };
+    }
+    return { url };
+  }}
+>
+```
+
+---
+
 ## 📚 컴포넌트 API 레퍼런스
 
 ### 1. `<VWorldMap>`
