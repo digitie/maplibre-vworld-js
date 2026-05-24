@@ -12,6 +12,7 @@ export * from './components/ClusterMarker';
 export * from './components/MarkerClusterer';
 export * from './components/RoutePointMarker';
 export * from './components/RouteLine';
+export * from './components/PolygonArea';
 
 // Export Zod validation schemas
 export * from './schemas';

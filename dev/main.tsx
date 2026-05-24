@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { 
   VWorldMap, Marker, WeatherMarker, PlaceMarker, SimpleMarker, 
   PriceMarker, PulsingMarker, PinMarker, MakiMarker, ClusterMarker, MarkerClusterer, RoutePointMarker, RouteLine,
-  VWorldLayerType 
+  VWorldLayerType, PolygonArea
 } from '../src';
 
 const API_KEY = import.meta.env.VITE_VWORLD_API_KEY || 'YOUR_API_KEY';
@@ -12,6 +12,41 @@ const App = () => {
   const [layerType, setLayerType] = useState<VWorldLayerType>('Base');
   const [markerPos, setMarkerPos] = useState<[number, number]>([127.024612, 37.532600]);
   const [semanticThreshold, setSemanticThreshold] = useState<number>(13);
+
+  // States for Area and Route hover
+  const [hoveredArea, setHoveredArea] = useState<string | null>(null);
+  const [hoveredRoute, setHoveredRoute] = useState<string | null>(null);
+
+  // Dummy GeoJSON for Namsan Park Area (Polygon)
+  const namsanAreaGeoJSON = useMemo<GeoJSON.Feature<GeoJSON.Polygon>>(() => ({
+    type: 'Feature',
+    properties: { name: '남산공원' },
+    geometry: {
+      type: 'Polygon',
+      coordinates: [[
+        [126.985, 37.555],
+        [126.995, 37.555],
+        [126.995, 37.545],
+        [126.985, 37.545],
+        [126.985, 37.555]
+      ]]
+    }
+  }), []);
+
+  // Dummy GeoJSON for a Trail (LineString)
+  const namsanTrailGeoJSON = useMemo<GeoJSON.Feature<GeoJSON.LineString>>(() => ({
+    type: 'Feature',
+    properties: { name: '남산 둘레길' },
+    geometry: {
+      type: 'LineString',
+      coordinates: [
+        [126.985, 37.545],
+        [126.990, 37.548],
+        [126.992, 37.552],
+        [126.995, 37.555]
+      ]
+    }
+  }), []);
 
   // Generate 500 random points around Seoul for clustering
   const clusterPoints = useMemo(() => {
@@ -90,6 +125,39 @@ const App = () => {
         />
 
         {/* New Markers Showcase */}
+        <PinMarker 
+          lngLat={[126.9822, 37.5492]} 
+          color="#0F9D58" 
+          icon={<span style={{ fontSize: '18px' }}>🌲</span>} 
+          size={50} 
+          label="남산" 
+          tooltip="남산 서울타워"
+        />
+
+        {/* Namsan Park Area (Polygon) */}
+        <PolygonArea 
+          id="namsan-park"
+          data={namsanAreaGeoJSON}
+          fillColor={hoveredArea ? 'rgba(76, 175, 80, 0.6)' : 'rgba(76, 175, 80, 0.3)'}
+          outlineColor="#2E7D32"
+          outlineWidth={hoveredArea ? 4 : 2}
+          onMouseEnter={() => setHoveredArea('namsan')}
+          onMouseLeave={() => setHoveredArea(null)}
+          onClick={() => alert('남산공원 영역을 클릭했습니다!')}
+        />
+
+        {/* Namsan Trail (Route) */}
+        <RouteLine
+          id="namsan-trail"
+          data={namsanTrailGeoJSON}
+          color={hoveredRoute ? '#FF5722' : '#795548'}
+          lineWidth={hoveredRoute ? 8 : 4}
+          lineDasharray={hoveredRoute ? undefined : [2, 2]}
+          onMouseEnter={() => setHoveredRoute('trail')}
+          onMouseLeave={() => setHoveredRoute(null)}
+          onClick={() => alert('남산 둘레길 경로를 클릭했습니다!')}
+        />
+
         {/* Price Markers (Airbnb style) */}
         <PriceMarker lngLat={[127.03, 37.52]} price={150000} />
         <PriceMarker lngLat={[127.04, 37.53]} price="Sold Out" currency="" color="#888" />
@@ -196,6 +264,9 @@ const App = () => {
         </label>
         <div style={{ fontSize: '12px' }}>
           Marker Pos: {markerPos[0].toFixed(4)}, {markerPos[1].toFixed(4)}
+        </div>
+        <div style={{ marginTop: '12px', fontSize: '12px', color: '#666' }}>
+          * 남산 영역(Polygon)과 둘레길(Line)에 마우스를 올리거나 클릭해보세요.
         </div>
       </div>
     </div>

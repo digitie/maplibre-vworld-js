@@ -13,7 +13,12 @@ export interface RouteLineProps {
    * Array of coordinates [longitude, latitude] that form the line.
    * MUST be memoized or defined outside the component to prevent infinite re-renders.
    */
-  coordinates: [number, number][];
+  coordinates?: [number, number][];
+  /**
+   * GeoJSON data for the route (Feature, FeatureCollection, or URL).
+   * If provided, overrides `coordinates`.
+   */
+  data?: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString> | GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.MultiLineString> | string;
   /**
    * Hex color for the line.
    * @default '#2196F3'
@@ -29,6 +34,18 @@ export interface RouteLineProps {
    * Leave undefined for a solid line.
    */
   lineDasharray?: number[];
+  /**
+   * Fired when the line is clicked.
+   */
+  onClick?: (e: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => void;
+  /**
+   * Fired when the mouse enters the line.
+   */
+  onMouseEnter?: (e: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => void;
+  /**
+   * Fired when the mouse leaves the line.
+   */
+  onMouseLeave?: (e: maplibregl.MapMouseEvent) => void;
 }
 
 /**
@@ -38,9 +55,13 @@ export interface RouteLineProps {
 export const RouteLine: React.FC<RouteLineProps> = ({
   id = 'route-line',
   coordinates,
+  data,
   color = '#2196F3',
   lineWidth = 4,
-  lineDasharray
+  lineDasharray,
+  onClick,
+  onMouseEnter,
+  onMouseLeave
 }) => {
   const { map } = useMap();
   const sourceId = `${id}-source`;
@@ -53,23 +74,31 @@ export const RouteLine: React.FC<RouteLineProps> = ({
       // Validate style exists
       if (!map.getStyle()) return;
 
-      const data: GeoJSON.Feature<GeoJSON.LineString> = {
-        type: 'Feature',
-        properties: {},
-        geometry: {
-          type: 'LineString',
-          coordinates
-        }
-      };
+      let sourceData: any = data;
+
+      if (!sourceData && coordinates) {
+        sourceData = {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates
+          }
+        };
+      }
+
+      if (!sourceData) return;
 
       const source = map.getSource(sourceId) as maplibregl.GeoJSONSource;
 
       if (source) {
-        source.setData(data);
+        if (typeof sourceData !== 'string') {
+          source.setData(sourceData);
+        }
       } else {
         map.addSource(sourceId, {
           type: 'geojson',
-          data
+          data: sourceData
         });
       }
 
@@ -115,7 +144,36 @@ export const RouteLine: React.FC<RouteLineProps> = ({
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, JSON.stringify(coordinates), color, lineWidth, JSON.stringify(lineDasharray), sourceId, layerId]);
+  }, [map, JSON.stringify(coordinates), JSON.stringify(data), color, lineWidth, JSON.stringify(lineDasharray), sourceId, layerId]);
+
+  // Event Listeners
+  useEffect(() => {
+    if (!map) return;
+
+    const clickHandler = (e: any) => {
+      if (onClick) onClick(e);
+    };
+
+    const mouseEnterHandler = (e: any) => {
+      map.getCanvas().style.cursor = 'pointer';
+      if (onMouseEnter) onMouseEnter(e);
+    };
+
+    const mouseLeaveHandler = (e: any) => {
+      map.getCanvas().style.cursor = '';
+      if (onMouseLeave) onMouseLeave(e);
+    };
+
+    map.on('click', layerId, clickHandler);
+    map.on('mouseenter', layerId, mouseEnterHandler);
+    map.on('mouseleave', layerId, mouseLeaveHandler);
+
+    return () => {
+      map.off('click', layerId, clickHandler);
+      map.off('mouseenter', layerId, mouseEnterHandler);
+      map.off('mouseleave', layerId, mouseLeaveHandler);
+    };
+  }, [map, layerId, onClick, onMouseEnter, onMouseLeave]);
 
   return null;
 };
