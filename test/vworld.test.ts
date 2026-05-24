@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getVWorldTileUrl, getVWorldStyle } from '../src/vworld';
+import { getVWorldMaxZoom, getVWorldTileUrl, getVWorldStyle } from '../src/vworld';
 
 describe('VWorld Utilities', () => {
   const API_KEY = 'TEST_KEY';
@@ -28,6 +28,8 @@ describe('VWorld Utilities', () => {
       expect(style.version).toBe(8);
       expect(style.sources).toHaveProperty('vworld-Base');
       expect(style.sources['vworld-Base'].type).toBe('raster');
+      expect((style.sources['vworld-Base'] as any).attribution).toBe('공간정보 오픈플랫폼 브이월드');
+      expect((style.sources['vworld-Base'] as any).maxzoom).toBe(19);
       expect((style.sources['vworld-Base'] as any).tiles[0]).toContain('/Base/');
       
       expect(style.layers).toHaveLength(1);
@@ -43,6 +45,14 @@ describe('VWorld Utilities', () => {
       expect(style.layers).toHaveLength(2);
       expect(style.layers[0].id).toBe('vworld-satellite-layer');
       expect(style.layers[1].id).toBe('vworld-Hybrid-layer');
+      expect((style.sources['vworld-satellite'] as any).maxzoom).toBe(18);
+      expect((style.sources['vworld-Hybrid'] as any).maxzoom).toBe(18);
+    });
+
+    it('returns layer-specific max zoom values', () => {
+      expect(getVWorldMaxZoom('Base')).toBe(19);
+      expect(getVWorldMaxZoom('Satellite')).toBe(18);
+      expect(getVWorldMaxZoom('Hybrid')).toBe(18);
     });
   });
 });

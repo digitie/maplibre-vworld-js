@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { Marker } from '../src/components/Marker';
 import { VWorldMap } from '../src/components/VWorldMap';

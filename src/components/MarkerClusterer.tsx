@@ -130,18 +130,23 @@ export const MarkerClusterer: React.FC<MarkerClustererProps> = ({
         const { cluster: isCluster, point_count } = cluster.properties;
 
         if (isCluster) {
-          if (renderCluster) {
+          if (renderCluster && supercluster) {
             return renderCluster(cluster as PointFeature, point_count || 0, supercluster);
           }
           
           // Default cluster rendering
+          const clusterId = cluster.properties.cluster_id;
+          if (clusterId === undefined || !supercluster) {
+            return null;
+          }
+
           return (
             <ClusterMarker
-              key={`cluster-${cluster.properties.cluster_id}`}
+              key={`cluster-${clusterId}`}
               lngLat={[lng, lat]}
               count={point_count || 0}
               onClick={() => {
-                const expansionZoom = supercluster.getClusterExpansionZoom(cluster.properties.cluster_id);
+                const expansionZoom = supercluster.getClusterExpansionZoom(clusterId);
                 map.flyTo({
                   center: [lng, lat],
                   zoom: expansionZoom,
@@ -153,7 +158,7 @@ export const MarkerClusterer: React.FC<MarkerClustererProps> = ({
         }
 
         // Render individual marker
-        return renderMarker(cluster.properties);
+        return renderMarker(cluster.properties as unknown as ClusterPoint);
       })}
     </>
   );

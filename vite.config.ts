@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [
     dts({
       insertTypesEntry: true,
+      tsconfigPath: './tsconfig.build.json',
+      include: ['src'],
+      exclude: ['dev', 'test'],
     }),
   ],
   build: {
@@ -15,11 +18,12 @@ export default defineConfig({
       fileName: 'maplibre-vworld-js',
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'maplibre-gl'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', 'maplibre-gl'],
       output: {
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM',
+          'react/jsx-runtime': 'jsxRuntime',
           'maplibre-gl': 'maplibregl',
         },
       },

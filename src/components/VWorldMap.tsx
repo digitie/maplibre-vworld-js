@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { getVWorldStyle, VWorldLayerType } from '../vworld';
+import { getVWorldMaxZoom, getVWorldStyle, VWorldLayerType } from '../vworld';
 
 /**
  * Props for the VWorldMap component.
@@ -146,7 +146,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
-    const effectiveMaxZoom = Math.min(maxZoom, 19);
+    const effectiveMaxZoom = Math.min(maxZoom, getVWorldMaxZoom(layerType));
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
@@ -240,10 +240,10 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   useEffect(() => {
     if (mapLoaded && mapRef.current) {
       if (minZoom !== undefined) mapRef.current.setMinZoom(minZoom);
-      if (maxZoom !== undefined) mapRef.current.setMaxZoom(Math.min(maxZoom, 19));
+      if (maxZoom !== undefined) mapRef.current.setMaxZoom(Math.min(maxZoom, getVWorldMaxZoom(layerType)));
       if (maxBounds !== undefined) mapRef.current.setMaxBounds(maxBounds);
     }
-  }, [minZoom, maxZoom, maxBounds, mapLoaded]);
+  }, [layerType, minZoom, maxZoom, maxBounds, mapLoaded]);
 
   return (
     <MapContext.Provider value={{ map: mapRef.current, zoom: currentZoom, semanticZoomThreshold }}>

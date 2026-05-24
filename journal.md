@@ -4,6 +4,36 @@
 
 ---
 
+## 2026-05-25: GitHub dependency 소비 가능 패키징 보강
+
+### 1. `dist/` 산출물 누락 문제 해결
+- **이슈**: `package.json`의 `main`/`module`/`types`/`exports`가 모두 `dist/`를 가리키지만, 저장소에는 `dist/`가 커밋되어 있지 않아 GitHub dependency로 설치한 소비자 프로젝트에서 package root import가 실패할 수 있었다.
+- **조치**:
+  1. `.gitignore`에서 `dist` 제외를 제거하고 `vite build` 산출물을 커밋 대상으로 전환했다.
+  2. `package.json`에 `./style.css` export와 CSS side effect 설정을 추가했다.
+  3. `prepack`과 `pack:check` 스크립트를 추가해 npm publish 또는 pack 검증 시 산출물을 다시 생성하도록 했다.
+- **결과**: `npm pack --dry-run` 기준 tarball에 `dist/maplibre-vworld-js.mjs`, `dist/maplibre-vworld-js.umd.js`, `dist/maplibre-vworld-js.css`, declaration files가 모두 포함된다.
+
+### 2. 테스트 스크립트 API key 평문 제거
+- **이슈**: `test_tiles.js`에 VWorld API key가 평문으로 남아 있었다. 브라우저 노출용 키라도 저장소에 남기면 재사용·복사·로그 전파 위험이 있다.
+- **조치**: `process.env.VITE_VWORLD_API_KEY`를 읽도록 바꾸고, 환경변수가 없으면 명확한 오류를 던진다.
+- **결과**: `rg`로 저장소 안의 UUID 형식 VWorld key가 더 이상 검색되지 않는다.
+
+### 3. 타입 생성 범위와 peer dependency 정리
+- **이슈**: `vite-plugin-dts`가 `dev/`와 `test/`까지 선언 파일 생성 대상으로 잡아 빌드 중 타입 오류를 출력했고, `maplibre-gl`/`zod`/React 계열이 소비자 dependency graph에 불필요하게 중복될 수 있었다.
+- **조치**:
+  1. `tsconfig.build.json`을 추가해 declaration generation을 `src/`로 한정했다.
+  2. `type-check` 스크립트를 추가하고 기존 test/dev 타입 오류를 정리했다.
+  3. `react`, `react-dom`, `maplibre-gl`, `zod`를 peer dependency로 이동하고, 빌드·테스트용 dev dependency로만 유지했다.
+- **결과**: `PUPPETEER_SKIP_DOWNLOAD=1 npm ci`, `npm run type-check`, `npm test`, `npm run build`, `npm run pack:check`, `npm audit --audit-level=high`가 통과한다. Node 20 환경에서는 Puppeteer 25의 Node 22 권장 engine 경고가 출력되지만 설치 자체는 성공한다.
+
+### 4. VWorld layer 계약 보정
+- **이슈**: `Satellite`/`Hybrid`가 z19까지 요청될 수 있어 타일 404가 발생할 수 있고, attribution 표기가 소비자 프로젝트와 일치하지 않았다.
+- **조치**: `getVWorldMaxZoom(layerType)`를 추가하고 `Satellite`/`Hybrid`는 z18, 나머지는 z19로 제한했다. attribution은 `공간정보 오픈플랫폼 브이월드`로 통일했다.
+- **결과**: `kraddr-geo-ui` 같은 소비자 프로젝트가 같은 layer/zoom/attribution 계약을 공유할 수 있다.
+
+---
+
 ## 2026-05-24: 보안 패치 및 아키텍처 문서화 완료
 
 ### 1. VWorld API Key 보안 위협 제거 및 Git History 소각

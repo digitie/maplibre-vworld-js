@@ -42,12 +42,17 @@ vi.mock('maplibre-gl', () => {
     return {};
   });
   
-  const GeolocateControl = vi.fn().mockImplementation(function() {
+  type ControlMock = {
+    onAdd: ReturnType<typeof vi.fn>;
+    onRemove: ReturnType<typeof vi.fn>;
+  };
+
+  const GeolocateControl = vi.fn().mockImplementation(function(this: ControlMock) {
     this.onAdd = vi.fn();
     this.onRemove = vi.fn();
   });
 
-  const ScaleControl = vi.fn().mockImplementation(function() {
+  const ScaleControl = vi.fn().mockImplementation(function(this: ControlMock) {
     this.onAdd = vi.fn();
     this.onRemove = vi.fn();
   });
@@ -79,7 +84,7 @@ vi.mock('maplibre-gl', () => {
 });
 
 // Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
+globalThis.ResizeObserver = class ResizeObserver {
   observe() {}
   unobserve() {}
   disconnect() {}
