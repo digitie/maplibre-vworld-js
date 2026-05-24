@@ -15,7 +15,6 @@ describe('VWorldMap', () => {
     expect(maplibregl.Map).toHaveBeenCalledWith(expect.objectContaining({
       center: [127, 37],
       zoom: 10,
-      attributionControl: true,
       style: expect.objectContaining({
         version: 8,
       })

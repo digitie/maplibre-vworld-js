@@ -160,7 +160,6 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
     });
 
     mapRef.current = map;
-    (window as any).vworldMap = map;
 
     if (showNavigationControl) {
       map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');

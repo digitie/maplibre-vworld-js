@@ -42,8 +42,10 @@ export interface MarkerClustererProps {
   /**
    * Optional render function for a cluster marker.
    * If omitted, a default circular cluster marker is used.
+   * The third argument is the supercluster instance, useful for
+   * `getClusterExpansionZoom(cluster_id)` inside an onClick handler.
    */
-  renderCluster?: (cluster: any, pointCount: number) => React.ReactNode;
+  renderCluster?: (cluster: PointFeature, pointCount: number, supercluster: any) => React.ReactNode;
   /**
    * The pixel radius for grouping markers together.
    * @default 50
@@ -129,7 +131,7 @@ export const MarkerClusterer: React.FC<MarkerClustererProps> = ({
 
         if (isCluster) {
           if (renderCluster) {
-            return renderCluster(cluster, supercluster);
+            return renderCluster(cluster as PointFeature, point_count || 0, supercluster);
           }
           
           // Default cluster rendering
