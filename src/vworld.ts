@@ -25,7 +25,7 @@ export function getVWorldStyle(apiKey: string, layerType: VWorldLayerType): Styl
       type: 'raster',
       source: 'vworld-satellite',
       minzoom: 0,
-      maxzoom: 19,
+      maxzoom: 18,
     });
   }
 
@@ -41,7 +41,7 @@ export function getVWorldStyle(apiKey: string, layerType: VWorldLayerType): Styl
     type: 'raster',
     source: `vworld-${layerType}`,
     minzoom: 0,
-    maxzoom: 19,
+    maxzoom: 18,
   });
 
   return {
