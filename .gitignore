@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+.DS_Store
+coverage
+take_screenshot.js
+debug_map.js
+check_console.js
+
+.env.local

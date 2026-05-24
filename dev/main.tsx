@@ -1,0 +1,193 @@
+import React, { useState, useMemo } from 'react';
+import ReactDOM from 'react-dom/client';
+import { 
+  VWorldMap, Marker, WeatherMarker, PlaceMarker, SimpleMarker, 
+  PriceMarker, PulsingMarker, PinMarker, MakiMarker, ClusterMarker, MarkerClusterer, RoutePointMarker, RouteLine,
+  VWorldLayerType 
+} from '../src';
+
+const API_KEY = import.meta.env.VITE_VWORLD_API_KEY || 'YOUR_API_KEY';
+
+const App = () => {
+  const [layerType, setLayerType] = useState<VWorldLayerType>('Base');
+  const [markerPos, setMarkerPos] = useState<[number, number]>([127.024612, 37.532600]);
+
+  // Generate 500 random points around Seoul for clustering
+  const clusterPoints = useMemo(() => {
+    return Array.from({ length: 500 }).map((_, i) => ({
+      id: i,
+      lngLat: [
+        126.9 + Math.random() * 0.2, // ~ longitude range
+        37.45 + Math.random() * 0.2  // ~ latitude range
+      ] as [number, number],
+      category: Math.random() > 0.5 ? 'cafe' : 'restaurant'
+    }));
+  }, []);
+
+  return (
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+      <VWorldMap
+        apiKey={API_KEY}
+        layerType={layerType}
+        center={[127.024612, 37.532600]}
+        zoom={12}
+      >
+        <Marker
+          lngLat={markerPos}
+          draggable
+          onDragEnd={(pos) => setMarkerPos(pos)}
+          color="#ff0000"
+        />
+        
+        {/* Simple Markers */}
+        <SimpleMarker lngLat={[127.02, 37.53]} label="강남역 주변" bgColor="#ff5500" />
+        <SimpleMarker lngLat={[126.97, 37.55]} label="서울역" bgColor="#0055ff" />
+
+        {/* Weather Markers */}
+        <WeatherMarker 
+          lngLat={[127.05, 37.51]} 
+          condition="sunny" 
+          temperature={24} 
+          hourlyForecast={[
+            { time: '12시', temperature: 24, condition: 'sunny' },
+            { time: '15시', temperature: 26, condition: 'sunny' },
+            { time: '18시', temperature: 22, condition: 'cloudy' },
+            { time: '21시', temperature: 19, condition: 'rainy' }
+          ]}
+        />
+        <WeatherMarker 
+          lngLat={[126.98, 37.57]} 
+          condition="cloudy" 
+          temperature={19}
+          hourlyForecast={[
+            { time: '12시', temperature: 19, condition: 'cloudy' },
+            { time: '15시', temperature: 20, condition: 'cloudy' },
+            { time: '18시', temperature: 17, condition: 'rainy' }
+          ]}
+        />
+        <WeatherMarker lngLat={[127.08, 37.55]} condition="rainy" temperature={15} />
+
+        {/* Place Detail Markers */}
+        <PlaceMarker 
+          lngLat={[127.0276, 37.4979]} 
+          title="강남 핫플레이스 카페" 
+          description="분위기 좋은 넓은 카페입니다. 스터디하기 좋아요." 
+          category="Cafe" 
+          photoUrl="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=400&q=80"
+          link="#"
+        />
+        <PlaceMarker 
+          lngLat={[126.9780, 37.5665]} 
+          title="서울시청" 
+          description="대한민국 서울특별시의 행정 업무를 총괄하는 곳" 
+          category="Government" 
+        />
+
+        {/* New Markers Showcase */}
+        {/* Price Markers (Airbnb style) */}
+        <PriceMarker lngLat={[127.03, 37.52]} price={150000} />
+        <PriceMarker lngLat={[127.04, 37.53]} price="Sold Out" currency="" color="#888" />
+
+        {/* Pulsing Marker */}
+        <PulsingMarker lngLat={[126.99, 37.54]} color="#E91E63" />
+
+        {/* Dynamic Marker Clustering Showcase */}
+        <MarkerClusterer 
+          points={clusterPoints}
+          radius={40} // Custom cluster radius
+          maxZoom={15} // Clusters will completely break apart at zoom level 15
+          renderMarker={(point) => (
+            <SimpleMarker 
+              key={`point-${point.id}`} 
+              lngLat={point.lngLat} 
+              label={point.category} 
+              bgColor={point.category === 'cafe' ? '#e67e22' : '#e74c3c'}
+            />
+          )}
+        />
+
+        {/* Route Point Markers - Diverse Examples */}
+        {/* Route 1: Numbered Steps (e.g. Delivery or Itinerary) */}
+        <RouteLine 
+          id="route-1"
+          coordinates={[
+            [127.01, 37.50],
+            [127.015, 37.49],
+            [127.02, 37.48],
+            [127.025, 37.47]
+          ]} 
+          color="#4CAF50" 
+          lineWidth={5} 
+        />
+        <RoutePointMarker lngLat={[127.01, 37.50]} label={1} color="#4CAF50" />
+        <RoutePointMarker lngLat={[127.015, 37.49]} label={2} color="#4CAF50" />
+        <RoutePointMarker lngLat={[127.02, 37.48]} label={3} color="#4CAF50" />
+        <RoutePointMarker lngLat={[127.025, 37.47]} label="도착" color="#2E7D32" size={32} />
+
+        {/* Route 2: Alphabetical Points with dashed line (e.g. Points of Interest) */}
+        <RouteLine 
+          id="route-2"
+          coordinates={[
+            [126.96, 37.53],
+            [126.97, 37.52],
+            [126.98, 37.51]
+          ]} 
+          color="#9C27B0" 
+          lineWidth={4}
+          lineDasharray={[4, 4]} // Made the dashed line more visible
+        />
+        <RoutePointMarker lngLat={[126.96, 37.53]} label="A" color="#9C27B0" />
+        <RoutePointMarker lngLat={[126.97, 37.52]} label="B" color="#9C27B0" />
+        <RoutePointMarker lngLat={[126.98, 37.51]} label="C" color="#9C27B0" />
+
+        {/* Maki Markers (Travel / Leisure) */}
+        <MakiMarker 
+          lngLat={[126.98, 37.55]} iconName="restaurant" color="#e74c3c" 
+          label="남산 레스토랑" tooltip="남산타워 뷰가 보이는 고급 레스토랑입니다." 
+        />
+        <MakiMarker 
+          lngLat={[126.99, 37.56]} iconName="museum" color="#3498db" 
+          label="국립박물관" tooltip="무료 입장 가능" 
+        />
+        <MakiMarker lngLat={[127.01, 37.55]} iconName="park" color="#2ecc71" tooltip="휴식하기 좋은 벤치가 많습니다." />
+        <MakiMarker lngLat={[127.00, 37.53]} iconName="lodging" color="#9b59b6" label="그랜드 호텔" />
+        <MakiMarker lngLat={[127.03, 37.55]} iconName="cafe" color="#e67e22" tooltip="24시간 오픈" />
+        <MakiMarker lngLat={[127.05, 37.54]} iconName="airport" color="#34495e" label="도심공항" tooltip="공항버스 탑승 장소" />
+      </VWorldMap>
+
+      <div style={{
+        position: 'absolute',
+        top: 10,
+        left: 10,
+        background: 'white',
+        padding: 10,
+        borderRadius: 8,
+        boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+        zIndex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px'
+      }}>
+        <label>
+          <b>Layer Type: </b>
+          <select value={layerType} onChange={(e) => setLayerType(e.target.value as VWorldLayerType)}>
+            <option value="Base">Base</option>
+            <option value="Satellite">Satellite</option>
+            <option value="Hybrid">Hybrid</option>
+            <option value="gray">Gray</option>
+            <option value="midnight">Midnight</option>
+          </select>
+        </label>
+        <div style={{ fontSize: '12px' }}>
+          Marker Pos: {markerPos[0].toFixed(4)}, {markerPos[1].toFixed(4)}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
