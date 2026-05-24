@@ -103,7 +103,6 @@ export const RouteLine: React.FC<RouteLineProps> = ({
       }
 
       if (!map.getLayer(layerId)) {
-        console.log(`Adding layer ${layerId} with dasharray:`, lineDasharray);
         map.addLayer({
           id: layerId,
           type: 'line',
@@ -136,7 +135,6 @@ export const RouteLine: React.FC<RouteLineProps> = ({
     map.on('styledata', addOrUpdateLayer);
 
     return () => {
-      console.log(`Removing layer ${layerId}`);
       map.off('styledata', addOrUpdateLayer);
       if (map.getStyle()) {
         if (map.getLayer(layerId)) map.removeLayer(layerId);

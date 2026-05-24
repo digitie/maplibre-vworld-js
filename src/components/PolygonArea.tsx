@@ -89,7 +89,6 @@ export const PolygonArea: React.FC<PolygonAreaProps> = ({
           source: sourceId,
           paint: {
             'fill-color': fillColor,
-            // Only apply opacity if fillColor doesn't have alpha, but MapLibre handles rgba automatically.
           }
         });
       } else {

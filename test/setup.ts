@@ -16,6 +16,25 @@ vi.mock('maplibre-gl', () => {
       addControl: vi.fn(),
       flyTo: vi.fn(),
       resize: vi.fn(),
+      getZoom: vi.fn().mockReturnValue(12),
+      setMinZoom: vi.fn(),
+      setMaxZoom: vi.fn(),
+      setMaxBounds: vi.fn(),
+      getBounds: vi.fn().mockReturnValue({
+        getWest: () => -180,
+        getSouth: () => -90,
+        getEast: () => 180,
+        getNorth: () => 90,
+      }),
+      getCanvas: vi.fn().mockReturnValue({ style: {} }),
+      getStyle: vi.fn().mockReturnValue({ layers: [], sources: {} }),
+      getSource: vi.fn(),
+      getLayer: vi.fn(),
+      addSource: vi.fn(),
+      addLayer: vi.fn(),
+      removeLayer: vi.fn(),
+      removeSource: vi.fn(),
+      setPaintProperty: vi.fn(),
     };
   });
 
