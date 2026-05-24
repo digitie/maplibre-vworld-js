@@ -116,13 +116,15 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
+    const effectiveMaxZoom = Math.min(maxZoom, 19);
+
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
       style: getVWorldStyle(apiKey, layerType),
       center,
       zoom,
       minZoom,
-      maxZoom,
+      maxZoom: effectiveMaxZoom,
       attributionControl: true,
       transformRequest,
     });
@@ -199,6 +201,14 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center, zoom]);
+
+  // Update minZoom and maxZoom dynamically
+  useEffect(() => {
+    if (mapLoaded && mapRef.current) {
+      if (minZoom !== undefined) mapRef.current.setMinZoom(minZoom);
+      if (maxZoom !== undefined) mapRef.current.setMaxZoom(Math.min(maxZoom, 19));
+    }
+  }, [minZoom, maxZoom, mapLoaded]);
 
   return (
     <MapContext.Provider value={{ map: mapRef.current }}>
