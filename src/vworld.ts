@@ -19,14 +19,13 @@ export function getVWorldStyle(apiKey: string, layerType: VWorldLayerType): Styl
       tiles: [getVWorldTileUrl(apiKey, 'Satellite')],
       tileSize: 256,
       attribution: '© VWorld',
-      maxzoom: 16,
+      maxzoom: 19,
     };
     layers.push({
       id: 'vworld-satellite-layer',
       type: 'raster',
       source: 'vworld-satellite',
       minzoom: 0,
-      maxzoom: 16,
     });
   }
 
@@ -35,7 +34,7 @@ export function getVWorldStyle(apiKey: string, layerType: VWorldLayerType): Styl
     tiles: [getVWorldTileUrl(apiKey, layerType)],
     tileSize: 256,
     attribution: '© VWorld',
-    maxzoom: 16,
+    maxzoom: 19,
   };
 
   layers.push({
@@ -43,7 +42,6 @@ export function getVWorldStyle(apiKey: string, layerType: VWorldLayerType): Styl
     type: 'raster',
     source: `vworld-${layerType}`,
     minzoom: 0,
-    maxzoom: 16,
   });
 
   return {
