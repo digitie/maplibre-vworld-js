@@ -19,6 +19,7 @@ export function getVWorldStyle(apiKey: string, layerType: VWorldLayerType): Styl
       tiles: [getVWorldTileUrl(apiKey, 'Satellite')],
       tileSize: 256,
       attribution: '© VWorld',
+      maxzoom: 18,
     };
     layers.push({
       id: 'vworld-satellite-layer',
@@ -34,6 +35,7 @@ export function getVWorldStyle(apiKey: string, layerType: VWorldLayerType): Styl
     tiles: [getVWorldTileUrl(apiKey, layerType)],
     tileSize: 256,
     attribution: '© VWorld',
+    maxzoom: 18,
   };
 
   layers.push({
