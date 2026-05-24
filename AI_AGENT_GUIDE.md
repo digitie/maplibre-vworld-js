@@ -8,6 +8,8 @@
 - **SSR 호환성**: Next.js (App/Pages Router) 및 Vite 지원.
   - **🚨 CRITICAL (매우 중요)**: MapLibre는 브라우저의 `window` 객체와 WebGL에 강하게 의존합니다. 이 라이브러리를 Next.js에서 사용할 때는 **반드시 지도 컴포넌트를 `next/dynamic`(`ssr: false`) 옵션으로 동적 임포트(Dynamic Import)** 해야 합니다. 그렇지 않으면 서버 사이드 렌더링 에러가 발생합니다.
   - 클라이언트 컴포넌트(`"use client"`) 내부에서만 마커나 폴리곤 관련 코드가 실행되도록 해야 합니다. SSR 시점에 `document`나 `window`에 접근하면 치명적인 에러가 발생합니다.
+- **패키징/소비자 설치**: `dist/`는 GitHub dependency 소비자가 바로 import할 수 있도록 저장소에 커밋합니다. `vite-plugin-dts`는 `tsconfig.build.json`으로 `src/`만 선언 파일 생성 대상에 포함하며, `dev/`와 `test/` 타입 오류가 패키지 빌드에 섞이면 안 됩니다.
+- **스타일 import**: 소비자 예제에는 `import 'maplibre-vworld/style.css';`를 포함해야 합니다. 이 CSS export에는 MapLibre 기본 CSS와 라이브러리 스타일 산출물이 들어 있습니다.
 - **Git Push 규칙**: 작업 내역을 원격 저장소의 `main` 브랜치에 직접 푸시(Direct Push)하는 것은 엄격히 금지됩니다. 반드시 별도의 브랜치를 따서 작업하고 PR(Pull Request)을 통해 반영해야 합니다.
 
 ## 🧭 컴포넌트 사용 가이드 (Next.js 기준)
@@ -25,6 +27,7 @@ if (!parsedCoordinate.success) throw new Error("유효하지 않은 좌표입니
 ```tsx
 'use client';
 import dynamic from 'next/dynamic';
+import 'maplibre-vworld/style.css';
 
 // 🚨 AI 지시사항: 지도 컴포넌트는 무조건 ssr: false 옵션과 함께 dynamic import 할 것!
 const VWorldMap = dynamic(
@@ -54,6 +57,8 @@ interface VWorldMapProps {
   transformRequest?: (url: string, resourceType: string) => { url: string, headers?: any }; // CORS 우회용 프록시 훅
 }
 ```
+
+**AI 지시사항**: `Satellite`와 `Hybrid`는 VWorld 타일 한계에 맞춰 z18까지만 요청해야 합니다. `Base`, `gray`, `midnight`는 z19까지 사용할 수 있습니다. 유틸 함수 `getVWorldMaxZoom(layerType)`를 사용해 지도 옵션과 style source의 `maxzoom`을 일관되게 맞추세요.
 
 **🚨 AI 지시사항 (CORS / 보안 에러 처리)**:
 - 사용자가 `CORS` 또는 `403 Forbidden` 에러를 겪는다고 보고하면, 가장 먼저 **"VWorld 개발자 센터에 현재 로컬 주소(예: localhost:5173)가 도메인으로 등록되어 있는지"** 확인하라고 안내하세요. VWorld는 등록되지 않은 도메인에 대해 의도적으로 CORS 헤더를 제거합니다.

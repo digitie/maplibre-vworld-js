@@ -1,4 +1,3 @@
-import React from 'react';
 import { render } from '@testing-library/react';
 import { VWorldMap } from '../src/components/VWorldMap';
 import maplibregl from 'maplibre-gl';

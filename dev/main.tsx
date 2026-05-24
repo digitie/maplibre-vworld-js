@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 import { 
   VWorldMap, Marker, WeatherMarker, PlaceMarker, SimpleMarker, 
-  PriceMarker, PulsingMarker, PinMarker, MakiMarker, ClusterMarker, MarkerClusterer, RoutePointMarker, RouteLine,
+  PriceMarker, PulsingMarker, PinMarker, MakiMarker, MarkerClusterer, RoutePointMarker, RouteLine,
   VWorldLayerType, PolygonArea
 } from '../src';
 

@@ -1,6 +1,10 @@
 const https = require('https');
 const fs = require('fs');
-const API_KEY = 'C737D607-1011-3AD8-98A0-EE550472F20A';
+const API_KEY = process.env.VITE_VWORLD_API_KEY;
+
+if (!API_KEY) {
+    throw new Error('VITE_VWORLD_API_KEY 환경변수를 설정하세요.');
+}
 
 function lon2tile(lon,zoom) { return (Math.floor((lon+180)/360*Math.pow(2,zoom))); }
 function lat2tile(lat,zoom)  { return (Math.floor((1-Math.log(Math.tan(lat*Math.PI/180) + 1/Math.cos(lat*Math.PI/180))/Math.PI)/2 *Math.pow(2,zoom))); }

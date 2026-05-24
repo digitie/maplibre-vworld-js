@@ -2,15 +2,23 @@ import { StyleSpecification } from 'maplibre-gl';
 
 export type VWorldLayerType = 'Base' | 'gray' | 'midnight' | 'Hybrid' | 'Satellite';
 
+const LIMITED_ZOOM_LAYER_TYPES = new Set<VWorldLayerType>(['Hybrid', 'Satellite']);
+const VWORLD_ATTRIBUTION = '공간정보 오픈플랫폼 브이월드';
+
 export function getVWorldTileUrl(apiKey: string, layerType: VWorldLayerType): string {
   const ext = layerType === 'Satellite' ? 'jpeg' : 'png';
   const apiLayer = layerType === 'gray' ? 'white' : layerType;
-  return `https://api.vworld.kr/req/wmts/1.0.0/${apiKey}/${apiLayer}/{z}/{y}/{x}.${ext}`;
+  return `https://api.vworld.kr/req/wmts/1.0.0/${encodeURIComponent(apiKey.trim())}/${apiLayer}/{z}/{y}/{x}.${ext}`;
+}
+
+export function getVWorldMaxZoom(layerType: VWorldLayerType): number {
+  return LIMITED_ZOOM_LAYER_TYPES.has(layerType) ? 18 : 19;
 }
 
 export function getVWorldStyle(apiKey: string, layerType: VWorldLayerType): StyleSpecification {
   const sources: StyleSpecification['sources'] = {};
   const layers: StyleSpecification['layers'] = [];
+  const maxzoom = getVWorldMaxZoom(layerType);
 
   // Always add Satellite as a base if Hybrid is selected
   if (layerType === 'Hybrid') {
@@ -18,8 +26,8 @@ export function getVWorldStyle(apiKey: string, layerType: VWorldLayerType): Styl
       type: 'raster',
       tiles: [getVWorldTileUrl(apiKey, 'Satellite')],
       tileSize: 256,
-      attribution: '© VWorld',
-      maxzoom: 19,
+      attribution: VWORLD_ATTRIBUTION,
+      maxzoom,
     };
     layers.push({
       id: 'vworld-satellite-layer',
@@ -33,8 +41,8 @@ export function getVWorldStyle(apiKey: string, layerType: VWorldLayerType): Styl
     type: 'raster',
     tiles: [getVWorldTileUrl(apiKey, layerType)],
     tileSize: 256,
-    attribution: '© VWorld',
-    maxzoom: 19,
+    attribution: VWORLD_ATTRIBUTION,
+    maxzoom,
   };
 
   layers.push({
