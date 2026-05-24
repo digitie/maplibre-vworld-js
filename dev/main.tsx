@@ -11,6 +11,7 @@ const API_KEY = import.meta.env.VITE_VWORLD_API_KEY || 'YOUR_API_KEY';
 const App = () => {
   const [layerType, setLayerType] = useState<VWorldLayerType>('Base');
   const [markerPos, setMarkerPos] = useState<[number, number]>([127.024612, 37.532600]);
+  const [semanticThreshold, setSemanticThreshold] = useState<number>(13);
 
   // Generate 500 random points around Seoul for clustering
   const clusterPoints = useMemo(() => {
@@ -31,6 +32,11 @@ const App = () => {
         layerType={layerType}
         center={[127.024612, 37.532600]}
         zoom={12}
+        maxBounds={[
+          [124.5, 33.0], // Southwest coordinates of Korea
+          [132.0, 38.9]  // Northeast coordinates of Korea
+        ]}
+        semanticZoomThreshold={semanticThreshold}
       >
         <Marker
           lngLat={markerPos}
@@ -177,6 +183,16 @@ const App = () => {
             <option value="gray">Gray</option>
             <option value="midnight">Midnight</option>
           </select>
+        </label>
+        <label>
+          <b>Semantic Zoom Threshold: </b>
+          <input 
+            type="range" 
+            min="6" max="18" 
+            value={semanticThreshold} 
+            onChange={(e) => setSemanticThreshold(Number(e.target.value))} 
+          />
+          <span style={{ marginLeft: '8px' }}>{semanticThreshold}</span>
         </label>
         <div style={{ fontSize: '12px' }}>
           Marker Pos: {markerPos[0].toFixed(4)}, {markerPos[1].toFixed(4)}

@@ -37,6 +37,16 @@ export interface VWorldMapProps {
    * @default 19 
    */
   maxZoom?: number;
+  /**
+   * Maximum bounds of the map (restrict panning outside this box).
+   * Format: [[minLng, minLat], [maxLng, maxLat]]
+   */
+  maxBounds?: maplibregl.LngLatBoundsLike;
+  /**
+   * Global threshold for semantic zoom. 
+   * Markers can use this to simplify themselves when the map is zoomed out below this value.
+   */
+  semanticZoomThreshold?: number;
   /** 
    * Show navigation controls (zoom in/out, compass). 
    * @default true 
@@ -78,11 +88,28 @@ export interface VWorldMapProps {
 
 interface MapContextType {
   map: maplibregl.Map | null;
+  zoom: number;
+  semanticZoomThreshold?: number;
 }
 
-const MapContext = createContext<MapContextType>({ map: null });
+const MapContext = createContext<MapContextType>({ map: null, zoom: 12 });
 
 export const useMap = () => useContext(MapContext);
+
+/**
+ * Custom hook to get the full map context, including global semantic zoom threshold.
+ */
+export const useMapContext = () => {
+  return useContext(MapContext);
+};
+
+/**
+ * Custom hook to get the current map zoom level.
+ * Useful for semantic zooming (e.g. degrading marker quality at low zooms).
+ */
+export const useMapZoom = () => {
+  return useContext(MapContext).zoom;
+};
 
 /**
  * The base map component that initializes MapLibre GL JS with VWorld maps.
@@ -100,6 +127,8 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   zoom = 12,
   minZoom = 6,
   maxZoom = 19,
+  maxBounds,
+  semanticZoomThreshold,
   showNavigationControl = true,
   showGeolocateControl = true,
   showScaleControl = true,
@@ -112,6 +141,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [currentZoom, setCurrentZoom] = useState(zoom);
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -125,7 +155,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       zoom,
       minZoom,
       maxZoom: effectiveMaxZoom,
-      attributionControl: true,
+      maxBounds,
       transformRequest,
     });
 
@@ -158,9 +188,14 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
 
     map.on('load', () => {
       setMapLoaded(true);
+      setCurrentZoom(map.getZoom());
       if (onMapLoad) {
         onMapLoad(map);
       }
+    });
+
+    map.on('zoomend', () => {
+      setCurrentZoom(map.getZoom());
     });
 
     // Handle resize for mobile responsiveness
@@ -202,16 +237,17 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [center, zoom]);
 
-  // Update minZoom and maxZoom dynamically
+  // Update minZoom, maxZoom, and maxBounds dynamically
   useEffect(() => {
     if (mapLoaded && mapRef.current) {
       if (minZoom !== undefined) mapRef.current.setMinZoom(minZoom);
       if (maxZoom !== undefined) mapRef.current.setMaxZoom(Math.min(maxZoom, 19));
+      if (maxBounds !== undefined) mapRef.current.setMaxBounds(maxBounds);
     }
-  }, [minZoom, maxZoom, mapLoaded]);
+  }, [minZoom, maxZoom, maxBounds, mapLoaded]);
 
   return (
-    <MapContext.Provider value={{ map: mapRef.current }}>
+    <MapContext.Provider value={{ map: mapRef.current, zoom: currentZoom, semanticZoomThreshold }}>
       <div ref={mapContainerRef} className={className} style={style} data-testid="vworld-map-container" />
       {mapLoaded && children}
     </MapContext.Provider>

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Marker, MarkerProps } from './Marker';
+import { PinMarker } from './PinMarker';
+import { useMapContext } from './VWorldMap';
 
 export type WeatherCondition = 'sunny' | 'cloudy' | 'rainy' | 'snowy';
 
@@ -13,6 +15,7 @@ export interface WeatherMarkerProps extends Omit<MarkerProps, 'children'> {
   temperature: number;
   condition: WeatherCondition;
   hourlyForecast?: HourlyForecast[];
+  simplifyAtZoom?: number;
 }
 
 const conditionIcons: Record<WeatherCondition, string> = {
@@ -33,9 +36,17 @@ export const WeatherMarker: React.FC<WeatherMarkerProps> = ({
   temperature,
   condition,
   hourlyForecast,
+  simplifyAtZoom,
   ...props
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { zoom, semanticZoomThreshold } = useMapContext();
+  
+  const threshold = simplifyAtZoom ?? semanticZoomThreshold;
+  const shouldSimplify = threshold !== undefined && zoom < threshold;
+  if (shouldSimplify) {
+    return <PinMarker lngLat={props.lngLat} color={conditionColors[condition]} size={24} showInnerCircle={true} />;
+  }
 
   return (
     <Marker {...props}>

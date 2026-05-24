@@ -16,7 +16,8 @@
    - 코드를 작성하기 직전, 반드시 `AI_AGENT_GUIDE.md`를 읽으세요.
    - Next.js SSR 환경에서 발생하는 에러를 피하기 위한 `dynamic import` 규칙, `useMemo`를 사용해야 하는 Props (배열, GeoJSON 데이터 등), 그리고 CORS 에러를 회피하기 위한 `transformRequest` 사용법 등 구체적인 코딩 가이드라인이 명시되어 있습니다.
 
-## 📝 문맥(Context) 유지 원칙
+## 📝 문맥(Context) 유지 원칙 및 형상 관리 규칙
+- **Git Push 규칙 (절대 원칙)**: 어떠한 경우라도 `main` 브랜치에 직접 푸시(`git push origin main`)하지 마세요. 반드시 새로운 Feature 브랜치(예: `feat/xxx`, `fix/xxx`)를 생성하여 작업한 후, 원격 저장소에 푸시하고 Pull Request(PR)를 생성해야 합니다.
 - 코드를 대대적으로 수정하거나 새로운 컴포넌트를 추가했다면, 즉시 `journal.md`에 당신의 작업 내역(날짜, 이슈, 해결방법)을 한글로 상세히 추가 기록(Append)하세요.
 - 아키텍처에 중대한 변화(예: 새로운 상태 관리 라이브러리 도입 등)가 생겼다면 `ADR.md`에 새로운 레코드를 추가하세요.
 - API 스펙이나 필수 Props가 변경되었다면 `README.md`와 `AI_AGENT_GUIDE.md`를 즉시 동기화하세요.
