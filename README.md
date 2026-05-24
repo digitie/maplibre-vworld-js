@@ -3,9 +3,12 @@
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/VWorld-Korea-blue?style=for-the-badge" alt="VWorld" />
+  <img src="https://img.shields.io/badge/Antigravity-2.0-8A2BE2?style=for-the-badge" alt="Antigravity 2.0" />
+  <img src="https://img.shields.io/badge/Gemini-3.1_Pro-1A73E8?style=for-the-badge" alt="Gemini 3.1 Pro" />
   
   <h1>🗺️ MapLibre VWorld JS</h1>
   <p><strong>MapLibre GL JS를 활용하여 브이월드(VWorld) 지도를 렌더링하는 고성능 React 라이브러리</strong></p>
+  <p><em>Built entirely by <b>Antigravity 2.0</b> powered by <b>Gemini 3.1 Pro</b></em></p>
 </div>
 
 <br />
