@@ -42,6 +42,11 @@ export interface VWorldMapProps {
    * Format: [[minLng, minLat], [maxLng, maxLat]]
    */
   maxBounds?: maplibregl.LngLatBoundsLike;
+  /**
+   * Global threshold for semantic zoom. 
+   * Markers can use this to simplify themselves when the map is zoomed out below this value.
+   */
+  semanticZoomThreshold?: number;
   /** 
    * Show navigation controls (zoom in/out, compass). 
    * @default true 
@@ -84,11 +89,19 @@ export interface VWorldMapProps {
 interface MapContextType {
   map: maplibregl.Map | null;
   zoom: number;
+  semanticZoomThreshold?: number;
 }
 
 const MapContext = createContext<MapContextType>({ map: null, zoom: 12 });
 
 export const useMap = () => useContext(MapContext);
+
+/**
+ * Custom hook to get the full map context, including global semantic zoom threshold.
+ */
+export const useMapContext = () => {
+  return useContext(MapContext);
+};
 
 /**
  * Custom hook to get the current map zoom level.
@@ -115,6 +128,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   minZoom = 6,
   maxZoom = 19,
   maxBounds,
+  semanticZoomThreshold,
   showNavigationControl = true,
   showGeolocateControl = true,
   showScaleControl = true,
@@ -233,7 +247,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   }, [minZoom, maxZoom, maxBounds, mapLoaded]);
 
   return (
-    <MapContext.Provider value={{ map: mapRef.current, zoom: currentZoom }}>
+    <MapContext.Provider value={{ map: mapRef.current, zoom: currentZoom, semanticZoomThreshold }}>
       <div ref={mapContainerRef} className={className} style={style} data-testid="vworld-map-container" />
       {mapLoaded && children}
     </MapContext.Provider>

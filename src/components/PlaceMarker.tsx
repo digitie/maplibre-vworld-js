@@ -1,7 +1,7 @@
 import React from 'react';
 import { Marker, MarkerProps } from './Marker';
 import { PinMarker } from './PinMarker';
-import { useMapZoom } from './VWorldMap';
+import { useMapContext } from './VWorldMap';
 
 export interface PlaceMarkerProps extends Omit<MarkerProps, 'children'> {
   title: string;
@@ -21,8 +21,9 @@ export const PlaceMarker: React.FC<PlaceMarkerProps> = ({
   simplifyAtZoom,
   ...props
 }) => {
-  const zoom = useMapZoom();
-  const shouldSimplify = simplifyAtZoom !== undefined && zoom < simplifyAtZoom;
+  const { zoom, semanticZoomThreshold } = useMapContext();
+  const threshold = simplifyAtZoom ?? semanticZoomThreshold;
+  const shouldSimplify = threshold !== undefined && zoom < threshold;
 
   if (shouldSimplify) {
     return <PinMarker lngLat={props.lngLat} color="#333" size={24} showInnerCircle={false} />;
