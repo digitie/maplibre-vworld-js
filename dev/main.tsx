@@ -31,6 +31,10 @@ const App = () => {
         layerType={layerType}
         center={[127.024612, 37.532600]}
         zoom={12}
+        maxBounds={[
+          [124.5, 33.0], // Southwest coordinates of Korea
+          [132.0, 38.9]  // Northeast coordinates of Korea
+        ]}
       >
         <Marker
           lngLat={markerPos}
@@ -40,8 +44,8 @@ const App = () => {
         />
         
         {/* Simple Markers */}
-        <SimpleMarker lngLat={[127.02, 37.53]} label="강남역 주변" bgColor="#ff5500" />
-        <SimpleMarker lngLat={[126.97, 37.55]} label="서울역" bgColor="#0055ff" />
+        <SimpleMarker lngLat={[127.02, 37.53]} label="강남역 주변" bgColor="#ff5500" simplifyAtZoom={13} />
+        <SimpleMarker lngLat={[126.97, 37.55]} label="서울역" bgColor="#0055ff" simplifyAtZoom={13} />
 
         {/* Weather Markers */}
         <WeatherMarker 
@@ -54,6 +58,7 @@ const App = () => {
             { time: '18시', temperature: 22, condition: 'cloudy' },
             { time: '21시', temperature: 19, condition: 'rainy' }
           ]}
+          simplifyAtZoom={13}
         />
         <WeatherMarker 
           lngLat={[126.98, 37.57]} 
@@ -64,8 +69,9 @@ const App = () => {
             { time: '15시', temperature: 20, condition: 'cloudy' },
             { time: '18시', temperature: 17, condition: 'rainy' }
           ]}
+          simplifyAtZoom={13}
         />
-        <WeatherMarker lngLat={[127.08, 37.55]} condition="rainy" temperature={15} />
+        <WeatherMarker lngLat={[127.08, 37.55]} condition="rainy" temperature={15} simplifyAtZoom={13} />
 
         {/* Place Detail Markers */}
         <PlaceMarker 
@@ -75,12 +81,14 @@ const App = () => {
           category="Cafe" 
           photoUrl="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=400&q=80"
           link="#"
+          simplifyAtZoom={13}
         />
         <PlaceMarker 
           lngLat={[126.9780, 37.5665]} 
           title="서울시청" 
           description="대한민국 서울특별시의 행정 업무를 총괄하는 곳" 
           category="Government" 
+          simplifyAtZoom={13}
         />
 
         {/* New Markers Showcase */}
