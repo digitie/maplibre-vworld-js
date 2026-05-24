@@ -39,7 +39,7 @@ export const PinMarker: React.FC<PinMarkerProps> = ({
           viewBox="0 0 24 36"
           width={size}
           height={size * 1.5}
-          style={{ position: 'absolute', top: 0, left: 0, dropShadow: '0 2px 6px rgba(0,0,0,0.3)' }}
+          style={{ position: 'absolute', top: 0, left: 0, filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.3))' }}
         >
           <path
             fill={color}
