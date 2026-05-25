@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import maplibregl from 'maplibre-gl';
 import { useMap, useEvent } from '../store/hooks';
@@ -52,13 +52,12 @@ function applyMarkerState(
   element.dataset.selected = selected ? 'true' : 'false';
   element.dataset.highlighted = highlighted ? 'true' : 'false';
   element.style.zIndex = zIndex === undefined ? '' : String(zIndex);
-  // Use `transform` (CSS2) instead of `scale` (CSS3 standalone) for broader
-  // browser support. MapLibre also sets `transform` on the element root, but
-  // it uses CSS variables / will-change so this composes cleanly.
-  element.style.setProperty(
-    '--vworld-marker-scale',
-    selected ? '1.18' : highlighted ? '1.1' : '1',
-  );
+  // MapLibre owns the root `transform` for positioning. Keep a CSS variable
+  // for consumer hooks and set the individual `scale` property so selected /
+  // highlighted state composes with MapLibre's transform instead of replacing it.
+  const scale = selected ? '1.18' : highlighted ? '1.1' : '1';
+  element.style.setProperty('--vworld-marker-scale', scale);
+  element.style.setProperty('scale', scale === '1' ? '' : scale);
   element.style.filter = selected
     ? 'drop-shadow(0 6px 14px rgba(0,0,0,0.34))'
     : highlighted
@@ -111,11 +110,18 @@ export const Marker: React.FC<MarkerProps> = ({
   const map = useMap();
   const markerRef = useRef<maplibregl.Marker | null>(null);
   const prevClassNameRef = useRef<string | undefined>(undefined);
+  const hasOnClickRef = useRef(onClick !== undefined);
+  const hasOnContextMenuRef = useRef(onContextMenu !== undefined);
   const hasChildren = children !== undefined && children !== null && children !== false;
 
   const stableOnClick = useEvent(onClick);
   const stableOnContextMenu = useEvent(onContextMenu);
   const stableOnDragEnd = useEvent(onDragEnd);
+
+  useLayoutEffect(() => {
+    hasOnClickRef.current = onClick !== undefined;
+    hasOnContextMenuRef.current = onContextMenu !== undefined;
+  }, [onClick, onContextMenu]);
 
   // Stable portal container — created once per component instance (only
   // when used). SSR-safe: the effect that uses it never runs on the server.
@@ -135,12 +141,12 @@ export const Marker: React.FC<MarkerProps> = ({
     const element = marker.getElement();
 
     const handleClick = (event: MouseEvent) => {
-      if (!onClick) return;
+      if (!hasOnClickRef.current) return;
       event.stopPropagation();
       stableOnClick(event, marker);
     };
     const handleContextMenu = (event: MouseEvent) => {
-      if (!onContextMenu) return;
+      if (!hasOnContextMenuRef.current) return;
       event.preventDefault();
       event.stopPropagation();
       stableOnContextMenu(event, marker);

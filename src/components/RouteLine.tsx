@@ -90,7 +90,7 @@ export const RouteLine: React.FC<RouteLineProps> = ({
       } else {
         map.setPaintProperty(layerId, 'line-color', color);
         map.setPaintProperty(layerId, 'line-width', width);
-        if (dashArray) map.setPaintProperty(layerId, 'line-dasharray', dashArray);
+        map.setPaintProperty(layerId, 'line-dasharray', dashArray);
       }
     };
 

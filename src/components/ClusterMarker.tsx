@@ -31,9 +31,11 @@ export const ClusterMarker: React.FC<ClusterMarkerProps> = ({
   }
 
   return (
-    <Marker {...props}>
+    <Marker
+      {...props}
+      onClick={onClick ? () => onClick() : undefined}
+    >
       <div 
-        onClick={onClick}
         style={{
           width: clusterSize,
           height: clusterSize,

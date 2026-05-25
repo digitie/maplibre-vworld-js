@@ -43,14 +43,14 @@ interface VWorldMapProps {
   fallback?: ReactNode | ((info: { reason: 'missing-api-key' | 'map-init-error'; error?: Error }) => ReactNode);
   loadingSkeleton?: ReactNode;
   animateCameraChanges?: boolean;       // default true
-  flyToOptions?: Omit<FlyToOptions, 'center' | 'zoom'>;
+  flyToOptions?: Omit<FlyToOptions, 'center' | 'zoom' | 'pitch' | 'bearing'>;
 }
 ```
 
 Rules for AI:
 - **No implicit center.** `center` is required. Pick a sensible value for the app.
 - Event callbacks receive **raw** MapLibre events. No `VWorldMap*Info` envelope.
-- Camera prop changes are applied with `flyTo` (animated) or `jumpTo` (instant) and skip when the user is mid-gesture (`map.isMoving()`).
+- Camera prop changes (`center`, `zoom`, `pitch`, `bearing`) are applied with `flyTo` (animated) or `jumpTo` (instant) and skip when the user is mid-gesture (`map.isMoving()`).
 - `Satellite`/`Hybrid` cap at z18; `Base`/`gray`/`midnight` cap at z19. The component clamps automatically — don't pass `maxZoom` higher than `getVWorldMaxZoom(layerType)`.
 - For CORS / proxy needs, use `transformRequest`. Don't fork the library to add headers.
 

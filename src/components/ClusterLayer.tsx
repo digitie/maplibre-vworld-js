@@ -140,7 +140,11 @@ export const ClusterLayer: React.FC<ClusterLayerProps> = ({
           const sc = supercluster as Supercluster | undefined;
           const count = point_count ?? 0;
           if (renderCluster && sc) {
-            return renderCluster(cluster as ClusterPointFeature, count, sc);
+            return (
+              <React.Fragment key={`cluster-${cluster_id ?? `${lng},${lat}`}`}>
+                {renderCluster(cluster as ClusterPointFeature, count, sc)}
+              </React.Fragment>
+            );
           }
           if (cluster_id === undefined || !sc) return null;
           return (
@@ -159,7 +163,12 @@ export const ClusterLayer: React.FC<ClusterLayerProps> = ({
           );
         }
 
-        return renderMarker(cluster.properties as unknown as ClusterPoint);
+        const point = cluster.properties as unknown as ClusterPoint;
+        return (
+          <React.Fragment key={point.id}>
+            {renderMarker(point)}
+          </React.Fragment>
+        );
       })}
     </>
   );

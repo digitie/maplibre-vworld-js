@@ -6,8 +6,11 @@ type MapMockInstance = maplibregl.Map & {
   on: ReturnType<typeof vi.fn>;
   flyTo: ReturnType<typeof vi.fn>;
   jumpTo: ReturnType<typeof vi.fn>;
+  setMaxBounds: ReturnType<typeof vi.fn>;
   getZoom: ReturnType<typeof vi.fn>;
   getCenter: ReturnType<typeof vi.fn>;
+  isMoving: ReturnType<typeof vi.fn>;
+  isEasing: ReturnType<typeof vi.fn>;
 };
 
 function latestMapMock(): MapMockInstance {
@@ -156,6 +159,19 @@ describe('VWorldMap', () => {
 
       expect(onError).toHaveBeenCalledWith(rawEvent);
     });
+
+    it('uses the latest onError handler even when it is added after mount', () => {
+      vi.clearAllMocks();
+      const onError = vi.fn();
+      const { rerender } = render(<VWorldMap apiKey="test-key" center={[127, 37]} />);
+      const map = latestMapMock();
+
+      rerender(<VWorldMap apiKey="test-key" center={[127, 37]} onError={onError} />);
+      const rawEvent = { error: new Error('late tile failed'), sourceId: 'vworld-Base' };
+      mapHandler<typeof rawEvent>(map, 'error')(rawEvent);
+
+      expect(onError).toHaveBeenCalledWith(rawEvent);
+    });
   });
 
   describe('loadingSkeleton', () => {
@@ -171,6 +187,16 @@ describe('VWorldMap', () => {
   });
 
   describe('camera changes', () => {
+    it('does not replay the initial camera after the map load event', async () => {
+      vi.clearAllMocks();
+      render(<VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} />);
+      const map = latestMapMock();
+
+      await waitFor(() => expect(map.getZoom).toHaveBeenCalledTimes(2));
+      expect(map.flyTo).not.toHaveBeenCalled();
+      expect(map.jumpTo).not.toHaveBeenCalled();
+    });
+
     it('forwards flyToOptions to flyTo when center prop changes', async () => {
       vi.clearAllMocks();
       const { rerender } = render(
@@ -198,6 +224,30 @@ describe('VWorldMap', () => {
           duration: 500,
           center: [128, 38],
           zoom: 10,
+          pitch: 0,
+          bearing: 0,
+        });
+      });
+    });
+
+    it('updates pitch and bearing when camera props change', async () => {
+      vi.clearAllMocks();
+      const { rerender } = render(
+        <VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} pitch={0} bearing={0} />,
+      );
+      const map = latestMapMock();
+      await waitFor(() => expect(map.getZoom).toHaveBeenCalledTimes(2));
+
+      rerender(
+        <VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} pitch={30} bearing={45} />,
+      );
+
+      await waitFor(() => {
+        expect(map.flyTo).toHaveBeenCalledWith({
+          center: [127, 37],
+          zoom: 10,
+          pitch: 30,
+          bearing: 45,
         });
       });
     });
@@ -225,9 +275,30 @@ describe('VWorldMap', () => {
       );
 
       await waitFor(() => {
-        expect(map.jumpTo).toHaveBeenCalledWith({ center: [128, 38], zoom: 10 });
+        expect(map.jumpTo).toHaveBeenCalledWith({
+          center: [128, 38],
+          zoom: 10,
+          pitch: 0,
+          bearing: 0,
+        });
       });
       expect(map.flyTo).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('bounds updates', () => {
+    it('clears maxBounds when the prop is removed', async () => {
+      vi.clearAllMocks();
+      const bounds: maplibregl.LngLatBoundsLike = [[126, 36], [128, 38]];
+      const { rerender } = render(
+        <VWorldMap apiKey="test-key" center={[127, 37]} maxBounds={bounds} />,
+      );
+      const map = latestMapMock();
+
+      await waitFor(() => expect(map.setMaxBounds).toHaveBeenCalledWith(bounds));
+      rerender(<VWorldMap apiKey="test-key" center={[127, 37]} />);
+
+      await waitFor(() => expect(map.setMaxBounds).toHaveBeenCalledWith(undefined));
     });
   });
 });

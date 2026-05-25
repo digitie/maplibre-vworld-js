@@ -88,7 +88,25 @@ export function useMapLoaded(): boolean {
  */
 export function useMapSelector<T>(selector: (snapshot: MapStoreSnapshot) => T): T {
   const store = useStore();
-  const get = useCallback(() => selector(store.getSnapshot()), [selector, store]);
+  const cacheRef = useRef<{
+    selector: (snapshot: MapStoreSnapshot) => T;
+    snapshot: MapStoreSnapshot;
+    value: T;
+  } | undefined>(undefined);
+  const get = useCallback(() => {
+    const snapshot = store.getSnapshot();
+    const cached = cacheRef.current;
+    if (cached && cached.selector === selector && cached.snapshot === snapshot) {
+      return cached.value;
+    }
+    const nextValue = selector(snapshot);
+    if (cached && cached.selector === selector && Object.is(cached.value, nextValue)) {
+      cacheRef.current = { selector, snapshot, value: cached.value };
+      return cached.value;
+    }
+    cacheRef.current = { selector, snapshot, value: nextValue };
+    return nextValue;
+  }, [selector, store]);
   return useSyncExternalStore(store.subscribe, get, get);
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import maplibregl, { type Map as MapLibreMap } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {
@@ -131,9 +131,10 @@ export interface VWorldMapProps {
   animateCameraChanges?: boolean;
   /**
    * Extra options forwarded to `flyTo` when `animateCameraChanges` is true.
-   * `center` and `zoom` are always taken from the corresponding props.
+   * `center`, `zoom`, `pitch`, and `bearing` are always taken from the
+   * corresponding props.
    */
-  flyToOptions?: Omit<maplibregl.FlyToOptions, 'center' | 'zoom'>;
+  flyToOptions?: Omit<maplibregl.FlyToOptions, 'center' | 'zoom' | 'pitch' | 'bearing'>;
 }
 
 function renderFallback(
@@ -154,6 +155,21 @@ function extractErrorUrl(event: maplibregl.ErrorEvent): string | undefined {
     if (typeof candidate === 'string' && candidate.length > 0) return candidate;
   }
   return undefined;
+}
+
+interface CameraSnapshot {
+  center: [number, number];
+  zoom: number;
+  pitch: number;
+  bearing: number;
+}
+
+function sameCamera(a: CameraSnapshot, b: CameraSnapshot): boolean {
+  return a.center[0] === b.center[0] &&
+    a.center[1] === b.center[1] &&
+    a.zoom === b.zoom &&
+    a.pitch === b.pitch &&
+    a.bearing === b.bearing;
 }
 
 /**
@@ -198,6 +214,10 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [store] = useState(() => new MapStore());
   const [initError, setInitError] = useState<Error | null>(null);
+  const [mapLoadedForEffects, setMapLoadedForEffects] = useState(false);
+  const hasOnErrorRef = useRef(onError !== undefined);
+  const lastCameraRef = useRef<CameraSnapshot>({ center, zoom, pitch, bearing });
+  const appliedStyleRef = useRef({ apiKey, layerType });
 
   // Stable callbacks: handler identity never changes, but the latest version
   // is always invoked. Lets us bind to MapLibre once and not re-bind when
@@ -209,6 +229,10 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   const stableOnZoomEnd = useEvent(onZoomEnd);
   const stableOnIdle = useEvent(onIdle);
   const stableOnError = useEvent(onError);
+
+  useLayoutEffect(() => {
+    hasOnErrorRef.current = onError !== undefined;
+  }, [onError]);
 
   const hasApiKey = typeof apiKey === 'string' && apiKey.trim().length > 0;
   const shouldMountMap = hasApiKey && initError === null;
@@ -250,6 +274,8 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       return;
     }
 
+    setMapLoadedForEffects(false);
+    appliedStyleRef.current = { apiKey, layerType };
     store.setMap(map);
     store.setZoom(map.getZoom());
 
@@ -275,6 +301,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
     const handleLoad = () => {
       store.setLoaded(true);
       store.setZoom(map.getZoom());
+      setMapLoadedForEffects(true);
       stableOnLoad(map);
     };
     const handleZoomEnd = (event: maplibregl.MapLibreEvent) => {
@@ -294,7 +321,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       stableOnContextMenu(event);
     };
     const handleError = (event: maplibregl.ErrorEvent) => {
-      if (onError) {
+      if (hasOnErrorRef.current) {
         stableOnError(event);
       } else {
         const url = extractErrorUrl(event);
@@ -332,6 +359,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       map.off('contextmenu', handleContextMenu);
       map.off('error', handleError);
       map.remove();
+      setMapLoadedForEffects(false);
       store.setMap(null);
     };
     // The map is mount-only; subsequent prop changes are applied via the
@@ -344,27 +372,38 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   useEffect(() => {
     const map = store.getSnapshot().map;
     if (!map) return;
-    if (!store.getSnapshot().loaded) return;
+    if (!mapLoadedForEffects) return;
+    if (
+      appliedStyleRef.current.apiKey === apiKey &&
+      appliedStyleRef.current.layerType === layerType
+    ) {
+      return;
+    }
     map.setStyle(getVWorldStyle(apiKey, layerType));
-  }, [apiKey, layerType, store]);
+    appliedStyleRef.current = { apiKey, layerType };
+  }, [apiKey, layerType, mapLoadedForEffects, store]);
 
   // Apply camera changes. Skip if the map is currently moving from a user
   // gesture so we do not interrupt them.
   useEffect(() => {
     const map = store.getSnapshot().map;
     if (!map) return;
-    if (!store.getSnapshot().loaded) return;
+    if (!mapLoadedForEffects) return;
     if (map.isMoving() || map.isEasing()) return;
 
+    const nextCamera = { center, zoom, pitch, bearing };
+    if (sameCamera(lastCameraRef.current, nextCamera)) return;
+
     if (animateCameraChanges) {
-      map.flyTo({ ...flyToOptions, center, zoom });
+      map.flyTo({ ...flyToOptions, ...nextCamera });
     } else {
-      map.jumpTo({ center, zoom });
+      map.jumpTo(nextCamera);
     }
+    lastCameraRef.current = nextCamera;
     // We intentionally exclude `flyToOptions` from deps — passing a fresh
     // object every render would re-animate on every parent re-render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [center[0], center[1], zoom, animateCameraChanges, store]);
+  }, [center[0], center[1], zoom, pitch, bearing, animateCameraChanges, mapLoadedForEffects, store]);
 
   // Apply min/max zoom and bounds.
   useEffect(() => {
@@ -372,7 +411,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
     if (!map) return;
     map.setMinZoom(minZoom);
     map.setMaxZoom(Math.min(maxZoom, getVWorldMaxZoom(layerType)));
-    if (maxBounds !== undefined) map.setMaxBounds(maxBounds);
+    map.setMaxBounds(maxBounds);
   }, [minZoom, maxZoom, layerType, maxBounds, store]);
 
   const fallbackInfo: VWorldMapFallbackInfo | null = !hasApiKey
