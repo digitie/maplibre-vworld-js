@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { getVWorldMaxZoom, getVWorldTileUrl, getVWorldStyle } from '../src/vworld';
+import {
+  getVWorldMaxZoom,
+  getVWorldTileUrl,
+  getVWorldStyle,
+  redactVWorldUrl,
+} from '../src/vworld';
 
 describe('VWorld Utilities', () => {
   const API_KEY = 'TEST_KEY';
@@ -66,6 +71,30 @@ describe('VWorld Utilities', () => {
       expect(getVWorldMaxZoom('Base')).toBe(19);
       expect(getVWorldMaxZoom('Satellite')).toBe(18);
       expect(getVWorldMaxZoom('Hybrid')).toBe(18);
+    });
+  });
+
+  describe('redactVWorldUrl', () => {
+    it('masks the API key segment of a WMTS tile URL', () => {
+      const url =
+        'https://api.vworld.kr/req/wmts/1.0.0/ABCD-1234-SECRET/Base/14/8000/12000.png';
+      expect(redactVWorldUrl(url)).toBe(
+        'https://api.vworld.kr/req/wmts/1.0.0/***/Base/14/8000/12000.png'
+      );
+      expect(redactVWorldUrl(url)).not.toContain('ABCD-1234-SECRET');
+    });
+
+    it('handles URL-encoded keys with special characters', () => {
+      const url =
+        'https://api.vworld.kr/req/wmts/1.0.0/a%2Fb%20c%2Bd/Satellite/10/200/300.jpeg';
+      expect(redactVWorldUrl(url)).toBe(
+        'https://api.vworld.kr/req/wmts/1.0.0/***/Satellite/10/200/300.jpeg'
+      );
+    });
+
+    it('returns the input unchanged for non-WMTS URLs', () => {
+      const url = 'https://example.com/not-a-vworld-tile';
+      expect(redactVWorldUrl(url)).toBe(url);
     });
   });
 });

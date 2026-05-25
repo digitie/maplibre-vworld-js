@@ -152,11 +152,40 @@ VWorld 지도 타일(WMTS)을 요청할 때 브라우저 콘솔에 **CORS 에러
 지도를 렌더링하는 최상위 컨테이너입니다.
 | 속성 (Prop) | 타입 (Type) | 기본값 (Default) | 설명 |
 |---|---|---|---|
-| `apiKey` | `string` | **필수** | 브이월드(VWorld)에서 발급받은 API Key |
+| `apiKey` | `string` | **필수** | 브이월드(VWorld)에서 발급받은 API Key. 비어 있거나 공백만 있으면 `fallback`이 렌더된다 |
 | `layerType` | `VWorldLayerType` | `'Base'` | 지도 테마 (`Base`, `gray`, `midnight`, `Satellite`, `Hybrid`) |
 | `center` | `[number, number]` | `[127.02, 37.53]` | 초기 카메라 중심 좌표 (경도, 위도) |
 | `zoom` | `number` | `12` | 초기 줌 레벨 |
-| `maxZoom` | `number` | `19` | 레이어별 상한과 함께 적용된다. `Satellite`/`Hybrid`는 VWorld 타일 한계에 맞춰 최대 z18까지만 요청한다. |
+| `maxZoom` | `number` | `19` | 레이어별 상한과 함께 적용된다. `Satellite`/`Hybrid`는 VWorld 타일 한계에 맞춰 최대 z18까지만 요청한다 |
+| `onMapClick` | `(e: MapMouseEvent) => void` | `undefined` | 지도 클릭 콜백. `e.lngLat.lng/lat`로 좌표 추출. 디버그 UI에서 클릭→입력 갱신 패턴에 사용 |
+| `onMapError` | `(e: VWorldMapErrorInfo) => void` | `console.warn` | MapLibre 오류 이벤트를 래핑(누적 카운트, 임계치 도달 플래그, **redacted URL**). 미지정 시 키가 가려진 채로 콘솔에 기록 |
+| `tileErrorThreshold` | `number` | `Infinity` | `onMapError`에 `thresholdReached: true`가 전달되는 누적 오류 횟수 |
+| `fallback` | `ReactNode \| (info) => ReactNode` | `undefined` | `apiKey` 누락 또는 MapLibre 초기화 실패 시 지도 자리에 렌더. 좌표 프리뷰 fallback UI에 사용 |
+| `loadingSkeleton` | `ReactNode` | `undefined` | MapLibre `load` 이벤트 전까지 보여줄 스피너/스켈레톤 |
+| `animateCameraChanges` | `boolean` | `true` | `false`면 prop 기반 `center`/`zoom` 변경 시 `flyTo` 대신 `jumpTo` 사용 (애니메이션 끔) |
+
+또한 `redactVWorldUrl(url)` 헬퍼를 export하여 임의 문자열에서 키 segment만 안전하게 `***`로 마스킹할 수 있습니다.
+
+```tsx
+import { VWorldMap, redactVWorldUrl, type VWorldMapErrorInfo } from 'maplibre-vworld';
+
+<VWorldMap
+  apiKey={process.env.NEXT_PUBLIC_VWORLD_API_KEY ?? ''}
+  fallback={(info) => (
+    <div>지도 미사용 ({info.reason})</div>
+  )}
+  loadingSkeleton={<div>지도 로딩 중...</div>}
+  animateCameraChanges={false}
+  tileErrorThreshold={5}
+  onMapClick={(e) => onPick({ x: e.lngLat.lng, y: e.lngLat.lat })}
+  onMapError={(e: VWorldMapErrorInfo) => {
+    if (e.thresholdReached) {
+      // 5회 누적 후 한 번만 사용자에게 알림
+      toast.warn(`지도 타일 로딩 지연: ${e.redactedUrl ?? ''}`);
+    }
+  }}
+/>
+```
 
 ### 2. `<MarkerClusterer>`
 만 개 이상의 마커를 그릴 때 필수적으로 사용해야 하는 고성능 클러스터링 엔진입니다. (화면 밖 마커 자동 제거 기능 포함)
