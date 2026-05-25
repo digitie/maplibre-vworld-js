@@ -6,6 +6,7 @@ type MapMockInstance = maplibregl.Map & {
   on: ReturnType<typeof vi.fn>;
   flyTo: ReturnType<typeof vi.fn>;
   getZoom: ReturnType<typeof vi.fn>;
+  getCenter: ReturnType<typeof vi.fn>;
 };
 
 function latestMapMock(): MapMockInstance {
@@ -91,16 +92,26 @@ describe('VWorldMap', () => {
   });
 
   describe('event wiring', () => {
-    it('attaches click/error handlers when map is created', () => {
+    it('attaches map event handlers when map is created', () => {
       vi.clearAllMocks();
       const onMapClick = vi.fn();
       const onMapError = vi.fn();
       render(
-        <VWorldMap apiKey="test-key" onMapClick={onMapClick} onMapError={onMapError} />
+        <VWorldMap
+          apiKey="test-key"
+          onMapClick={onMapClick}
+          onMapContextMenu={vi.fn()}
+          onViewportChange={vi.fn()}
+          onMapError={onMapError}
+        />
       );
       const mapInstance = (maplibregl.Map as any).mock.results[0].value;
       const registered = mapInstance.on.mock.calls.map((c: any[]) => c[0]);
       expect(registered).toContain('click');
+      expect(registered).toContain('contextmenu');
+      expect(registered).toContain('moveend');
+      expect(registered).toContain('zoomend');
+      expect(registered).toContain('idle');
       expect(registered).toContain('error');
       expect(registered).toContain('load');
     });
@@ -115,6 +126,50 @@ describe('VWorldMap', () => {
       mapHandler<typeof event>(map, 'click')(event);
 
       expect(onMapClick).toHaveBeenCalledWith(event);
+    });
+
+    it('passes normalized context menu payload to onMapContextMenu', () => {
+      vi.clearAllMocks();
+      const onMapContextMenu = vi.fn();
+      render(<VWorldMap apiKey="test-key" onMapContextMenu={onMapContextMenu} />);
+
+      const map = latestMapMock();
+      const originalEvent = new MouseEvent('contextmenu');
+      const event = {
+        lngLat: { lng: 127.1, lat: 37.5 },
+        point: { x: 12, y: 24 },
+        originalEvent,
+      };
+      mapHandler<typeof event>(map, 'contextmenu')(event);
+
+      expect(onMapContextMenu).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event,
+          lngLat: [127.1, 37.5],
+          point: { x: 12, y: 24 },
+          originalEvent,
+        })
+      );
+    });
+
+    it('emits normalized viewport changes from map camera events', () => {
+      vi.clearAllMocks();
+      const onViewportChange = vi.fn();
+      render(<VWorldMap apiKey="test-key" onViewportChange={onViewportChange} />);
+
+      const map = latestMapMock();
+      map.getCenter.mockReturnValue({ lng: 128, lat: 36 });
+      map.getZoom.mockReturnValue(9);
+      mapHandler(map, 'moveend')({} as never);
+
+      expect(onViewportChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          center: [128, 36],
+          zoom: 9,
+          bounds: [-180, -90, 180, 90],
+          eventType: 'moveend',
+        })
+      );
     });
 
     it('wraps MapLibre error events in VWorldMapErrorInfo for onMapError', () => {

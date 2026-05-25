@@ -28,6 +28,23 @@ export interface VWorldMapErrorInfo {
   redactedUrl?: string;
 }
 
+export type VWorldViewportEventType = 'load' | 'moveend' | 'zoomend' | 'idle';
+
+export interface VWorldViewportInfo {
+  map: maplibregl.Map;
+  center: [number, number];
+  zoom: number;
+  bounds: [number, number, number, number];
+  eventType: VWorldViewportEventType;
+}
+
+export interface VWorldMapContextMenuInfo {
+  event: maplibregl.MapMouseEvent;
+  lngLat: [number, number];
+  point: maplibregl.MapMouseEvent['point'];
+  originalEvent: maplibregl.MapMouseEvent['originalEvent'];
+}
+
 /**
  * Props for the VWorldMap component.
  */
@@ -112,6 +129,18 @@ export interface VWorldMapProps {
    * renders (the map is not re-created).
    */
   onMapClick?: (e: maplibregl.MapMouseEvent) => void;
+  /**
+   * Context menu handler for the map canvas. The payload normalizes the click
+   * coordinate to `[lng, lat]` so apps can open custom right-click menus
+   * without touching the MapLibre instance.
+   */
+  onMapContextMenu?: (e: VWorldMapContextMenuInfo) => void;
+  /**
+   * Fired after map load and camera-settled events with normalized viewport
+   * state. Data fetching, debounce, aborting, and cache policy should stay in
+   * the consuming app.
+   */
+  onViewportChange?: (viewport: VWorldViewportInfo) => void;
   /**
    * Handler for MapLibre `error` events (failed tile fetches, style errors,
    * WebGL warnings). The event is wrapped with a running count, a
@@ -236,6 +265,23 @@ function extractErrorUrl(event: maplibregl.ErrorEvent): string | undefined {
   return undefined;
 }
 
+function getViewportInfo(map: maplibregl.Map, eventType: VWorldViewportEventType): VWorldViewportInfo {
+  const center = map.getCenter();
+  const bounds = map.getBounds();
+  return {
+    map,
+    center: [center.lng, center.lat],
+    zoom: map.getZoom(),
+    bounds: [
+      bounds.getWest(),
+      bounds.getSouth(),
+      bounds.getEast(),
+      bounds.getNorth(),
+    ],
+    eventType,
+  };
+}
+
 /**
  * The base map component that initializes MapLibre GL JS with VWorld maps.
  * It provides a MapContext to all child components.
@@ -262,6 +308,8 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   children,
   onMapLoad,
   onMapClick,
+  onMapContextMenu,
+  onViewportChange,
   onMapError,
   tileErrorThreshold = Infinity,
   transformRequest,
@@ -280,14 +328,20 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   // Collapsed into a single effect — three writes are cheaper than three
   // useEffect bookkeeping entries, and the refs are read together at click /
   // error time anyway.
+  const onMapLoadRef = useRef(onMapLoad);
   const onMapClickRef = useRef(onMapClick);
+  const onMapContextMenuRef = useRef(onMapContextMenu);
+  const onViewportChangeRef = useRef(onViewportChange);
   const onMapErrorRef = useRef(onMapError);
   const tileErrorThresholdRef = useRef(tileErrorThreshold);
   useEffect(() => {
+    onMapLoadRef.current = onMapLoad;
     onMapClickRef.current = onMapClick;
+    onMapContextMenuRef.current = onMapContextMenu;
+    onViewportChangeRef.current = onViewportChange;
     onMapErrorRef.current = onMapError;
     tileErrorThresholdRef.current = tileErrorThreshold;
-  }, [onMapClick, onMapError, tileErrorThreshold]);
+  }, [onMapLoad, onMapClick, onMapContextMenu, onViewportChange, onMapError, tileErrorThreshold]);
 
   const hasApiKey = typeof apiKey === 'string' && apiKey.trim().length > 0;
   const shouldMountMap = hasApiKey && initError === null;
@@ -349,18 +403,40 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       );
     }
 
+    const emitViewportChange = (eventType: VWorldViewportEventType) => {
+      onViewportChangeRef.current?.(getViewportInfo(map, eventType));
+    };
+    const syncZoom = () => {
+      const nextZoom = map.getZoom();
+      setCurrentZoom((previousZoom) => (previousZoom === nextZoom ? previousZoom : nextZoom));
+    };
     const handleLoad = () => {
       setMapLoaded(true);
-      setCurrentZoom(map.getZoom());
-      if (onMapLoad) {
-        onMapLoad(map);
-      }
+      syncZoom();
+      onMapLoadRef.current?.(map);
+      emitViewportChange('load');
     };
     const handleZoomEnd = () => {
-      setCurrentZoom(map.getZoom());
+      syncZoom();
+      emitViewportChange('zoomend');
+    };
+    const handleMoveEnd = () => {
+      syncZoom();
+      emitViewportChange('moveend');
+    };
+    const handleIdle = () => {
+      emitViewportChange('idle');
     };
     const handleClick = (e: maplibregl.MapMouseEvent) => {
       onMapClickRef.current?.(e);
+    };
+    const handleContextMenu = (e: maplibregl.MapMouseEvent) => {
+      onMapContextMenuRef.current?.({
+        event: e,
+        lngLat: [e.lngLat.lng, e.lngLat.lat],
+        point: e.point,
+        originalEvent: e.originalEvent,
+      });
     };
     let errorCount = 0;
     const handleError = (event: maplibregl.ErrorEvent) => {
@@ -392,7 +468,10 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
 
     map.on('load', handleLoad);
     map.on('zoomend', handleZoomEnd);
+    map.on('moveend', handleMoveEnd);
+    map.on('idle', handleIdle);
     map.on('click', handleClick);
+    map.on('contextmenu', handleContextMenu);
     map.on('error', handleError);
 
     // Handle resize for mobile responsiveness
@@ -405,7 +484,10 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       resizeObserver.disconnect();
       map.off('load', handleLoad);
       map.off('zoomend', handleZoomEnd);
+      map.off('moveend', handleMoveEnd);
+      map.off('idle', handleIdle);
       map.off('click', handleClick);
+      map.off('contextmenu', handleContextMenu);
       map.off('error', handleError);
       map.remove();
       mapRef.current = null;

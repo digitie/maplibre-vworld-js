@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-05-25: TripMate 지도 primitive P0/P1 구현
+
+### 1. PR #10 백로그 기반 public API 추가
+- **이슈**: 문서화된 TripMate Sprint 4 요구사항 중 viewport 변화, 우클릭 메뉴, marker palette, Maki vendor path, 서버 클러스터, feature kind 렌더링, popup은 소비자 앱마다 직접 MapLibre listener와 DOM portal을 붙이면 중복과 성능 저하 위험이 크다.
+- **조치**:
+  1. `<VWorldMap>`에 `onViewportChange`, `onMapContextMenu`를 추가해 `center/zoom/bounds`와 우클릭 좌표를 정규화한다.
+  2. `<Marker>`에 `onClick`, `onContextMenu`, `selected`, `highlighted`, `zIndex`, `ariaLabel`, `className`을 추가하고 event handler ref로 map/marker 재생성을 피한다.
+  3. `TRIPMATE_MARKER_PALETTE`, `TRIPMATE_CATEGORY_MARKERS`, `resolveTripmateMarkerStyle`, Korea 좌표/bounds schema와 bounds serialize/parse helper를 추가했다.
+  4. `<MakiMarker>`가 `icon`, `iconBaseUrl`, `fallbackIcon`을 받아 TripMate의 `/maki` vendored SVG 정책을 지원한다.
+  5. `<ServerClusterLayer>`, `<TripmateFeatureLayer>`, `<MapPopup>`을 추가했다.
+  6. `<MarkerClusterer>`의 raw point → GeoJSON 변환을 `useMemo`로 고정하고, bounds/zoom state update를 동일 값에서 건너뛰도록 줄였다.
+- **결과**: TripMate는 MapLibre listener를 직접 붙이지 않고도 viewport query trigger, right-click menu, 서버 cluster, 7종 feature marker/route/area, popup을 라이브러리 primitive로 구성할 수 있다. API 호출, Zustand/TanStack Query, 위치 동의/감사 로그는 여전히 앱 책임으로 남는다.
+
+### 2. 검증
+- `PATH=/tmp/node-v20.19.5-linux-x64/bin:$PATH PUPPETEER_SKIP_DOWNLOAD=1 npm ci` → Node 20 환경에서 Puppeteer Node 22 권장 engine 경고만 출력, 설치 성공.
+- `PATH=/tmp/node-v20.19.5-linux-x64/bin:$PATH npm run type-check` → 통과.
+- `PATH=/tmp/node-v20.19.5-linux-x64/bin:$PATH npm test` → 7 files / 44 tests 통과.
+
 ## 2026-05-25: TripMate 연동 추가 구현 백로그 문서화
 
 ### 1. TripMate 최신 main 문서 기준의 지도 요구사항 정리

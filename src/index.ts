@@ -14,9 +14,13 @@ export * from './components/PinMarker';
 export * from './components/MakiMarker';
 export * from './components/ClusterMarker';
 export * from './components/MarkerClusterer';
+export * from './components/ServerClusterLayer';
+export * from './components/MapPopup';
+export * from './components/TripmateFeatureLayer';
 export * from './components/RoutePointMarker';
 export * from './components/RouteLine';
 export * from './components/PolygonArea';
+export * from './tripmate';
 
 // Export Zod validation schemas
 export * from './schemas';

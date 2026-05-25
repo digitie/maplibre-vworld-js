@@ -56,7 +56,9 @@ interface VWorldMapProps {
   showGeolocateControl?: boolean; // 기본값: true
   showScaleControl?: boolean; // 기본값: true
   onMapClick?: (event: maplibregl.MapMouseEvent) => void; // 지도 바탕 클릭 이벤트
-  onMapError?: (event: maplibregl.ErrorEvent) => void; // MapLibre error 이벤트
+  onMapContextMenu?: (event: VWorldMapContextMenuInfo) => void; // 지도 우클릭 이벤트
+  onViewportChange?: (event: VWorldViewportInfo) => void; // center/zoom/bounds 변경 이벤트
+  onMapError?: (event: VWorldMapErrorInfo) => void; // redacted URL을 포함한 MapLibre error 이벤트
   flyToOptions?: Omit<maplibregl.FlyToOptions, 'center' | 'zoom'>; // center/zoom 변경 시 flyTo 추가 옵션
   transformRequest?: (url: string, resourceType: string) => { url: string, headers?: any }; // CORS 우회용 프록시 훅
 }
@@ -66,6 +68,8 @@ interface VWorldMapProps {
 
 **AI 지시사항 (디버그/운영 UI 이벤트)**:
 - 지도 클릭 좌표가 필요한 화면은 `onMapClick`을 사용하고, 좌표 순서는 항상 `[lng, lat]` 또는 `{ x: lng, y: lat }`로 유지하세요.
+- viewport 기반 feature 로딩은 `onViewportChange`에서 받은 `bounds`와 `zoom`을 앱의 debounce/TanStack Query로 넘기세요. 라이브러리 안에 API 호출, AbortController, cache 정책을 넣지 마세요.
+- 우클릭 메뉴는 `onMapContextMenu` 또는 `<Marker onContextMenu>`로 좌표와 DOM event를 받아 앱에서 렌더링하세요. 메뉴 UI와 mutation은 TripMate 앱 책임입니다.
 - VWorld tile 오류를 사용자 overlay로 처리할 때는 `onMapError`에서 `isVWorldTileError(event)`로 먼저 분류하고, 로그에는 `redactVWorldTileUrl(url)`을 사용해 API key를 제거하세요.
 - marker나 입력 폼 동기화 때문에 지도 이동 애니메이션을 끄고 싶다면 `flyToOptions={{ animate: false, duration: 0 }}`를 전달하세요.
 - API key 미설정 fallback UI는 이 라이브러리가 강제하지 않습니다. Next.js 운영 콘솔에서는 `VWorldMap`을 렌더링하기 전에 환경변수를 확인하고, 없으면 같은 크기의 placeholder를 렌더링하세요.
@@ -88,6 +92,15 @@ interface MarkerClustererProps {
 }
 ```
 **AI 지시사항**: `MarkerClusterer`는 화면을 벗어난 마커를 DOM에서 자동으로 제거합니다. 클러스터링 기능 자체를 원하지 않더라도(`radius={0}`), 대량의 데이터셋을 다룰 때는 성능 최적화(Culling)를 위해 반드시 이 컴포넌트를 사용해야 합니다.
+
+### TripMate 전용 primitive
+
+**AI 지시사항**:
+- 서버에서 이미 zoom 단계별 cluster를 반환한다면 `<MarkerClusterer>`로 다시 묶지 말고 `<ServerClusterLayer>`를 사용하세요.
+- TripMate feature DTO는 앱에서 얕은 `TripmateFeatureLike` 형태로 변환한 뒤 `<TripmateFeatureLayer>`에 넘기세요. API 응답 schema 전체를 이 라이브러리 타입에 고정하지 마세요.
+- Maki 아이콘은 운영 앱에서 `iconBaseUrl="/maki"`처럼 vendored path를 전달하세요. CDN 기본값은 빠른 실험용입니다.
+- `resolveTripmateMarkerStyle`은 fallback 계산용입니다. DB override와 사용자 custom marker가 있으면 그 값을 우선 넘기세요.
+- `KoreaLngLatSchema`와 `KoreaBoundsSchema`는 broad web-map guard입니다. 법정동/CRS 정합성은 `python-krtour-map`/`python-kraddr-geo` 쪽에서 처리하세요.
 
 ### `<RouteLine>`
 GeoJSON 데이터 규격을 사용하여 다수의 `[경도, 위도]` 좌표를 연결하는 선을 그립니다.

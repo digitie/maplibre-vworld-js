@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useSupercluster from 'use-supercluster';
 import { useMap } from './VWorldMap';
 import { ClusterMarker } from './ClusterMarker';
@@ -79,13 +79,26 @@ export const MarkerClusterer: React.FC<MarkerClustererProps> = ({
 
     const updateBoundsAndZoom = () => {
       const mapBounds = map.getBounds();
-      setBounds([
+      const nextBounds: [number, number, number, number] = [
         mapBounds.getWest(),
         mapBounds.getSouth(),
         mapBounds.getEast(),
         mapBounds.getNorth()
-      ]);
-      setZoom(map.getZoom());
+      ];
+      setBounds((previousBounds) => {
+        if (
+          previousBounds &&
+          previousBounds[0] === nextBounds[0] &&
+          previousBounds[1] === nextBounds[1] &&
+          previousBounds[2] === nextBounds[2] &&
+          previousBounds[3] === nextBounds[3]
+        ) {
+          return previousBounds;
+        }
+        return nextBounds;
+      });
+      const nextZoom = map.getZoom();
+      setZoom((previousZoom) => (previousZoom === nextZoom ? previousZoom : nextZoom));
     };
 
     // Initial update
@@ -102,7 +115,7 @@ export const MarkerClusterer: React.FC<MarkerClustererProps> = ({
   }, [map]);
 
   // Convert raw points to GeoJSON features for supercluster
-  const features: PointFeature[] = points.map(point => ({
+  const features: PointFeature[] = useMemo(() => points.map(point => ({
     type: 'Feature',
     properties: {
       cluster: false,
@@ -112,13 +125,14 @@ export const MarkerClusterer: React.FC<MarkerClustererProps> = ({
       type: 'Point',
       coordinates: point.lngLat
     }
-  }));
+  })), [points]);
+  const clusterOptions = useMemo(() => ({ radius, maxZoom }), [radius, maxZoom]);
 
   const { clusters, supercluster } = useSupercluster({
     points: features,
     bounds: bounds || undefined,
     zoom,
-    options: { radius, maxZoom }
+    options: clusterOptions
   });
 
   if (!map) return null;

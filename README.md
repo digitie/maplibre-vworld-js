@@ -158,6 +158,8 @@ VWorld 지도 타일(WMTS)을 요청할 때 브라우저 콘솔에 **CORS 에러
 | `zoom` | `number` | `12` | 초기 줌 레벨 |
 | `maxZoom` | `number` | `19` | 레이어별 상한과 함께 적용된다. `Satellite`/`Hybrid`는 VWorld 타일 한계에 맞춰 최대 z18까지만 요청한다 |
 | `onMapClick` | `(e: MapMouseEvent) => void` | `undefined` | 지도 클릭 콜백. `e.lngLat.lng/lat`로 좌표 추출. 디버그 UI에서 클릭→입력 갱신 패턴에 사용 |
+| `onMapContextMenu` | `(e: VWorldMapContextMenuInfo) => void` | `undefined` | 지도 우클릭 콜백. `e.lngLat`는 `[lng, lat]`로 정규화된다 |
+| `onViewportChange` | `(e: VWorldViewportInfo) => void` | `undefined` | `load/moveend/zoomend/idle` 이후 `center/zoom/bounds`를 정규화해 전달 |
 | `onMapError` | `(e: VWorldMapErrorInfo) => void` | `console.warn` | MapLibre 오류 이벤트를 래핑(누적 카운트, 임계치 도달 플래그, **redacted URL**). 미지정 시 키가 가려진 채로 콘솔에 기록 |
 | `tileErrorThreshold` | `number` | `Infinity` | `onMapError`에 `thresholdReached: true`가 전달되는 누적 오류 횟수 |
 | `fallback` | `ReactNode \| (info) => ReactNode` | `undefined` | `apiKey` 누락 또는 MapLibre 초기화 실패 시 지도 자리에 렌더. 좌표 프리뷰 fallback UI에 사용 |
@@ -196,7 +198,44 @@ import { VWorldMap, redactVWorldUrl, type VWorldMapErrorInfo } from 'maplibre-vw
 | `maxZoom` | `number` | `16` | 병합을 해제할 최대 줌 레벨 |
 | `renderMarker` | `(point) => ReactNode` | **필수** | 개별 마커 렌더링 함수 |
 
-### 3. `<PolygonArea>`
+### 3. TripMate 지도 primitive
+TripMate 같은 소비자 앱이 서버 클러스터, 7종 feature, popup, 16색 marker palette를 반복 구현하지 않도록 얕은 public contract를 제공합니다. API 호출, Zustand/TanStack Query, 위치 동의/감사 로그는 소비자 앱 책임입니다.
+
+```tsx
+import {
+  ServerClusterLayer,
+  TripmateFeatureLayer,
+  MapPopup,
+  resolveTripmateMarkerStyle,
+} from 'maplibre-vworld';
+
+<VWorldMap
+  apiKey={apiKey}
+  onViewportChange={({ bounds, zoom }) => {
+    // debounce/fetch/cache는 앱에서 처리
+    setViewport({ bounds, zoom });
+  }}
+  onMapContextMenu={({ lngLat, originalEvent }) => {
+    openRightClickMenu({ lngLat, x: originalEvent.clientX, y: originalEvent.clientY });
+  }}
+>
+  <ServerClusterLayer clusters={serverClusters} />
+  <TripmateFeatureLayer features={features} iconBaseUrl="/maki" />
+  {selected && <MapPopup lngLat={selected.lngLat}>{selected.name}</MapPopup>}
+</VWorldMap>
+```
+
+주요 export:
+
+| Export | 설명 |
+|---|---|
+| `TRIPMATE_MARKER_PALETTE` | P-01~P-16 색상과 label color |
+| `TRIPMATE_CATEGORY_MARKERS` | TripMate 기본 category → Maki icon/color 매핑 |
+| `resolveTripmateMarkerStyle` | DB override / 사용자 custom marker fallback 계산 |
+| `KoreaLngLatSchema`, `KoreaBoundsSchema` | 대한민국 범위의 broad coordinate guard |
+| `serializeBounds`, `parseBoundsParam` | `GET /features/in-bounds` query param 준비용 helper |
+
+### 4. `<PolygonArea>`
 국립공원, 읍면동 등 폴리곤(다각형) 형태의 영역을 렌더링하고 클릭/호버 이벤트를 처리합니다.
 | 속성 (Prop) | 타입 (Type) | 기본값 (Default) | 설명 |
 |---|---|---|---|
@@ -207,7 +246,7 @@ import { VWorldMap, redactVWorldUrl, type VWorldMapErrorInfo } from 'maplibre-vw
 | `onClick` | `function` | `undefined` | 영역 클릭 이벤트 콜백 |
 | `onMouseEnter` | `function` | `undefined` | 영역 마우스 진입 이벤트 콜백 |
 
-### 4. `<RouteLine>`
+### 5. `<RouteLine>`
 복수의 좌표나 GeoJSON LineString 데이터를 받아 선(등산로, 트래킹 코스 등)을 그립니다.
 | 속성 (Prop) | 타입 (Type) | 기본값 (Default) | 설명 |
 |---|---|---|---|

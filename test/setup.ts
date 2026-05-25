@@ -15,9 +15,11 @@ vi.mock('maplibre-gl', () => {
       setStyle: vi.fn(),
       addControl: vi.fn(),
       flyTo: vi.fn(),
+      fitBounds: vi.fn(),
       jumpTo: vi.fn(),
       resize: vi.fn(),
       getZoom: vi.fn().mockReturnValue(12),
+      getCenter: vi.fn().mockReturnValue({ lng: 127, lat: 37 }),
       setMinZoom: vi.fn(),
       setMaxZoom: vi.fn(),
       setMaxBounds: vi.fn(),
@@ -60,13 +62,26 @@ vi.mock('maplibre-gl', () => {
     this.onRemove = vi.fn();
   });
 
-  const Marker = vi.fn().mockImplementation(function() {
+  const Marker = vi.fn().mockImplementation(function(options?: { element?: HTMLElement }) {
+    const element = options?.element ?? document.createElement('div');
     return {
       setLngLat: vi.fn().mockReturnThis(),
       addTo: vi.fn().mockReturnThis(),
       remove: vi.fn(),
       on: vi.fn(),
       getLngLat: vi.fn().mockReturnValue({ lng: 0, lat: 0 }),
+      getElement: vi.fn().mockReturnValue(element),
+    };
+  });
+
+  const Popup = vi.fn().mockImplementation(function() {
+    return {
+      setLngLat: vi.fn().mockReturnThis(),
+      setDOMContent: vi.fn().mockReturnThis(),
+      addTo: vi.fn().mockReturnThis(),
+      on: vi.fn(),
+      off: vi.fn(),
+      remove: vi.fn(),
     };
   });
 
@@ -77,12 +92,14 @@ vi.mock('maplibre-gl', () => {
       GeolocateControl,
       ScaleControl,
       Marker,
+      Popup,
     },
     Map,
     NavigationControl,
     GeolocateControl,
     ScaleControl,
     Marker,
+    Popup,
   };
 });
 
