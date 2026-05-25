@@ -15,6 +15,20 @@ export function getVWorldMaxZoom(layerType: VWorldLayerType): number {
   return LIMITED_ZOOM_LAYER_TYPES.has(layerType) ? 18 : 19;
 }
 
+/**
+ * Replace the API-key segment of a VWorld WMTS tile URL with `***` so the URL
+ * can be safely logged, shown in error banners, or sent to monitoring.
+ *
+ * The VWorld WMTS path format is:
+ *   `https://api.vworld.kr/req/wmts/1.0.0/{key}/{layer}/{z}/{y}/{x}.{ext}`
+ *
+ * This function returns the input unchanged if the path does not look like a
+ * VWorld WMTS URL, so it is safe to call on arbitrary error strings.
+ */
+export function redactVWorldUrl(url: string): string {
+  return url.replace(/(\/req\/wmts\/1\.0\.0\/)([^/?#]+)(\/)/, '$1***$3');
+}
+
 export function getVWorldStyle(apiKey: string, layerType: VWorldLayerType): StyleSpecification {
   const sources: StyleSpecification['sources'] = {};
   const layers: StyleSpecification['layers'] = [];
