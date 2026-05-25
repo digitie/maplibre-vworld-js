@@ -261,6 +261,14 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   const hasApiKey = typeof apiKey === 'string' && apiKey.trim().length > 0;
   const shouldMountMap = hasApiKey && initError === null;
 
+  // Give the map another shot when the consumer rotates the key or switches
+  // layers. A terminal failure (e.g. no WebGL) will re-trip immediately, so
+  // this is safe — at worst it costs one re-render. Without this, a brief
+  // misconfiguration sticks the component in fallback until full remount.
+  useEffect(() => {
+    setInitError(null);
+  }, [apiKey, layerType]);
+
   useEffect(() => {
     if (!shouldMountMap) return;
     if (!mapContainerRef.current) return;
