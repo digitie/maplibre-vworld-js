@@ -15,31 +15,22 @@ export type Bounds = z.infer<typeof BoundsSchema>;
  * Basic Point Data schema for clustering and markers.
  */
 export declare const BasePointDataSchema: z.ZodObject<{
-    id: z.ZodUnion<[z.ZodString, z.ZodNumber]>;
+    id: z.ZodUnion<readonly [z.ZodString, z.ZodNumber]>;
     lngLat: z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>;
-}, "strip", z.ZodTypeAny, {
-    lngLat: [number, number];
-    id: string | number;
-}, {
-    lngLat: [number, number];
-    id: string | number;
-}>;
+}, z.core.$strip>;
 export type BasePointData = z.infer<typeof BasePointDataSchema>;
 /**
  * Generic Point Data schema constructor to validate custom properties.
  */
-export declare const createPointDataSchema: <T extends z.ZodRawShape>(properties: T) => z.ZodObject<z.objectUtil.extendShape<{
-    id: z.ZodUnion<[z.ZodString, z.ZodNumber]>;
+export declare const createPointDataSchema: <T extends z.ZodRawShape>(properties: T) => z.ZodObject<(("lngLat" | "id") & keyof T extends never ? {
+    id: z.ZodUnion<readonly [z.ZodString, z.ZodNumber]>;
     lngLat: z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>;
-}, T>, "strip", z.ZodTypeAny, z.objectUtil.addQuestionMarks<z.baseObjectOutputType<z.objectUtil.extendShape<{
-    id: z.ZodUnion<[z.ZodString, z.ZodNumber]>;
+} & { -readonly [P in keyof T]: T[P]; } : ({
+    id: z.ZodUnion<readonly [z.ZodString, z.ZodNumber]>;
     lngLat: z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>;
-}, T>>, any> extends infer T_1 ? { [k in keyof T_1]: T_1[k]; } : never, z.baseObjectInputType<z.objectUtil.extendShape<{
-    id: z.ZodUnion<[z.ZodString, z.ZodNumber]>;
-    lngLat: z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>;
-}, T>> extends infer T_2 ? { [k_1 in keyof T_2]: T_2[k_1]; } : never>;
+} extends infer T_2 extends z.core.util.SomeObject ? { [K in keyof T_2 as K extends keyof T ? never : K]: T_2[K]; } : never) & { [K_1 in keyof { -readonly [P in keyof T]: T[P]; }]: { -readonly [P in keyof T]: T[P]; }[K_1]; }) extends infer T_1 ? { [k in keyof T_1]: T_1[k]; } : never, z.core.$strip>;
 /**
  * Route coordinates validation schema.
  */
-export declare const RouteCoordinatesSchema: z.ZodArray<z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>, "many">;
+export declare const RouteCoordinatesSchema: z.ZodArray<z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>>;
 export type RouteCoordinates = z.infer<typeof RouteCoordinatesSchema>;

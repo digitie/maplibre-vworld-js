@@ -19,6 +19,19 @@ describe('VWorld Utilities', () => {
       const url = getVWorldTileUrl(API_KEY, 'Hybrid');
       expect(url).toBe('https://api.vworld.kr/req/wmts/1.0.0/TEST_KEY/Hybrid/{z}/{y}/{x}.png');
     });
+
+    it('URL-encodes API keys with special characters', () => {
+      const url = getVWorldTileUrl('a/b c+d', 'Base');
+      expect(url).toContain('/a%2Fb%20c%2Bd/');
+      expect(url).not.toContain('/a/b c+d/');
+    });
+
+    it('trims surrounding whitespace and newlines from API key', () => {
+      const url = getVWorldTileUrl('  KEY_WITH_SPACES\n', 'Base');
+      expect(url).toContain('/KEY_WITH_SPACES/');
+      expect(url).not.toContain('%20');
+      expect(url).not.toContain('%0A');
+    });
   });
 
   describe('getVWorldStyle', () => {

@@ -26,8 +26,10 @@ vi.mock('maplibre-gl', () => {
         getEast: () => 180,
         getNorth: () => 90,
       }),
-      getCanvas: vi.fn().mockReturnValue({ style: {} }),
-      getStyle: vi.fn().mockReturnValue({ layers: [], sources: {} }),
+      // mockImplementation gives each call a fresh object, so multiple map
+      // instances in the same test don't share cursor state through `style`.
+      getCanvas: vi.fn(() => ({ style: {} })),
+      getStyle: vi.fn(() => ({ layers: [], sources: {} })),
       getSource: vi.fn(),
       getLayer: vi.fn(),
       addSource: vi.fn(),
