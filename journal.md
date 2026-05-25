@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-05-25: TripMate 연동 추가 구현 백로그 문서화
+
+### 1. TripMate 최신 main 문서 기준의 지도 요구사항 정리
+- **이슈**: `tripmate`는 사용자 대면 UI를 `maplibre-vworld` 기반 지도로 가져가는 방향을 명시하지만, 세부 Sprint 문서에는 과거 Kakao SDK 기준 문구와 지도 UI 요구사항이 섞여 있다. 이 상태에서 바로 구현에 들어가면 앱 책임(TanStack Query, Zustand, 위치 동의/감사 로그)과 라이브러리 책임(MapLibre 이벤트, marker primitive, VWorld 오류 처리)이 뒤섞일 위험이 있었다.
+- **조치**:
+  1. `tripmate` `origin/main` `767bace`와 `maplibre-vworld-js` `origin/main` `b19baa3`를 기준점으로 고정했다.
+  2. `docs/tripmate-implementation-roadmap.md`를 추가해 viewport 이벤트, context menu, 16색 마커 팔레트, Maki icon vendor path, Korea 좌표/bounds helper, 서버 클러스터, feature kind 렌더링, 선택/호버 상태, popup primitive를 우선순위별로 정리했다.
+  3. README와 `AI_AGENT_GUIDE.md`에 새 백로그 문서 링크와 책임 경계 주의사항을 추가했다.
+- **결과**: 후속 PR은 TripMate Sprint 4 요구사항을 라이브러리 public API로 승격할지, TripMate 앱 내부에 남길지를 먼저 확인한 뒤 작게 나눠 구현할 수 있다.
+
+### 2. 검증
+- `git diff --check` → 통과.
+
 ## 2026-05-25: 디버그 UI 동작 정합화를 위한 Map event hook 보강
 
 ### 1. `python-kraddr-geo` 디버그 지도와 공통화할 이벤트 표면 추가

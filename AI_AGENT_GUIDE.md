@@ -5,6 +5,7 @@
 ## 1. 아키텍처 개요
 - **핵심 기술**: MapLibre GL JS + React 18+
 - **목적**: 커스텀 마커, 클러스터링, 다각형 및 경로 렌더링을 포함하여 대한민국 브이월드(VWorld) 지도를 고성능으로 렌더링.
+- **TripMate 연동 백로그**: `docs/tripmate-implementation-roadmap.md`는 `tripmate` 최신 `main` 문서를 기준으로 이 라이브러리에 추가해야 할 지도 계약을 정리합니다. TripMate 작업을 위해 이 저장소를 수정한다면 해당 문서를 먼저 확인하고, 앱 책임(TanStack Query, Zustand, 위치 동의/감사 로그, API 호출)을 라이브러리 책임으로 끌어오지 마세요.
 - **SSR 호환성**: Next.js (App/Pages Router) 및 Vite 지원.
   - **🚨 CRITICAL (매우 중요)**: MapLibre는 브라우저의 `window` 객체와 WebGL에 강하게 의존합니다. 이 라이브러리를 Next.js에서 사용할 때는 **반드시 지도 컴포넌트를 `next/dynamic`(`ssr: false`) 옵션으로 동적 임포트(Dynamic Import)** 해야 합니다. 그렇지 않으면 서버 사이드 렌더링 에러가 발생합니다.
   - 클라이언트 컴포넌트(`"use client"`) 내부에서만 마커나 폴리곤 관련 코드가 실행되도록 해야 합니다. SSR 시점에 `document`나 `window`에 접근하면 치명적인 에러가 발생합니다.

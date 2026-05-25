@@ -223,6 +223,8 @@ import { VWorldMap, redactVWorldUrl, type VWorldMapErrorInfo } from 'maplibre-vw
 ## 🤖 AI 에이전트 연동 가이드
 이 라이브러리를 기반으로 Cursor, GitHub Copilot 등 AI에게 코드를 작성하게 할 때는, 프로젝트 루트 디렉토리에 있는 **[AGENTS.md](./AGENTS.md)** 및 **[AI_AGENT_GUIDE.md](./AI_AGENT_GUIDE.md)** 내용을 프롬프트에 제공해주세요. Race Condition이나 SSR 렌더링 충돌 없이 완벽한 코드를 자동 생성할 수 있습니다.
 
+TripMate 소비자 앱에서 필요한 추가 지도 계약은 **[TripMate 연동 추가 구현 백로그](./docs/tripmate-implementation-roadmap.md)**에 정리되어 있습니다. 이 문서는 `tripmate` 최신 `main` 문서를 기준으로 viewport 이벤트, context menu, 16색 마커 팔레트, Maki icon vendor path, 서버 클러스터, feature kind 렌더링 등 후속 구현 범위를 구분합니다.
+
 ---
 
 ## 📄 라이선스 (License)
