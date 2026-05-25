@@ -252,6 +252,37 @@ describe('VWorldMap', () => {
       });
     });
 
+    it('defers camera prop changes while user is panning and re-applies on moveend', async () => {
+      vi.clearAllMocks();
+      const { rerender } = render(
+        <VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} />,
+      );
+      const map = latestMapMock();
+      await waitFor(() => expect(maplibregl.Map).toHaveBeenCalled());
+
+      // Simulate the user being mid-gesture.
+      map.isMoving.mockReturnValue(true);
+
+      rerender(<VWorldMap apiKey="test-key" center={[128, 38]} zoom={10} />);
+
+      // While the gesture is in progress, no camera command runs.
+      expect(map.flyTo).not.toHaveBeenCalled();
+      expect(map.jumpTo).not.toHaveBeenCalled();
+
+      // Gesture ends → moveend fires → pending camera is applied.
+      map.isMoving.mockReturnValue(false);
+      mapHandler(map, 'moveend')({} as never);
+
+      await waitFor(() => {
+        expect(map.flyTo).toHaveBeenCalledWith({
+          center: [128, 38],
+          zoom: 10,
+          pitch: 0,
+          bearing: 0,
+        });
+      });
+    });
+
     it('uses jumpTo when animateCameraChanges is false', async () => {
       vi.clearAllMocks();
       const { rerender } = render(

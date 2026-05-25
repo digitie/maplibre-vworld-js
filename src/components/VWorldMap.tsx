@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import maplibregl, { type Map as MapLibreMap } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {
@@ -215,24 +215,28 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   const [store] = useState(() => new MapStore());
   const [initError, setInitError] = useState<Error | null>(null);
   const [mapLoadedForEffects, setMapLoadedForEffects] = useState(false);
-  const hasOnErrorRef = useRef(onError !== undefined);
   const lastCameraRef = useRef<CameraSnapshot>({ center, zoom, pitch, bearing });
+  const pendingCameraRef = useRef<CameraSnapshot | null>(null);
   const appliedStyleRef = useRef({ apiKey, layerType });
 
-  // Stable callbacks: handler identity never changes, but the latest version
-  // is always invoked. Lets us bind to MapLibre once and not re-bind when
-  // the consumer passes new closures.
+  // Stable pass-through callbacks: handler identity never changes, but the
+  // latest version is always invoked.
   const stableOnLoad = useEvent(onLoad);
   const stableOnClick = useEvent(onClick);
   const stableOnContextMenu = useEvent(onContextMenu);
   const stableOnMoveEnd = useEvent(onMoveEnd);
   const stableOnZoomEnd = useEvent(onZoomEnd);
   const stableOnIdle = useEvent(onIdle);
-  const stableOnError = useEvent(onError);
 
+  // onError needs a defined-vs-undefined branch (to decide between user
+  // callback and the console.warn fallback), so we hold the raw handler in
+  // a ref and dispatch from there. `useEvent` cannot express that branch
+  // without an extra synchronized ref — keeping a single ref here is
+  // simpler and removes the race the PR #13 review surfaced.
+  const onErrorRef = useRef(onError);
   useLayoutEffect(() => {
-    hasOnErrorRef.current = onError !== undefined;
-  }, [onError]);
+    onErrorRef.current = onError;
+  });
 
   const hasApiKey = typeof apiKey === 'string' && apiKey.trim().length > 0;
   const shouldMountMap = hasApiKey && initError === null;
@@ -309,6 +313,9 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       stableOnZoomEnd(event);
     };
     const handleMoveEnd = (event: maplibregl.MapLibreEvent) => {
+      // If we had to skip a camera prop update while the user was panning
+      // (see camera-apply effect below), now is the time to apply it.
+      applyPendingCameraIfAny(map);
       stableOnMoveEnd(event);
     };
     const handleIdle = (event: maplibregl.MapLibreEvent) => {
@@ -321,16 +328,17 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       stableOnContextMenu(event);
     };
     const handleError = (event: maplibregl.ErrorEvent) => {
-      if (hasOnErrorRef.current) {
-        stableOnError(event);
-      } else {
-        const url = extractErrorUrl(event);
-        const redacted = url ? redactVWorldUrl(url) : '';
-        const message =
-          (event as { error?: { message?: string } }).error?.message ?? 'unknown error';
-        // eslint-disable-next-line no-console
-        console.warn(`[VWorldMap] ${message}`, redacted);
+      const handler = onErrorRef.current;
+      if (handler) {
+        handler(event);
+        return;
       }
+      const url = extractErrorUrl(event);
+      const redacted = url ? redactVWorldUrl(url) : '';
+      const message =
+        (event as { error?: { message?: string } }).error?.message ?? 'unknown error';
+      // eslint-disable-next-line no-console
+      console.warn(`[VWorldMap] ${message}`, redacted);
     };
 
     map.on('load', handleLoad);
@@ -383,27 +391,44 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
     appliedStyleRef.current = { apiKey, layerType };
   }, [apiKey, layerType, mapLoadedForEffects, store]);
 
-  // Apply camera changes. Skip if the map is currently moving from a user
-  // gesture so we do not interrupt them.
+  // Apply camera changes. If the map is currently moving from a user
+  // gesture, queue the new camera and re-apply when the map settles
+  // (`moveend`) — so a prop change is never silently dropped.
+  //
+  // `flyToOptions` and `animateCameraChanges` are read through a ref so a
+  // fresh `flyToOptions` literal does not re-fly the camera on every parent
+  // re-render. The latest values are picked up at apply time.
+  const cameraOptionsRef = useRef({ animateCameraChanges, flyToOptions });
+  useLayoutEffect(() => {
+    cameraOptionsRef.current = { animateCameraChanges, flyToOptions };
+  });
+
+  const applyPendingCameraIfAny = useCallback((map: MapLibreMap): void => {
+    const pending = pendingCameraRef.current;
+    if (!pending) return;
+    if (map.isMoving() || map.isEasing()) return;
+
+    const { animateCameraChanges: animate, flyToOptions: options } = cameraOptionsRef.current;
+    if (animate) {
+      map.flyTo({ ...options, ...pending });
+    } else {
+      map.jumpTo(pending);
+    }
+    lastCameraRef.current = pending;
+    pendingCameraRef.current = null;
+  }, []);
+
   useEffect(() => {
     const map = store.getSnapshot().map;
     if (!map) return;
     if (!mapLoadedForEffects) return;
-    if (map.isMoving() || map.isEasing()) return;
 
-    const nextCamera = { center, zoom, pitch, bearing };
+    const nextCamera: CameraSnapshot = { center, zoom, pitch, bearing };
     if (sameCamera(lastCameraRef.current, nextCamera)) return;
 
-    if (animateCameraChanges) {
-      map.flyTo({ ...flyToOptions, ...nextCamera });
-    } else {
-      map.jumpTo(nextCamera);
-    }
-    lastCameraRef.current = nextCamera;
-    // We intentionally exclude `flyToOptions` from deps — passing a fresh
-    // object every render would re-animate on every parent re-render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [center[0], center[1], zoom, pitch, bearing, animateCameraChanges, mapLoadedForEffects, store]);
+    pendingCameraRef.current = nextCamera;
+    applyPendingCameraIfAny(map);
+  }, [center[0], center[1], zoom, pitch, bearing, mapLoadedForEffects, store, applyPendingCameraIfAny]);
 
   // Apply min/max zoom and bounds.
   useEffect(() => {

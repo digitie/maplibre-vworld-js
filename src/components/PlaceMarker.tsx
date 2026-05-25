@@ -42,18 +42,20 @@ export const PlaceMarker: React.FC<PlaceMarkerProps> = ({
   }
 
   return (
-    <Marker {...props}>
+    // The card sits above the coordinate with the downward-pointing arrow
+    // tip at the lngLat — use the `bottom` anchor with a small upward
+    // offset so the arrow has room to sit above the dot.
+    <Marker {...props} anchor="bottom" offset={[0, -8]}>
       <div
         style={{
+          position: 'relative',
           background: 'white',
           borderRadius: '8px',
-          overflow: 'hidden',
+          overflow: 'visible',
           boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
           width: '200px',
           fontFamily: 'sans-serif',
           cursor: 'default',
-          transform: 'translate(-50%, -100%)',
-          marginTop: '-10px',
         }}
       >
         <div

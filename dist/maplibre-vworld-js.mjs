@@ -106,37 +106,39 @@ function D() {
 	if (!e) throw Error("useMap / useMapZoom / useMapLoaded / useMapSelector must be used inside <VWorldMap>.");
 	return e;
 }
-var te = (e) => e.map, O = (e) => e.zoom, k = (e) => e.loaded;
-function A() {
-	let e = D();
-	return u(e.subscribe, () => te(e.getSnapshot()), () => null);
-}
+var O = (e) => e.map, k = (e) => e.zoom, A = (e) => e.loaded;
 function j() {
 	let e = D();
-	return u(e.subscribe, () => O(e.getSnapshot()), () => 0);
+	return u(e.subscribe, () => O(e.getSnapshot()), () => null);
 }
 function M() {
 	let e = D();
-	return u(e.subscribe, () => k(e.getSnapshot()), () => !1);
+	return u(e.subscribe, () => k(e.getSnapshot()), () => 0);
 }
-function N(e) {
-	let t = D(), n = c(void 0), i = r(() => {
-		let r = t.getSnapshot(), i = n.current;
-		if (i && i.selector === e && i.snapshot === r) return i.value;
-		let a = e(r);
-		return i && i.selector === e && Object.is(i.value, a) ? (n.current = {
-			selector: e,
-			snapshot: r,
-			value: i.value
-		}, i.value) : (n.current = {
-			selector: e,
-			snapshot: r,
-			value: a
-		}, a);
-	}, [e, t]);
-	return u(t.subscribe, i, i);
+function N() {
+	let e = D();
+	return u(e.subscribe, () => A(e.getSnapshot()), () => !1);
 }
 function P(e) {
+	let t = D(), n = c(e);
+	o(() => {
+		n.current = e;
+	});
+	let i = c(void 0), a = r(() => {
+		let e = t.getSnapshot(), r = i.current;
+		if (r && r.snapshot === e) return r.value;
+		let a = n.current(e);
+		return r && Object.is(r.value, a) ? (i.current = {
+			snapshot: e,
+			value: r.value
+		}, r.value) : (i.current = {
+			snapshot: e,
+			value: a
+		}, a);
+	}, [t]);
+	return u(t.subscribe, a, a);
+}
+function F(e) {
 	let t = c(e);
 	return o(() => {
 		t.current = e;
@@ -144,7 +146,7 @@ function P(e) {
 }
 //#endregion
 //#region node_modules/react/cjs/react-jsx-runtime.production.js
-var F = /* @__PURE__ */ m(((e) => {
+var I = /* @__PURE__ */ m(((e) => {
 	var t = Symbol.for("react.transitional.element"), n = Symbol.for("react.fragment");
 	function r(e, n, r) {
 		var i = null;
@@ -159,11 +161,11 @@ var F = /* @__PURE__ */ m(((e) => {
 		};
 	}
 	e.Fragment = n, e.jsx = r, e.jsxs = r;
-})), I = /* @__PURE__ */ m(((e) => {
+})), L = /* @__PURE__ */ m(((e) => {
 	process.env.NODE_ENV !== "production" && (function() {
 		function t(e) {
 			if (e == null) return null;
-			if (typeof e == "function") return e.$$typeof === te ? null : e.displayName || e.name || null;
+			if (typeof e == "function") return e.$$typeof === O ? null : e.displayName || e.name || null;
 			if (typeof e == "string") return e;
 			switch (e) {
 				case v: return "Fragment";
@@ -216,14 +218,14 @@ var F = /* @__PURE__ */ m(((e) => {
 			}
 		}
 		function a() {
-			var e = O.A;
+			var e = k.A;
 			return e === null ? null : e.getOwner();
 		}
 		function o() {
 			return Error("react-stack-top-frame");
 		}
 		function s(e) {
-			if (k.call(e, "key")) {
+			if (A.call(e, "key")) {
 				var t = Object.getOwnPropertyDescriptor(e, "key").get;
 				if (t && t.isReactWarning) return !1;
 			}
@@ -231,7 +233,7 @@ var F = /* @__PURE__ */ m(((e) => {
 		}
 		function c(e, t) {
 			function n() {
-				M || (M = !0, console.error("%s: `key` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://react.dev/link/special-props)", t));
+				N || (N = !0, console.error("%s: `key` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://react.dev/link/special-props)", t));
 			}
 			n.isReactWarning = !0, Object.defineProperty(e, "key", {
 				get: n,
@@ -240,7 +242,7 @@ var F = /* @__PURE__ */ m(((e) => {
 		}
 		function l() {
 			var e = t(this.type);
-			return N[e] || (N[e] = !0, console.error("Accessing element.ref was removed in React 19. ref is now a regular prop. It will be removed from the JSX Element type in a future release.")), e = this.props.ref, e === void 0 ? null : e;
+			return P[e] || (P[e] = !0, console.error("Accessing element.ref was removed in React 19. ref is now a regular prop. It will be removed from the JSX Element type in a future release.")), e = this.props.ref, e === void 0 ? null : e;
 		}
 		function u(e, t, n, r, i, a) {
 			var o = n.ref;
@@ -280,17 +282,17 @@ var F = /* @__PURE__ */ m(((e) => {
 		}
 		function d(e, n, i, o, l, d) {
 			var p = n.children;
-			if (p !== void 0) if (o) if (A(p)) {
+			if (p !== void 0) if (o) if (j(p)) {
 				for (o = 0; o < p.length; o++) f(p[o]);
 				Object.freeze && Object.freeze(p);
 			} else console.error("React.jsx: Static children should always be an array. You are likely explicitly calling React.jsxs or React.jsxDEV. Use the Babel transform instead.");
 			else f(p);
-			if (k.call(n, "key")) {
+			if (A.call(n, "key")) {
 				p = t(e);
 				var m = Object.keys(n).filter(function(e) {
 					return e !== "key";
 				});
-				o = 0 < m.length ? "{key: someKey, " + m.join(": ..., ") + ": ...}" : "{key: someKey}", I[p + o] || (m = 0 < m.length ? "{" + m.join(": ..., ") + ": ...}" : "{}", console.error("A props object containing a \"key\" prop is being spread into JSX:\n  let props = %s;\n  <%s {...props} />\nReact keys must be passed directly to JSX without using spread:\n  let props = %s;\n  <%s key={someKey} {...props} />", o, p, m, p), I[p + o] = !0);
+				o = 0 < m.length ? "{key: someKey, " + m.join(": ..., ") + ": ...}" : "{key: someKey}", L[p + o] || (m = 0 < m.length ? "{" + m.join(": ..., ") + ": ...}" : "{}", console.error("A props object containing a \"key\" prop is being spread into JSX:\n  let props = %s;\n  <%s {...props} />\nReact keys must be passed directly to JSX without using spread:\n  let props = %s;\n  <%s key={someKey} {...props} />", o, p, m, p), L[p + o] = !0);
 			}
 			if (p = null, i !== void 0 && (r(i), p = "" + i), s(n) && (r(n.key), p = "" + n.key), "key" in n) for (var h in i = {}, n) h !== "key" && (i[h] = n[h]);
 			else i = n;
@@ -302,112 +304,114 @@ var F = /* @__PURE__ */ m(((e) => {
 		function p(e) {
 			return typeof e == "object" && !!e && e.$$typeof === g;
 		}
-		var m = h("react"), g = Symbol.for("react.transitional.element"), _ = Symbol.for("react.portal"), v = Symbol.for("react.fragment"), y = Symbol.for("react.strict_mode"), b = Symbol.for("react.profiler"), x = Symbol.for("react.consumer"), S = Symbol.for("react.context"), C = Symbol.for("react.forward_ref"), w = Symbol.for("react.suspense"), T = Symbol.for("react.suspense_list"), ee = Symbol.for("react.memo"), E = Symbol.for("react.lazy"), D = Symbol.for("react.activity"), te = Symbol.for("react.client.reference"), O = m.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, k = Object.prototype.hasOwnProperty, A = Array.isArray, j = console.createTask ? console.createTask : function() {
+		var m = h("react"), g = Symbol.for("react.transitional.element"), _ = Symbol.for("react.portal"), v = Symbol.for("react.fragment"), y = Symbol.for("react.strict_mode"), b = Symbol.for("react.profiler"), x = Symbol.for("react.consumer"), S = Symbol.for("react.context"), C = Symbol.for("react.forward_ref"), w = Symbol.for("react.suspense"), T = Symbol.for("react.suspense_list"), ee = Symbol.for("react.memo"), E = Symbol.for("react.lazy"), D = Symbol.for("react.activity"), O = Symbol.for("react.client.reference"), k = m.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, A = Object.prototype.hasOwnProperty, j = Array.isArray, M = console.createTask ? console.createTask : function() {
 			return null;
 		};
 		m = { react_stack_bottom_frame: function(e) {
 			return e();
 		} };
-		var M, N = {}, P = m.react_stack_bottom_frame.bind(m, o)(), F = j(i(o)), I = {};
+		var N, P = {}, F = m.react_stack_bottom_frame.bind(m, o)(), I = M(i(o)), L = {};
 		e.Fragment = v, e.jsx = function(e, t, n) {
-			var r = 1e4 > O.recentlyCreatedOwnerStacks++;
-			return d(e, t, n, !1, r ? Error("react-stack-top-frame") : P, r ? j(i(e)) : F);
+			var r = 1e4 > k.recentlyCreatedOwnerStacks++;
+			return d(e, t, n, !1, r ? Error("react-stack-top-frame") : F, r ? M(i(e)) : I);
 		}, e.jsxs = function(e, t, n) {
-			var r = 1e4 > O.recentlyCreatedOwnerStacks++;
-			return d(e, t, n, !0, r ? Error("react-stack-top-frame") : P, r ? j(i(e)) : F);
+			var r = 1e4 > k.recentlyCreatedOwnerStacks++;
+			return d(e, t, n, !0, r ? Error("react-stack-top-frame") : F, r ? M(i(e)) : I);
 		};
 	})();
-})), L = (/* @__PURE__ */ m(((e, t) => {
-	process.env.NODE_ENV === "production" ? t.exports = F() : t.exports = I();
+})), R = (/* @__PURE__ */ m(((e, t) => {
+	process.env.NODE_ENV === "production" ? t.exports = I() : t.exports = L();
 })))();
-function ne(e, t) {
+function te(e, t) {
 	return e === void 0 ? null : typeof e == "function" ? e(t) : e;
 }
-function re(e) {
+function ne(e) {
 	let t = [e.error?.url, e.url];
 	for (let e of t) if (typeof e == "string" && e.length > 0) return e;
 }
-function ie(e, t) {
+function re(e, t) {
 	return e.center[0] === t.center[0] && e.center[1] === t.center[1] && e.zoom === t.zoom && e.pitch === t.pitch && e.bearing === t.bearing;
 }
-var R = ({ apiKey: e, layerType: t = "Base", center: n, zoom: r = 12, pitch: i = 0, bearing: s = 0, minZoom: u = 6, maxZoom: f = 19, maxBounds: p, semanticZoomThreshold: m, navigation: h = !0, geolocate: g = !0, scale: _ = !0, className: v = "", style: y = {
+var ie = ({ apiKey: e, layerType: t = "Base", center: n, zoom: i = 12, pitch: s = 0, bearing: u = 0, minZoom: f = 6, maxZoom: p = 19, maxBounds: m, semanticZoomThreshold: h, navigation: g = !0, geolocate: _ = !0, scale: v = !0, className: y = "", style: b = {
 	width: "100%",
 	height: "100%"
-}, children: b, onLoad: C, onClick: T, onContextMenu: D, onMoveEnd: te, onZoomEnd: O, onIdle: k, onError: A, transformRequest: j, fallback: M, loadingSkeleton: N, animateCameraChanges: F = !0, flyToOptions: I }) => {
-	let R = c(null), [z] = l(() => new ee()), [B, V] = l(null), [H, U] = l(!1), W = c(A !== void 0), oe = c({
+}, children: C, onLoad: T, onClick: D, onContextMenu: O, onMoveEnd: k, onZoomEnd: A, onIdle: j, onError: M, transformRequest: N, fallback: P, loadingSkeleton: I, animateCameraChanges: L = !0, flyToOptions: ie }) => {
+	let z = c(null), [B] = l(() => new ee()), [V, oe] = l(null), [H, U] = l(!1), se = c({
 		center: n,
-		zoom: r,
-		pitch: i,
-		bearing: s
-	}), G = c({
+		zoom: i,
+		pitch: s,
+		bearing: u
+	}), ce = c(null), W = c({
 		apiKey: e,
 		layerType: t
-	}), se = P(C), ce = P(T), le = P(D), ue = P(te), de = P(O), fe = P(k), pe = P(A);
+	}), le = F(T), ue = F(D), de = F(O), fe = F(k), pe = F(A), me = F(j), he = c(M);
 	o(() => {
-		W.current = A !== void 0;
-	}, [A]);
-	let me = typeof e == "string" && e.trim().length > 0, he = me && B === null;
+		he.current = M;
+	});
+	let ge = typeof e == "string" && e.trim().length > 0, G = ge && V === null;
 	a(() => {
-		V(null);
+		oe(null);
 	}, [e, t]), a(() => {
-		z.setSemanticZoomThreshold(m);
-	}, [z, m]), a(() => {
-		if (!he || !R.current) return;
-		let a = Math.min(f, x(t)), o;
+		B.setSemanticZoomThreshold(h);
+	}, [B, h]), a(() => {
+		if (!G || !z.current) return;
+		let r = Math.min(p, x(t)), a;
 		try {
-			o = new d.Map({
-				container: R.current,
+			a = new d.Map({
+				container: z.current,
 				style: w(e, t),
 				center: n,
-				zoom: r,
-				pitch: i,
-				bearing: s,
-				minZoom: u,
-				maxZoom: a,
-				maxBounds: p,
-				transformRequest: j
+				zoom: i,
+				pitch: s,
+				bearing: u,
+				minZoom: f,
+				maxZoom: r,
+				maxBounds: m,
+				transformRequest: N
 			});
 		} catch (e) {
-			V(e instanceof Error ? e : Error(String(e)));
+			oe(e instanceof Error ? e : Error(String(e)));
 			return;
 		}
-		U(!1), G.current = {
+		U(!1), W.current = {
 			apiKey: e,
 			layerType: t
-		}, z.setMap(o), z.setZoom(o.getZoom()), h && o.addControl(new d.NavigationControl({ visualizePitch: !0 }), "top-right"), g && o.addControl(new d.GeolocateControl({
+		}, B.setMap(a), B.setZoom(a.getZoom()), g && a.addControl(new d.NavigationControl({ visualizePitch: !0 }), "top-right"), _ && a.addControl(new d.GeolocateControl({
 			positionOptions: { enableHighAccuracy: !0 },
 			trackUserLocation: !0
-		}), "top-right"), _ && o.addControl(new d.ScaleControl({
+		}), "top-right"), v && a.addControl(new d.ScaleControl({
 			maxWidth: 150,
 			unit: "metric"
 		}), "bottom-right");
-		let c = () => {
-			z.setLoaded(!0), z.setZoom(o.getZoom()), U(!0), se(o);
+		let o = () => {
+			B.setLoaded(!0), B.setZoom(a.getZoom()), U(!0), le(a);
+		}, c = (e) => {
+			B.setZoom(a.getZoom()), pe(e);
 		}, l = (e) => {
-			z.setZoom(o.getZoom()), de(e);
-		}, m = (e) => {
-			ue(e);
-		}, v = (e) => {
-			fe(e);
+			K(a), fe(e);
+		}, h = (e) => {
+			me(e);
 		}, y = (e) => {
-			ce(e);
+			ue(e);
 		}, b = (e) => {
-			le(e);
+			de(e);
 		}, C = (e) => {
-			if (W.current) pe(e);
-			else {
-				let t = re(e), n = t ? S(t) : "", r = e.error?.message ?? "unknown error";
-				console.warn(`[VWorldMap] ${r}`, n);
+			let t = he.current;
+			if (t) {
+				t(e);
+				return;
 			}
+			let n = ne(e), r = n ? S(n) : "", i = e.error?.message ?? "unknown error";
+			console.warn(`[VWorldMap] ${i}`, r);
 		};
-		o.on("load", c), o.on("zoomend", l), o.on("moveend", m), o.on("idle", v), o.on("click", y), o.on("contextmenu", b), o.on("error", C);
-		let T = typeof ResizeObserver < "u" ? new ResizeObserver(() => o.resize()) : null;
-		return T && R.current && T.observe(R.current), () => {
-			T?.disconnect(), o.off("load", c), o.off("zoomend", l), o.off("moveend", m), o.off("idle", v), o.off("click", y), o.off("contextmenu", b), o.off("error", C), o.remove(), U(!1), z.setMap(null);
+		a.on("load", o), a.on("zoomend", c), a.on("moveend", l), a.on("idle", h), a.on("click", y), a.on("contextmenu", b), a.on("error", C);
+		let T = typeof ResizeObserver < "u" ? new ResizeObserver(() => a.resize()) : null;
+		return T && z.current && T.observe(z.current), () => {
+			T?.disconnect(), a.off("load", o), a.off("zoomend", c), a.off("moveend", l), a.off("idle", h), a.off("click", y), a.off("contextmenu", b), a.off("error", C), a.remove(), U(!1), B.setMap(null);
 		};
-	}, [he]), a(() => {
-		let n = z.getSnapshot().map;
-		n && H && (G.current.apiKey === e && G.current.layerType === t || (n.setStyle(w(e, t)), G.current = {
+	}, [G]), a(() => {
+		let n = B.getSnapshot().map;
+		n && H && (W.current.apiKey === e && W.current.layerType === t || (n.setStyle(w(e, t)), W.current = {
 			apiKey: e,
 			layerType: t
 		}));
@@ -415,192 +419,219 @@ var R = ({ apiKey: e, layerType: t = "Base", center: n, zoom: r = 12, pitch: i =
 		e,
 		t,
 		H,
-		z
-	]), a(() => {
-		let e = z.getSnapshot().map;
-		if (!e || !H || e.isMoving() || e.isEasing()) return;
+		B
+	]);
+	let _e = c({
+		animateCameraChanges: L,
+		flyToOptions: ie
+	});
+	o(() => {
+		_e.current = {
+			animateCameraChanges: L,
+			flyToOptions: ie
+		};
+	});
+	let K = r((e) => {
+		let t = ce.current;
+		if (!t || e.isMoving() || e.isEasing()) return;
+		let { animateCameraChanges: n, flyToOptions: r } = _e.current;
+		n ? e.flyTo({
+			...r,
+			...t
+		}) : e.jumpTo(t), se.current = t, ce.current = null;
+	}, []);
+	a(() => {
+		let e = B.getSnapshot().map;
+		if (!e || !H) return;
 		let t = {
 			center: n,
-			zoom: r,
-			pitch: i,
-			bearing: s
+			zoom: i,
+			pitch: s,
+			bearing: u
 		};
-		ie(oe.current, t) || (F ? e.flyTo({
-			...I,
-			...t
-		}) : e.jumpTo(t), oe.current = t);
+		re(se.current, t) || (ce.current = t, K(e));
 	}, [
 		n[0],
 		n[1],
-		r,
 		i,
 		s,
-		F,
-		H,
-		z
-	]), a(() => {
-		let e = z.getSnapshot().map;
-		e && (e.setMinZoom(u), e.setMaxZoom(Math.min(f, x(t))), e.setMaxBounds(p));
-	}, [
 		u,
+		H,
+		B,
+		K
+	]), a(() => {
+		let e = B.getSnapshot().map;
+		e && (e.setMinZoom(f), e.setMaxZoom(Math.min(p, x(t))), e.setMaxBounds(m));
+	}, [
 		f,
-		t,
 		p,
-		z
+		t,
+		m,
+		B
 	]);
-	let K = me ? B ? {
+	let q = ge ? V ? {
 		reason: "map-init-error",
-		error: B
+		error: V
 	} : null : { reason: "missing-api-key" };
-	return /* @__PURE__ */ (0, L.jsx)(E.Provider, {
-		value: z,
-		children: K ? ne(M, K) : /* @__PURE__ */ (0, L.jsxs)(L.Fragment, { children: [/* @__PURE__ */ (0, L.jsx)("div", {
-			ref: R,
-			className: v,
-			style: y,
+	return /* @__PURE__ */ (0, R.jsx)(E.Provider, {
+		value: B,
+		children: q ? te(P, q) : /* @__PURE__ */ (0, R.jsxs)(R.Fragment, { children: [/* @__PURE__ */ (0, R.jsx)("div", {
+			ref: z,
+			className: y,
+			style: b,
 			"data-testid": "vworld-map-container"
-		}), /* @__PURE__ */ (0, L.jsx)(ae, {
-			loadingSkeleton: N,
-			children: b
+		}), /* @__PURE__ */ (0, R.jsx)(ae, {
+			loadingSkeleton: I,
+			children: C
 		})] })
 	});
-}, ae = ({ children: e, loadingSkeleton: t }) => /* @__PURE__ */ (0, L.jsx)(L.Fragment, { children: M() ? e : t });
+}, ae = ({ children: e, loadingSkeleton: t }) => /* @__PURE__ */ (0, R.jsx)(R.Fragment, { children: N() ? e : t });
 //#endregion
 //#region src/components/Marker.tsx
 function z(e, t, { selected: n, highlighted: r, zIndex: i, ariaLabel: a, className: o }) {
 	e.dataset.selected = n ? "true" : "false", e.dataset.highlighted = r ? "true" : "false", e.style.zIndex = i === void 0 ? "" : String(i);
 	let s = n ? "1.18" : r ? "1.1" : "1";
-	if (e.style.setProperty("--vworld-marker-scale", s), e.style.setProperty("scale", s === "1" ? "" : s), e.style.filter = n ? "drop-shadow(0 6px 14px rgba(0,0,0,0.34))" : r ? "drop-shadow(0 4px 10px rgba(0,0,0,0.26))" : "", a ? (e.setAttribute("aria-label", a), e.setAttribute("role", "button")) : (e.removeAttribute("aria-label"), e.removeAttribute("role")), t) for (let n of t.split(/\s+/)) n && e.classList.remove(n);
-	if (o) for (let t of o.split(/\s+/)) t && e.classList.add(t);
+	e.style.setProperty("--vworld-marker-scale", s), e.style.setProperty("scale", s === "1" ? "" : s), e.style.filter = n ? "drop-shadow(0 6px 14px rgba(0,0,0,0.34))" : r ? "drop-shadow(0 4px 10px rgba(0,0,0,0.26))" : "", a ? (e.setAttribute("aria-label", a), e.setAttribute("role", "button")) : (e.removeAttribute("aria-label"), e.removeAttribute("role"));
+	let c = t ? t.split(/\s+/).filter(Boolean) : [], l = o ? o.split(/\s+/).filter(Boolean) : [], u = new Set(l);
+	for (let t of c) u.has(t) || e.classList.remove(t);
+	let d = new Set(c);
+	for (let t of l) d.has(t) || e.classList.add(t);
 }
-var B = ({ lngLat: e, color: t = "#3FB1CE", draggable: n = !1, onDragEnd: r, onClick: i, onContextMenu: l, selected: u, highlighted: p, zIndex: m, ariaLabel: h, className: g, children: _ }) => {
-	let v = A(), y = c(null), b = c(void 0), x = c(i !== void 0), S = c(l !== void 0), C = _ != null && _ !== !1, w = P(i), T = P(l), ee = P(r);
+var B = ({ lngLat: e, color: t = "#3FB1CE", anchor: n, offset: r, draggable: i = !1, onDragEnd: l, onClick: u, onContextMenu: p, selected: m, highlighted: h, zIndex: g, ariaLabel: _, className: v, children: y }) => {
+	let b = j(), x = c(null), S = c(void 0), C = c(u !== void 0), w = c(p !== void 0), T = y != null && y !== !1, ee = F(u), E = F(p), D = F(l);
 	o(() => {
-		x.current = i !== void 0, S.current = l !== void 0;
-	}, [i, l]);
-	let E = s(() => typeof document > "u" ? null : document.createElement("div"), []);
+		C.current = u !== void 0, w.current = p !== void 0;
+	}, [u, p]);
+	let O = s(() => typeof document > "u" ? null : document.createElement("div"), []);
 	return a(() => {
-		if (!v) return;
-		let r = C && E ? {
-			element: E,
-			draggable: n
+		if (!b) return;
+		let a = T && O ? {
+			element: O,
+			draggable: i,
+			anchor: n,
+			offset: r
 		} : {
 			color: t,
-			draggable: n
-		}, i = new d.Marker(r).setLngLat(e).addTo(v), a = i.getElement(), o = (e) => {
-			x.current && (e.stopPropagation(), w(e, i));
-		}, s = (e) => {
-			S.current && (e.preventDefault(), e.stopPropagation(), T(e, i));
-		}, c = () => {
-			let { lng: e, lat: t } = i.getLngLat();
-			ee([e, t]);
+			draggable: i,
+			anchor: n,
+			offset: r
+		}, o = new d.Marker(a).setLngLat(e).addTo(b), s = o.getElement(), c = (e) => {
+			C.current && (e.stopPropagation(), ee(e, o));
+		}, l = (e) => {
+			w.current && (e.preventDefault(), e.stopPropagation(), E(e, o));
+		}, u = () => {
+			let { lng: e, lat: t } = o.getLngLat();
+			D([e, t]);
 		};
-		return a.addEventListener("click", o), a.addEventListener("contextmenu", s), n && i.on("dragend", c), y.current = i, () => {
-			a.removeEventListener("click", o), a.removeEventListener("contextmenu", s), n && i.off("dragend", c), i.remove(), y.current = null;
+		return s.addEventListener("click", c), s.addEventListener("contextmenu", l), i && o.on("dragend", u), x.current = o, () => {
+			s.removeEventListener("click", c), s.removeEventListener("contextmenu", l), i && o.off("dragend", u), o.remove(), x.current = null;
 		};
 	}, [
-		v,
-		C,
+		b,
+		T,
 		t,
+		i,
 		n,
-		E
+		O
 	]), a(() => {
-		y.current?.setLngLat(e);
+		x.current?.setLngLat(e);
 	}, [e[0], e[1]]), a(() => {
-		let e = y.current;
-		e && (z(e.getElement(), b.current, {
-			selected: u,
-			highlighted: p,
-			zIndex: m,
-			ariaLabel: h,
-			className: g
-		}), b.current = g);
+		r !== void 0 && x.current?.setOffset(r);
+	}, [r]), a(() => {
+		let e = x.current;
+		e && (z(e.getElement(), S.current, {
+			selected: m,
+			highlighted: h,
+			zIndex: g,
+			ariaLabel: _,
+			className: v
+		}), S.current = v);
 	}, [
-		u,
-		p,
 		m,
 		h,
-		g
-	]), C && E ? f(_, E) : null;
-}, V = ({ color: e = "#DB4437", icon: t, size: n = 40, showInnerCircle: r = !0, label: i, tooltip: a, ...o }) => /* @__PURE__ */ (0, L.jsx)(B, {
-	...o,
-	children: /* @__PURE__ */ (0, L.jsxs)("div", {
-		title: a,
-		style: {
-			width: n,
-			height: n,
-			position: "relative",
-			display: "flex",
-			alignItems: "center",
-			justifyContent: "center",
-			cursor: "pointer",
-			transform: "translate(-50%, -100%)",
-			marginTop: n / 2
-		},
-		children: [
-			/* @__PURE__ */ (0, L.jsxs)("svg", {
-				viewBox: "0 0 24 36",
+		g,
+		_,
+		v
+	]), T && O ? f(y, O) : null;
+}, V = ({ color: e = "#DB4437", icon: t, size: n = 40, showInnerCircle: r = !0, label: i, tooltip: a, ...o }) => {
+	let s = n * 1.5;
+	return /* @__PURE__ */ (0, R.jsx)(B, {
+		...o,
+		anchor: "bottom",
+		children: /* @__PURE__ */ (0, R.jsxs)("div", {
+			title: a,
+			style: {
 				width: n,
-				height: n * 1.5,
-				style: {
-					position: "absolute",
-					top: 0,
-					left: 0,
-					filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.3))"
-				},
-				children: [/* @__PURE__ */ (0, L.jsx)("path", {
-					fill: e,
-					d: "M12,0 C5.372583,0 0,5.372583 0,12 C0,21 12,36 12,36 C12,36 24,21 24,12 C24,5.372583 18.627417,0 12,0 Z"
-				}), r && /* @__PURE__ */ (0, L.jsx)("circle", {
-					cx: "12",
-					cy: "12",
-					r: "8",
-					fill: "white"
-				})]
-			}),
-			/* @__PURE__ */ (0, L.jsx)("div", {
-				style: {
-					position: "absolute",
-					top: n * 1.5 * (12 / 36),
-					left: "50%",
-					transform: "translate(-50%, -50%)",
-					width: n * .55,
-					height: n * .55,
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					zIndex: 1
-				},
-				children: t
-			}),
-			i && /* @__PURE__ */ (0, L.jsx)("div", {
-				style: {
-					position: "absolute",
-					top: n * 1.5 + 4,
-					left: "50%",
-					transform: "translateX(-50%)",
-					background: "rgba(255, 255, 255, 0.9)",
-					padding: "2px 6px",
-					borderRadius: "4px",
-					fontSize: "12px",
-					fontWeight: "bold",
-					color: "#333",
-					whiteSpace: "nowrap",
-					boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-					pointerEvents: "none",
-					textShadow: "0 0 2px white"
-				},
-				children: i
-			})
-		]
-	})
-}), H = "https://unpkg.com/@mapbox/maki@8.0.0/icons", U = ({ icon: e, iconBaseUrl: t = H, color: n = "#2c3e50", iconColor: r = "white", size: i = 40, ...a }) => {
+				height: s,
+				position: "relative",
+				cursor: "pointer"
+			},
+			children: [
+				/* @__PURE__ */ (0, R.jsxs)("svg", {
+					viewBox: "0 0 24 36",
+					width: n,
+					height: s,
+					style: {
+						position: "absolute",
+						top: 0,
+						left: 0,
+						filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.3))"
+					},
+					children: [/* @__PURE__ */ (0, R.jsx)("path", {
+						fill: e,
+						d: "M12,0 C5.372583,0 0,5.372583 0,12 C0,21 12,36 12,36 C12,36 24,21 24,12 C24,5.372583 18.627417,0 12,0 Z"
+					}), r && /* @__PURE__ */ (0, R.jsx)("circle", {
+						cx: "12",
+						cy: "12",
+						r: "8",
+						fill: "white"
+					})]
+				}),
+				/* @__PURE__ */ (0, R.jsx)("div", {
+					style: {
+						position: "absolute",
+						top: 12 / 36 * s,
+						left: "50%",
+						transform: "translate(-50%, -50%)",
+						width: n * .55,
+						height: n * .55,
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						zIndex: 1,
+						pointerEvents: "none"
+					},
+					children: t
+				}),
+				i && /* @__PURE__ */ (0, R.jsx)("div", {
+					style: {
+						position: "absolute",
+						top: s + 4,
+						left: "50%",
+						transform: "translateX(-50%)",
+						background: "rgba(255, 255, 255, 0.9)",
+						padding: "2px 6px",
+						borderRadius: "4px",
+						fontSize: "12px",
+						fontWeight: "bold",
+						color: "#333",
+						whiteSpace: "nowrap",
+						boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+						pointerEvents: "none",
+						textShadow: "0 0 2px white"
+					},
+					children: i
+				})
+			]
+		})
+	});
+}, oe = "https://unpkg.com/@mapbox/maki@8.0.0/icons", H = ({ icon: e, iconBaseUrl: t = oe, color: n = "#2c3e50", iconColor: r = "white", size: i = 40, ...a }) => {
 	let o = s(() => `${t.replace(/\/+$/, "")}/${e}.svg`, [t, e]);
-	return /* @__PURE__ */ (0, L.jsx)(V, {
+	return /* @__PURE__ */ (0, R.jsx)(V, {
 		color: n,
 		size: i,
 		showInnerCircle: !1,
-		icon: /* @__PURE__ */ (0, L.jsx)("div", { style: s(() => ({
+		icon: /* @__PURE__ */ (0, R.jsx)("div", { style: s(() => ({
 			width: "100%",
 			height: "100%",
 			backgroundColor: r,
@@ -609,21 +640,21 @@ var B = ({ lngLat: e, color: t = "#3FB1CE", draggable: n = !1, onDragEnd: r, onC
 		}), [r, o]) }),
 		...a
 	});
-}, W = "vworld-pulsing-marker-keyframes";
-function oe() {
-	if (typeof document > "u" || document.getElementById(W)) return;
+}, U = "vworld-pulsing-marker-keyframes";
+function se() {
+	if (typeof document > "u" || document.getElementById(U)) return;
 	let e = document.createElement("style");
-	e.id = W, e.textContent = "\n    @keyframes vworld-pulsing-ripple {\n      0%   { transform: scale(0.3); opacity: 0.8; }\n      80%  { transform: scale(1);   opacity: 0; }\n      100% { transform: scale(1);   opacity: 0; }\n    }\n  ", document.head.appendChild(e);
+	e.id = U, e.textContent = "\n    @keyframes vworld-pulsing-ripple {\n      0%   { transform: scale(0.3); opacity: 0.8; }\n      80%  { transform: scale(1);   opacity: 0; }\n      100% { transform: scale(1);   opacity: 0; }\n    }\n  ", document.head.appendChild(e);
 }
-var G = ({ color: e = "#4285F4", size: t = 14, ...n }) => (oe(), /* @__PURE__ */ (0, L.jsx)(B, {
+var ce = ({ color: e = "#4285F4", size: t = 14, ...n }) => (se(), /* @__PURE__ */ (0, R.jsx)(B, {
 	...n,
-	children: /* @__PURE__ */ (0, L.jsxs)("div", {
+	children: /* @__PURE__ */ (0, R.jsxs)("div", {
 		style: {
 			position: "relative",
 			width: t,
 			height: t
 		},
-		children: [/* @__PURE__ */ (0, L.jsx)("div", { style: {
+		children: [/* @__PURE__ */ (0, R.jsx)("div", { style: {
 			position: "absolute",
 			top: 0,
 			left: 0,
@@ -635,7 +666,7 @@ var G = ({ color: e = "#4285F4", size: t = 14, ...n }) => (oe(), /* @__PURE__ */
 			boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
 			zIndex: 2,
 			boxSizing: "border-box"
-		} }), /* @__PURE__ */ (0, L.jsx)("div", { style: {
+		} }), /* @__PURE__ */ (0, R.jsx)("div", { style: {
 			position: "absolute",
 			top: "-100%",
 			left: "-100%",
@@ -647,17 +678,17 @@ var G = ({ color: e = "#4285F4", size: t = 14, ...n }) => (oe(), /* @__PURE__ */
 			animation: "vworld-pulsing-ripple 2s infinite ease-out"
 		} })]
 	})
-})), se = ({ label: e, bgColor: t = "#222", textColor: n = "white", simplifyAtZoom: i, ...a }) => N(r((e) => {
+})), W = ({ label: e, bgColor: t = "#222", textColor: n = "white", simplifyAtZoom: i, ...a }) => P(r((e) => {
 	let t = i ?? e.semanticZoomThreshold;
 	return t !== void 0 && e.zoom < t;
-}, [i])) ? /* @__PURE__ */ (0, L.jsx)(V, {
+}, [i])) ? /* @__PURE__ */ (0, R.jsx)(V, {
 	lngLat: a.lngLat,
 	color: t,
 	size: 20,
 	showInnerCircle: !1
-}) : /* @__PURE__ */ (0, L.jsx)(B, {
+}) : /* @__PURE__ */ (0, R.jsx)(B, {
 	...a,
-	children: /* @__PURE__ */ (0, L.jsx)("div", {
+	children: /* @__PURE__ */ (0, R.jsx)("div", {
 		style: {
 			background: t,
 			color: n,
@@ -671,30 +702,31 @@ var G = ({ color: e = "#4285F4", size: t = 14, ...n }) => (oe(), /* @__PURE__ */
 		},
 		children: e
 	})
-}), ce = ({ title: e, description: t, category: n, photoUrl: i, link: a, linkLabel: o = "View more", simplifyAtZoom: s, ...c }) => N(r((e) => {
+}), le = ({ title: e, description: t, category: n, photoUrl: i, link: a, linkLabel: o = "View more", simplifyAtZoom: s, ...c }) => P(r((e) => {
 	let t = s ?? e.semanticZoomThreshold;
 	return t !== void 0 && e.zoom < t;
-}, [s])) ? /* @__PURE__ */ (0, L.jsx)(V, {
+}, [s])) ? /* @__PURE__ */ (0, R.jsx)(V, {
 	lngLat: c.lngLat,
 	color: "#333",
 	size: 24,
 	showInnerCircle: !1
-}) : /* @__PURE__ */ (0, L.jsx)(B, {
+}) : /* @__PURE__ */ (0, R.jsx)(B, {
 	...c,
-	children: /* @__PURE__ */ (0, L.jsxs)("div", {
+	anchor: "bottom",
+	offset: [0, -8],
+	children: /* @__PURE__ */ (0, R.jsxs)("div", {
 		style: {
+			position: "relative",
 			background: "white",
 			borderRadius: "8px",
-			overflow: "hidden",
+			overflow: "visible",
 			boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
 			width: "200px",
 			fontFamily: "sans-serif",
-			cursor: "default",
-			transform: "translate(-50%, -100%)",
-			marginTop: "-10px"
+			cursor: "default"
 		},
 		children: [
-			/* @__PURE__ */ (0, L.jsx)("div", { style: {
+			/* @__PURE__ */ (0, R.jsx)("div", { style: {
 				position: "absolute",
 				bottom: "-8px",
 				left: "50%",
@@ -705,7 +737,7 @@ var G = ({ color: e = "#4285F4", size: t = 14, ...n }) => (oe(), /* @__PURE__ */
 				display: "block",
 				width: 0
 			} }),
-			i && /* @__PURE__ */ (0, L.jsx)("img", {
+			i && /* @__PURE__ */ (0, R.jsx)("img", {
 				src: i,
 				alt: e,
 				style: {
@@ -715,10 +747,10 @@ var G = ({ color: e = "#4285F4", size: t = 14, ...n }) => (oe(), /* @__PURE__ */
 					display: "block"
 				}
 			}),
-			/* @__PURE__ */ (0, L.jsxs)("div", {
+			/* @__PURE__ */ (0, R.jsxs)("div", {
 				style: { padding: "12px" },
 				children: [
-					/* @__PURE__ */ (0, L.jsx)("div", {
+					/* @__PURE__ */ (0, R.jsx)("div", {
 						style: {
 							fontSize: "10px",
 							color: "#888",
@@ -728,7 +760,7 @@ var G = ({ color: e = "#4285F4", size: t = 14, ...n }) => (oe(), /* @__PURE__ */
 						},
 						children: n
 					}),
-					/* @__PURE__ */ (0, L.jsx)("div", {
+					/* @__PURE__ */ (0, R.jsx)("div", {
 						style: {
 							fontSize: "14px",
 							fontWeight: "bold",
@@ -737,7 +769,7 @@ var G = ({ color: e = "#4285F4", size: t = 14, ...n }) => (oe(), /* @__PURE__ */
 						},
 						children: e
 					}),
-					/* @__PURE__ */ (0, L.jsx)("div", {
+					/* @__PURE__ */ (0, R.jsx)("div", {
 						style: {
 							fontSize: "12px",
 							color: "#666",
@@ -746,7 +778,7 @@ var G = ({ color: e = "#4285F4", size: t = 14, ...n }) => (oe(), /* @__PURE__ */
 						},
 						children: t
 					}),
-					a && /* @__PURE__ */ (0, L.jsxs)("a", {
+					a && /* @__PURE__ */ (0, R.jsxs)("a", {
 						href: a,
 						target: "_blank",
 						rel: "noreferrer",
@@ -762,11 +794,11 @@ var G = ({ color: e = "#4285F4", size: t = 14, ...n }) => (oe(), /* @__PURE__ */
 			})
 		]
 	})
-}), le = ({ price: e, currency: t = "₩", isHoverable: n = !0, ...r }) => {
+}), ue = ({ price: e, currency: t = "", isHoverable: n = !0, ...r }) => {
 	let [i, a] = l(!1), o = (e) => typeof e == "number" ? e.toLocaleString() : e;
-	return /* @__PURE__ */ (0, L.jsx)(B, {
+	return /* @__PURE__ */ (0, R.jsx)(B, {
 		...r,
-		children: /* @__PURE__ */ (0, L.jsxs)("div", {
+		children: /* @__PURE__ */ (0, R.jsxs)("div", {
 			onMouseEnter: () => a(!0),
 			onMouseLeave: () => a(!1),
 			style: {
@@ -785,54 +817,54 @@ var G = ({ color: e = "#4285F4", size: t = 14, ...n }) => (oe(), /* @__PURE__ */
 				alignItems: "center",
 				gap: "2px"
 			},
-			children: [/* @__PURE__ */ (0, L.jsx)("span", { children: t }), /* @__PURE__ */ (0, L.jsx)("span", { children: o(e) })]
+			children: [/* @__PURE__ */ (0, R.jsx)("span", { children: t }), /* @__PURE__ */ (0, R.jsx)("span", { children: o(e) })]
 		})
 	});
-}, ue = {
+}, de = {
 	sunny: "☀️",
 	cloudy: "☁️",
 	rainy: "🌧️",
 	snowy: "❄️"
-}, de = {
+}, fe = {
 	sunny: "#FFA500",
 	cloudy: "#808080",
 	rainy: "#4169E1",
 	snowy: "#ADD8E6"
-}, fe = "vworld-weather-marker-fadein";
-function pe() {
-	if (typeof document > "u" || document.getElementById(fe)) return;
+}, pe = "vworld-weather-marker-fadein";
+function me() {
+	if (typeof document > "u" || document.getElementById(pe)) return;
 	let e = document.createElement("style");
-	e.id = fe, e.textContent = "\n    @keyframes vworld-weather-fadeIn {\n      from { opacity: 0; transform: translateY(-10px); }\n      to { opacity: 1; transform: translateY(0); }\n    }\n  ", document.head.appendChild(e);
+	e.id = pe, e.textContent = "\n    @keyframes vworld-weather-fadeIn {\n      from { opacity: 0; transform: translateY(-10px); }\n      to { opacity: 1; transform: translateY(0); }\n    }\n  ", document.head.appendChild(e);
 }
-var me = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, ...a }) => {
+var he = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, ...a }) => {
 	let [o, s] = l(!1);
-	if (N(r((e) => {
+	if (P(r((e) => {
 		let t = i ?? e.semanticZoomThreshold;
 		return t !== void 0 && e.zoom < t;
-	}, [i]))) return /* @__PURE__ */ (0, L.jsx)(V, {
+	}, [i]))) return /* @__PURE__ */ (0, R.jsx)(V, {
 		lngLat: a.lngLat,
-		color: de[t],
+		color: fe[t],
 		size: 24,
 		showInnerCircle: !0
 	});
-	pe();
+	me();
 	let c = !!n?.length;
-	return /* @__PURE__ */ (0, L.jsx)(B, {
+	return /* @__PURE__ */ (0, R.jsx)(B, {
 		...a,
-		children: /* @__PURE__ */ (0, L.jsxs)("div", {
+		children: /* @__PURE__ */ (0, R.jsxs)("div", {
 			style: {
 				position: "relative",
 				display: "flex",
 				flexDirection: "column",
 				alignItems: "center"
 			},
-			children: [/* @__PURE__ */ (0, L.jsxs)("div", {
+			children: [/* @__PURE__ */ (0, R.jsxs)("div", {
 				onClick: (e) => {
 					e.stopPropagation(), c && s((e) => !e);
 				},
 				style: {
 					background: "white",
-					border: `2px solid ${de[t]}`,
+					border: `2px solid ${fe[t]}`,
 					borderRadius: "20px",
 					padding: "4px 10px",
 					display: "flex",
@@ -848,12 +880,12 @@ var me = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 					zIndex: o ? 10 : 1
 				},
 				children: [
-					/* @__PURE__ */ (0, L.jsx)("span", {
+					/* @__PURE__ */ (0, R.jsx)("span", {
 						style: { fontSize: "16px" },
-						children: ue[t]
+						children: de[t]
 					}),
-					/* @__PURE__ */ (0, L.jsxs)("span", { children: [e, "°C"] }),
-					c && /* @__PURE__ */ (0, L.jsx)("span", {
+					/* @__PURE__ */ (0, R.jsxs)("span", { children: [e, "°C"] }),
+					c && /* @__PURE__ */ (0, R.jsx)("span", {
 						style: {
 							fontSize: "10px",
 							color: "#999",
@@ -862,7 +894,7 @@ var me = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 						children: o ? "▲" : "▼"
 					})
 				]
-			}), o && c && /* @__PURE__ */ (0, L.jsx)("div", {
+			}), o && c && /* @__PURE__ */ (0, R.jsx)("div", {
 				style: {
 					position: "absolute",
 					top: "100%",
@@ -877,7 +909,7 @@ var me = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 					cursor: "default",
 					animation: "vworld-weather-fadeIn 0.2s ease"
 				},
-				children: n.map((e, t) => /* @__PURE__ */ (0, L.jsxs)("div", {
+				children: n.map((e, t) => /* @__PURE__ */ (0, R.jsxs)("div", {
 					style: {
 						display: "flex",
 						flexDirection: "column",
@@ -885,7 +917,7 @@ var me = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 						minWidth: "40px"
 					},
 					children: [
-						/* @__PURE__ */ (0, L.jsx)("div", {
+						/* @__PURE__ */ (0, R.jsx)("div", {
 							style: {
 								fontSize: "12px",
 								color: "#666",
@@ -893,14 +925,14 @@ var me = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 							},
 							children: e.time
 						}),
-						/* @__PURE__ */ (0, L.jsx)("div", {
+						/* @__PURE__ */ (0, R.jsx)("div", {
 							style: {
 								fontSize: "18px",
 								marginBottom: "4px"
 							},
-							children: ue[e.condition]
+							children: de[e.condition]
 						}),
-						/* @__PURE__ */ (0, L.jsxs)("div", {
+						/* @__PURE__ */ (0, R.jsxs)("div", {
 							style: {
 								fontSize: "13px",
 								fontWeight: "bold"
@@ -912,9 +944,9 @@ var me = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 			})]
 		})
 	});
-}, he = ({ label: e, color: t = "#111", size: n = 24, ...r }) => /* @__PURE__ */ (0, L.jsx)(B, {
+}, ge = ({ label: e, color: t = "#111", size: n = 24, ...r }) => /* @__PURE__ */ (0, R.jsx)(B, {
 	...r,
-	children: /* @__PURE__ */ (0, L.jsx)("div", {
+	children: /* @__PURE__ */ (0, R.jsx)("div", {
 		style: {
 			width: n,
 			height: n,
@@ -932,33 +964,37 @@ var me = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 		},
 		children: e
 	})
-}), K = ({ count: e, color: t, size: n, onClick: r, ...i }) => {
-	let a = n || 30, o = t || "#51bbd6";
-	return e > 100 && (a = n || 40, o = t || "#f1f075"), e > 500 && (a = n || 50, o = t || "#f28cb1"), /* @__PURE__ */ (0, L.jsx)(B, {
-		...i,
-		onClick: r ? () => r() : void 0,
-		children: /* @__PURE__ */ (0, L.jsx)("div", {
+}), G = ({ count: e, color: t, size: n, onClick: i, ...a }) => {
+	let o = n ?? (e > 500 ? 50 : e > 100 ? 40 : 30), c = t ?? (e > 500 ? "#f28cb1" : e > 100 ? "#f1f075" : "#51bbd6"), l = F(i), u = s(() => i ? () => l() : void 0, [i === void 0, l]), d = r((e) => {
+		e.currentTarget.style.transform = "scale(1.1)";
+	}, []), f = r((e) => {
+		e.currentTarget.style.transform = "scale(1)";
+	}, []);
+	return /* @__PURE__ */ (0, R.jsx)(B, {
+		...a,
+		onClick: u,
+		children: /* @__PURE__ */ (0, R.jsx)("div", {
 			style: {
-				width: a,
-				height: a,
-				backgroundColor: o,
+				width: o,
+				height: o,
+				backgroundColor: c,
 				color: e > 100 ? "#333" : "white",
 				borderRadius: "50%",
 				display: "flex",
 				alignItems: "center",
 				justifyContent: "center",
 				fontWeight: "bold",
-				fontSize: a * .4,
+				fontSize: o * .4,
 				boxShadow: "0 0 0 4px rgba(255,255,255,0.5), 0 2px 4px rgba(0,0,0,0.3)",
-				cursor: r ? "pointer" : "default",
+				cursor: i ? "pointer" : "default",
 				transition: "transform 0.2s ease"
 			},
-			onMouseEnter: (e) => e.currentTarget.style.transform = "scale(1.1)",
-			onMouseLeave: (e) => e.currentTarget.style.transform = "scale(1)",
+			onMouseEnter: d,
+			onMouseLeave: f,
 			children: e > 999 ? "999+" : e
 		})
 	});
-}, ge = [
+}, _e = [
 	Int8Array,
 	Uint8Array,
 	Uint8ClampedArray,
@@ -968,14 +1004,14 @@ var me = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 	Uint32Array,
 	Float32Array,
 	Float64Array
-], _e = 1, q = 8, J = new Uint32Array(96), ve = class e {
+], K = 1, q = 8, J = new Uint32Array(96), ve = class e {
 	static from(t) {
 		if (!t || t.byteLength === void 0 || t.buffer) throw Error("Data must be an instance of ArrayBuffer or SharedArrayBuffer.");
 		let [n, r] = new Uint8Array(t, 0, 2);
 		if (n !== 219) throw Error("Data does not appear to be in a KDBush format.");
 		let i = r >> 4;
-		if (i !== _e) throw Error(`Got v${i} data when expected v${_e}.`);
-		let a = ge[r & 15];
+		if (i !== K) throw Error(`Got v${i} data when expected v${K}.`);
+		let a = _e[r & 15];
 		if (!a) throw Error("Unrecognized array type.");
 		let [o] = new Uint16Array(t, 2, 1), [s] = new Uint32Array(t, 4, 1);
 		return new e(s, o, a, void 0, t);
@@ -983,12 +1019,12 @@ var me = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 	constructor(e, t = 64, n = Float64Array, r = ArrayBuffer, i) {
 		if (isNaN(e) || e < 0) throw Error(`Unexpected numItems value: ${e}.`);
 		this.numItems = +e, this.nodeSize = Math.min(Math.max(+t, 2), 65535), this.ArrayType = n, this.IndexArrayType = e < 65536 ? Uint16Array : Uint32Array;
-		let a = ge.indexOf(this.ArrayType), o = e * 2 * this.ArrayType.BYTES_PER_ELEMENT, s = e * this.IndexArrayType.BYTES_PER_ELEMENT, c = (8 - s % 8) % 8;
+		let a = _e.indexOf(this.ArrayType), o = e * 2 * this.ArrayType.BYTES_PER_ELEMENT, s = e * this.IndexArrayType.BYTES_PER_ELEMENT, c = (8 - s % 8) % 8;
 		if (a < 0) throw Error(`Unexpected typed array class: ${n}.`);
 		if (i) this.data = i, this.ids = new this.IndexArrayType(i, q, e), this.coords = new n(i, q + s + c, e * 2), this._pos = e * 2, this._finished = !0;
 		else {
 			let i = this.data = new r(q + o + s + c);
-			this.ids = new this.IndexArrayType(i, q, e), this.coords = new n(i, q + s + c, e * 2), this._pos = 0, this._finished = !1, new Uint8Array(i, 0, 2).set([219, (_e << 4) + a]), new Uint16Array(i, 2, 1)[0] = t, new Uint32Array(i, 4, 1)[0] = e;
+			this.ids = new this.IndexArrayType(i, q, e), this.coords = new n(i, q + s + c, e * 2), this._pos = 0, this._finished = !1, new Uint8Array(i, 0, 2).set([219, (K << 4) + a]), new Uint16Array(i, 2, 1)[0] = t, new Uint32Array(i, 4, 1)[0] = e;
 		}
 	}
 	add(e, t) {
@@ -1348,7 +1384,7 @@ var Re = function(e) {
 		supercluster: o.current
 	};
 }, ze = ({ points: e, renderMarker: n, renderCluster: r, radius: i = 50, maxZoom: o = 16 }) => {
-	let c = A(), [u, d] = l(null), [f, p] = l(() => 0);
+	let c = j(), [u, d] = l(null), [f, p] = l(() => 0);
 	a(() => {
 		if (!c) return;
 		let e = () => {
@@ -1363,8 +1399,8 @@ var Re = function(e) {
 				return e === t ? e : t;
 			});
 		};
-		return e(), c.on("moveend", e), c.on("zoomend", e), () => {
-			c.off("moveend", e), c.off("zoomend", e);
+		return c.loaded() ? e() : c.once("load", e), c.on("moveend", e), c.on("zoomend", e), () => {
+			c.off("load", e), c.off("moveend", e), c.off("zoomend", e);
 		};
 	}, [c]);
 	let m = s(() => e.map((e) => ({
@@ -1386,11 +1422,11 @@ var Re = function(e) {
 		zoom: f,
 		options: h
 	});
-	return c ? /* @__PURE__ */ (0, L.jsx)(L.Fragment, { children: g.map((e) => {
+	return c ? /* @__PURE__ */ (0, R.jsx)(R.Fragment, { children: g.map((e) => {
 		let [i, a] = e.geometry.coordinates, { cluster: o, point_count: s, cluster_id: l } = e.properties;
 		if (o) {
 			let n = _, o = s ?? 0;
-			return r && n ? /* @__PURE__ */ (0, L.jsx)(t.Fragment, { children: r(e, o, n) }, `cluster-${l ?? `${i},${a}`}`) : l === void 0 || !n ? null : /* @__PURE__ */ (0, L.jsx)(K, {
+			return r && n ? /* @__PURE__ */ (0, R.jsx)(t.Fragment, { children: r(e, o, n) }, `cluster-${l ?? `${i},${a}`}`) : l === void 0 || !n ? null : /* @__PURE__ */ (0, R.jsx)(G, {
 				lngLat: [i, a],
 				count: o,
 				onClick: () => {
@@ -1403,7 +1439,7 @@ var Re = function(e) {
 			}, `cluster-${l}`);
 		}
 		let u = e.properties;
-		return /* @__PURE__ */ (0, L.jsx)(t.Fragment, { children: n(u) }, u.id);
+		return /* @__PURE__ */ (0, R.jsx)(t.Fragment, { children: n(u) }, u.id);
 	}) }) : null;
 };
 //#endregion
@@ -1412,7 +1448,7 @@ function Be(e) {
 	return [[e[0], e[1]], [e[2], e[3]]];
 }
 var Ve = ({ clusters: e, renderCluster: n, onClusterClick: i, fitBoundsOptions: a, flyToOptions: o }) => {
-	let s = A(), c = r((e) => {
+	let s = j(), c = r((e) => {
 		if (s) {
 			if (i?.(e), e.bounds) {
 				s.fitBounds(Be(e.bounds), {
@@ -1434,9 +1470,9 @@ var Ve = ({ clusters: e, renderCluster: n, onClusterClick: i, fitBoundsOptions: 
 		s,
 		i
 	]);
-	return s ? /* @__PURE__ */ (0, L.jsx)(L.Fragment, { children: e.map((e) => {
+	return s ? /* @__PURE__ */ (0, R.jsx)(R.Fragment, { children: e.map((e) => {
 		let r = () => c(e);
-		return n ? /* @__PURE__ */ (0, L.jsx)(t.Fragment, { children: n(e, r) }, e.id) : /* @__PURE__ */ (0, L.jsx)(K, {
+		return n ? /* @__PURE__ */ (0, R.jsx)(t.Fragment, { children: n(e, r) }, e.id) : /* @__PURE__ */ (0, R.jsx)(G, {
 			lngLat: e.lngLat,
 			count: e.count,
 			color: e.color,
@@ -1446,7 +1482,7 @@ var Ve = ({ clusters: e, renderCluster: n, onClusterClick: i, fitBoundsOptions: 
 		}, e.id);
 	}) }) : null;
 }, He = ({ id: e = "route-line", coordinates: t, color: n = "#2196F3", width: r = 4, dashArray: i, onClick: o, onMouseEnter: c, onMouseLeave: l }) => {
-	let u = A(), d = `${e}-source`, f = `${e}-layer`, p = P(o), m = P(c), h = P(l), g = s(() => ({
+	let u = j(), d = `${e}-source`, f = `${e}-layer`, p = F(o), m = F(c), h = F(l), g = s(() => ({
 		type: "Feature",
 		properties: {},
 		geometry: {
@@ -1477,8 +1513,8 @@ var Ve = ({ clusters: e, renderCluster: n, onClusterClick: i, fitBoundsOptions: 
 				}
 			});
 		};
-		return e(), u.on("styledata", e), () => {
-			u.off("styledata", e), u.getStyle() && (u.getLayer(f) && u.removeLayer(f), u.getSource(d) && u.removeSource(d));
+		return e(), u.on("style.load", e), () => {
+			u.off("style.load", e), u.getStyle() && (u.getLayer(f) && u.removeLayer(f), u.getSource(d) && u.removeSource(d));
 		};
 	}, [
 		u,
@@ -1508,7 +1544,7 @@ var Ve = ({ clusters: e, renderCluster: n, onClusterClick: i, fitBoundsOptions: 
 		h
 	]), null;
 }, Ue = ({ id: e, data: t, fillColor: n = "rgba(33, 150, 243, 0.4)", outlineColor: r = "#2196F3", outlineWidth: i = 2, onClick: o, onMouseEnter: s, onMouseLeave: c }) => {
-	let l = A(), u = `${e}-source`, d = `${e}-fill-layer`, f = `${e}-line-layer`, p = P(o), m = P(s), h = P(c);
+	let l = j(), u = `${e}-source`, d = `${e}-fill-layer`, f = `${e}-line-layer`, p = F(o), m = F(s), h = F(c);
 	return a(() => {
 		if (!l) return;
 		let e = () => {
@@ -1532,8 +1568,8 @@ var Ve = ({ clusters: e, renderCluster: n, onClusterClick: i, fitBoundsOptions: 
 				}
 			});
 		};
-		return e(), l.on("styledata", e), () => {
-			l.off("styledata", e), l.getStyle() && (l.getLayer(d) && l.removeLayer(d), l.getLayer(f) && l.removeLayer(f), l.getSource(u) && l.removeSource(u));
+		return e(), l.on("style.load", e), () => {
+			l.off("style.load", e), l.getStyle() && (l.getLayer(d) && l.removeLayer(d), l.getLayer(f) && l.removeLayer(f), l.getSource(u) && l.removeSource(u));
 		};
 	}, [
 		l,
@@ -1564,30 +1600,28 @@ var Ve = ({ clusters: e, renderCluster: n, onClusterClick: i, fitBoundsOptions: 
 		h
 	]), null;
 }, We = ({ lngLat: e, children: t, offset: n, closeButton: r = !0, closeOnClick: i = !0, maxWidth: o, className: l, onClose: u }) => {
-	let p = A(), m = c(null), h = P(u), g = s(() => typeof document > "u" ? null : document.createElement("div"), []);
+	let p = j(), m = c(null), h = F(u), g = c({
+		closeButton: r,
+		closeOnClick: i,
+		className: l
+	}), _ = s(() => typeof document > "u" ? null : document.createElement("div"), []);
 	return a(() => {
-		if (!p || !g) return;
+		if (!p || !_) return;
 		let t = new d.Popup({
+			...g.current,
 			offset: n,
-			closeButton: r,
-			closeOnClick: i,
-			className: l,
 			maxWidth: o
-		}).setLngLat(e).setDOMContent(g).addTo(p), a = () => h();
-		return t.on("close", a), m.current = t, () => {
-			t.off("close", a), t.remove(), m.current = null;
+		}).setLngLat(e).setDOMContent(_).addTo(p), r = () => h();
+		return t.on("close", r), m.current = t, () => {
+			t.off("close", r), t.remove(), m.current = null;
 		};
-	}, [
-		p,
-		g,
-		n,
-		r,
-		i,
-		l,
-		o
-	]), a(() => {
+	}, [p, _]), a(() => {
 		m.current?.setLngLat(e);
-	}, [e[0], e[1]]), g ? f(t, g) : null;
+	}, [e[0], e[1]]), a(() => {
+		n !== void 0 && m.current?.setOffset(n);
+	}, [n]), a(() => {
+		o !== void 0 && m.current?.setMaxWidth(o);
+	}, [o]), _ ? f(t, _) : null;
 }, Ge = p.tuple([p.number().min(-180).max(180), p.number().min(-90).max(90)]), Ke = p.tuple([
 	p.number().min(-180).max(180),
 	p.number().min(-90).max(90),
@@ -1628,4 +1662,4 @@ function et(e) {
 }
 var tt = p.array(Ge).min(2, "Route must have at least 2 points");
 //#endregion
-export { Ke as BoundsSchema, ze as ClusterLayer, K as ClusterMarker, Ge as LngLatSchema, U as MakiMarker, ee as MapStore, E as MapStoreContext, B as Marker, V as PinMarker, ce as PlaceMarker, $e as PointSchema, Ue as PolygonArea, We as Popup, le as PriceMarker, G as PulsingMarker, tt as RouteCoordinatesSchema, He as RouteLine, he as RoutePointMarker, Ve as ServerClusterLayer, se as SimpleMarker, R as VWorldMap, me as WeatherMarker, et as extendPointSchema, Xe as formatLngLat, x as getVWorldMaxZoom, w as getVWorldStyle, b as getVWorldTileUrl, C as isVWorldTileError, Je as makeBoundedBoundsSchema, qe as makeBoundedLngLatSchema, Qe as parseBoundsParam, S as redactVWorldUrl, Ze as serializeBounds, P as useEvent, A as useMap, M as useMapLoaded, N as useMapSelector, j as useMapZoom };
+export { Ke as BoundsSchema, ze as ClusterLayer, G as ClusterMarker, Ge as LngLatSchema, H as MakiMarker, ee as MapStore, E as MapStoreContext, B as Marker, V as PinMarker, le as PlaceMarker, $e as PointSchema, Ue as PolygonArea, We as Popup, ue as PriceMarker, ce as PulsingMarker, tt as RouteCoordinatesSchema, He as RouteLine, ge as RoutePointMarker, Ve as ServerClusterLayer, W as SimpleMarker, ie as VWorldMap, he as WeatherMarker, et as extendPointSchema, Xe as formatLngLat, x as getVWorldMaxZoom, w as getVWorldStyle, b as getVWorldTileUrl, C as isVWorldTileError, Je as makeBoundedBoundsSchema, qe as makeBoundedLngLatSchema, Qe as parseBoundsParam, S as redactVWorldUrl, Ze as serializeBounds, F as useEvent, j as useMap, N as useMapLoaded, P as useMapSelector, M as useMapZoom };

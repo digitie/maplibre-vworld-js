@@ -13,6 +13,20 @@ export interface MarkerProps {
    * @default '#3FB1CE'
    */
   color?: string;
+  /**
+   * Where the marker element anchors against the `lngLat`. Matches
+   * MapLibre's [`MarkerOptions.anchor`](https://maplibre.org/maplibre-gl-js/docs/API/types/MarkerOptions/#anchor).
+   *
+   * - For pin-shaped content where the tip touches the coordinate, use
+   *   `'bottom'`.
+   * - For a centered bubble / dot, leave as `'center'` (default).
+   */
+  anchor?: maplibregl.PositionAnchor;
+  /**
+   * Pixel offset `[x, y]` applied after `anchor`. Matches MapLibre's
+   * `MarkerOptions.offset`.
+   */
+  offset?: maplibregl.PointLike;
   /** Allow the user to drag the marker. */
   draggable?: boolean;
   /** Fired after a drag ends, with the new `[lng, lat]`. */
@@ -70,17 +84,20 @@ function applyMarkerState(
     element.removeAttribute('aria-label');
     element.removeAttribute('role');
   }
-  // Remove previous tokens before adding new ones, so the className prop is
-  // truly the source of truth.
-  if (prevClassName) {
-    for (const token of prevClassName.split(/\s+/)) {
-      if (token) element.classList.remove(token);
-    }
+  // Token-set diff: only remove tokens that disappeared, only add tokens
+  // that newly appeared. This avoids a single-frame flicker on tokens that
+  // are common to the old and new className.
+  const prevTokens = prevClassName
+    ? prevClassName.split(/\s+/).filter(Boolean)
+    : [];
+  const nextTokens = className ? className.split(/\s+/).filter(Boolean) : [];
+  const nextSet = new Set(nextTokens);
+  for (const token of prevTokens) {
+    if (!nextSet.has(token)) element.classList.remove(token);
   }
-  if (className) {
-    for (const token of className.split(/\s+/)) {
-      if (token) element.classList.add(token);
-    }
+  const prevSet = new Set(prevTokens);
+  for (const token of nextTokens) {
+    if (!prevSet.has(token)) element.classList.add(token);
   }
 }
 
@@ -96,6 +113,8 @@ function applyMarkerState(
 export const Marker: React.FC<MarkerProps> = ({
   lngLat,
   color = '#3FB1CE',
+  anchor,
+  offset,
   draggable = false,
   onDragEnd,
   onClick,
@@ -134,8 +153,8 @@ export const Marker: React.FC<MarkerProps> = ({
     if (!map) return;
 
     const options: maplibregl.MarkerOptions = hasChildren && container
-      ? { element: container, draggable }
-      : { color, draggable };
+      ? { element: container, draggable, anchor, offset }
+      : { color, draggable, anchor, offset };
 
     const marker = new maplibregl.Marker(options).setLngLat(lngLat).addTo(map);
     const element = marker.getElement();
@@ -170,15 +189,22 @@ export const Marker: React.FC<MarkerProps> = ({
       markerRef.current = null;
     };
     // `hasChildren`, `color`, `draggable` affect the construction options
-    // and so genuinely require a re-create. lngLat/state are applied via the
-    // dedicated effects below.
+    // and so genuinely require a re-create. lngLat / offset / state are
+    // applied via the dedicated effects below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, hasChildren, color, draggable, container]);
+  }, [map, hasChildren, color, draggable, anchor, container]);
 
   // Update position when lngLat changes (cheap; no re-create needed).
   useEffect(() => {
     markerRef.current?.setLngLat(lngLat);
   }, [lngLat[0], lngLat[1]]);
+
+  // `offset` has a setter on MapLibre's Marker, so we can update without
+  // re-creating. `anchor` does not — changing it falls through to the
+  // construction effect above.
+  useEffect(() => {
+    if (offset !== undefined) markerRef.current?.setOffset(offset);
+  }, [offset]);
 
   // Apply visual state.
   useEffect(() => {

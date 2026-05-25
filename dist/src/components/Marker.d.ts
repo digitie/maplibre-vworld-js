@@ -8,6 +8,20 @@ export interface MarkerProps {
      * @default '#3FB1CE'
      */
     color?: string;
+    /**
+     * Where the marker element anchors against the `lngLat`. Matches
+     * MapLibre's [`MarkerOptions.anchor`](https://maplibre.org/maplibre-gl-js/docs/API/types/MarkerOptions/#anchor).
+     *
+     * - For pin-shaped content where the tip touches the coordinate, use
+     *   `'bottom'`.
+     * - For a centered bubble / dot, leave as `'center'` (default).
+     */
+    anchor?: maplibregl.PositionAnchor;
+    /**
+     * Pixel offset `[x, y]` applied after `anchor`. Matches MapLibre's
+     * `MarkerOptions.offset`.
+     */
+    offset?: maplibregl.PointLike;
     /** Allow the user to drag the marker. */
     draggable?: boolean;
     /** Fired after a drag ends, with the new `[lng, lat]`. */
