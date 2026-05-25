@@ -152,21 +152,43 @@ export interface VWorldMapProps {
      */
     animateCameraChanges?: boolean;
 }
-interface MapContextType {
+/**
+ * Stable per-mount context: the MapLibre instance handle and configuration
+ * that only changes on map mount/unmount. Markers that just need to register
+ * sources/layers subscribe here and DO NOT re-render on zoom changes.
+ */
+interface MapInstanceContextType {
     map: maplibregl.Map | null;
-    zoom: number;
     semanticZoomThreshold?: number;
 }
-export declare const useMap: () => MapContextType;
 /**
- * Custom hook to get the full map context, including global semantic zoom threshold.
+ * Returns the map instance + global semantic zoom threshold.
+ *
+ * Subscribes to the STABLE instance context only — components using only
+ * `useMap()` will NOT re-render on `zoomend`. If you need the live zoom,
+ * use {@link useMapZoom} or {@link useMapContext}.
+ *
+ * NOTE (breaking from <1.0): `useMap()` no longer returns a `zoom` field.
+ * Read zoom from `useMapZoom()` instead. This split lets markers that only
+ * need the map handle (e.g. the bundled <Marker>, <PolygonArea>,
+ * <RouteLine>, <MarkerClusterer>) skip re-rendering on every camera change.
  */
-export declare const useMapContext: () => MapContextType;
+export declare const useMap: () => MapInstanceContextType;
 /**
- * Custom hook to get the current map zoom level.
+ * Returns the current map zoom level. Re-renders the consumer on `zoomend`.
  * Useful for semantic zooming (e.g. degrading marker quality at low zooms).
  */
 export declare const useMapZoom: () => number;
+/**
+ * Returns the merged shape `{ map, zoom, semanticZoomThreshold }`. Consumes
+ * BOTH contexts and therefore re-renders on every `zoomend`. Use only when
+ * the component genuinely needs zoom — otherwise prefer `useMap()`.
+ */
+export declare const useMapContext: () => {
+    zoom: number;
+    map: maplibregl.Map | null;
+    semanticZoomThreshold?: number;
+};
 /**
  * The base map component that initializes MapLibre GL JS with VWorld maps.
  * It provides a MapContext to all child components.

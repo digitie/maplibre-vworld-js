@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { getVWorldMaxZoom, getVWorldStyle, redactVWorldUrl, VWorldLayerType } from '../vworld';
@@ -157,29 +157,53 @@ export interface VWorldMapProps {
   animateCameraChanges?: boolean;
 }
 
-interface MapContextType {
+/**
+ * Stable per-mount context: the MapLibre instance handle and configuration
+ * that only changes on map mount/unmount. Markers that just need to register
+ * sources/layers subscribe here and DO NOT re-render on zoom changes.
+ */
+interface MapInstanceContextType {
   map: maplibregl.Map | null;
-  zoom: number;
   semanticZoomThreshold?: number;
 }
 
-const MapContext = createContext<MapContextType>({ map: null, zoom: 12 });
-
-export const useMap = () => useContext(MapContext);
-
 /**
- * Custom hook to get the full map context, including global semantic zoom threshold.
+ * Volatile context: the current map zoom level, updated on every `zoomend`.
+ * Kept separate so that semantic-zoom-aware markers can subscribe without
+ * forcing the entire marker tree to re-render on zoom.
  */
-export const useMapContext = () => {
-  return useContext(MapContext);
-};
+const MapInstanceContext = createContext<MapInstanceContextType>({ map: null });
+const MapZoomContext = createContext<number>(12);
 
 /**
- * Custom hook to get the current map zoom level.
+ * Returns the map instance + global semantic zoom threshold.
+ *
+ * Subscribes to the STABLE instance context only — components using only
+ * `useMap()` will NOT re-render on `zoomend`. If you need the live zoom,
+ * use {@link useMapZoom} or {@link useMapContext}.
+ *
+ * NOTE (breaking from <1.0): `useMap()` no longer returns a `zoom` field.
+ * Read zoom from `useMapZoom()` instead. This split lets markers that only
+ * need the map handle (e.g. the bundled <Marker>, <PolygonArea>,
+ * <RouteLine>, <MarkerClusterer>) skip re-rendering on every camera change.
+ */
+export const useMap = () => useContext(MapInstanceContext);
+
+/**
+ * Returns the current map zoom level. Re-renders the consumer on `zoomend`.
  * Useful for semantic zooming (e.g. degrading marker quality at low zooms).
  */
-export const useMapZoom = () => {
-  return useContext(MapContext).zoom;
+export const useMapZoom = () => useContext(MapZoomContext);
+
+/**
+ * Returns the merged shape `{ map, zoom, semanticZoomThreshold }`. Consumes
+ * BOTH contexts and therefore re-renders on every `zoomend`. Use only when
+ * the component genuinely needs zoom — otherwise prefer `useMap()`.
+ */
+export const useMapContext = () => {
+  const instance = useContext(MapInstanceContext);
+  const zoom = useContext(MapZoomContext);
+  return { ...instance, zoom };
 };
 
 function renderFallback(
@@ -245,18 +269,17 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   const [initError, setInitError] = useState<Error | null>(null);
 
   // Stable refs for handlers so prop changes don't tear down the map.
+  // Collapsed into a single effect — three writes are cheaper than three
+  // useEffect bookkeeping entries, and the refs are read together at click /
+  // error time anyway.
   const onMapClickRef = useRef(onMapClick);
   const onMapErrorRef = useRef(onMapError);
   const tileErrorThresholdRef = useRef(tileErrorThreshold);
   useEffect(() => {
     onMapClickRef.current = onMapClick;
-  }, [onMapClick]);
-  useEffect(() => {
     onMapErrorRef.current = onMapError;
-  }, [onMapError]);
-  useEffect(() => {
     tileErrorThresholdRef.current = tileErrorThreshold;
-  }, [tileErrorThreshold]);
+  }, [onMapClick, onMapError, tileErrorThreshold]);
 
   const hasApiKey = typeof apiKey === 'string' && apiKey.trim().length > 0;
   const shouldMountMap = hasApiKey && initError === null;
@@ -428,17 +451,30 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
     ? { reason: 'map-init-error', error: initError }
     : null;
 
+  // Memoize the stable instance context so parent re-renders don't churn
+  // every consumer. `mapRef.current` flips from null to a real instance once
+  // `mapLoaded` becomes true, and stays stable afterwards — so we depend on
+  // mapLoaded (a state proxy for "mapRef is populated") plus the threshold
+  // prop. Zoom changes do NOT rebuild this object.
+  const mapInstanceValue = useMemo<MapInstanceContextType>(
+    () => ({ map: mapRef.current, semanticZoomThreshold }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mapLoaded, semanticZoomThreshold]
+  );
+
   return (
-    <MapContext.Provider value={{ map: mapRef.current, zoom: currentZoom, semanticZoomThreshold }}>
-      {fallbackInfo ? (
-        renderFallback(fallback, fallbackInfo)
-      ) : (
-        <>
-          <div ref={mapContainerRef} className={className} style={style} data-testid="vworld-map-container" />
-          {!mapLoaded && loadingSkeleton}
-          {mapLoaded && children}
-        </>
-      )}
-    </MapContext.Provider>
+    <MapInstanceContext.Provider value={mapInstanceValue}>
+      <MapZoomContext.Provider value={currentZoom}>
+        {fallbackInfo ? (
+          renderFallback(fallback, fallbackInfo)
+        ) : (
+          <>
+            <div ref={mapContainerRef} className={className} style={style} data-testid="vworld-map-container" />
+            {!mapLoaded && loadingSkeleton}
+            {mapLoaded && children}
+          </>
+        )}
+      </MapZoomContext.Provider>
+    </MapInstanceContext.Provider>
   );
 };
