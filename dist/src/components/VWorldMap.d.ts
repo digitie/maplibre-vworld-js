@@ -118,9 +118,10 @@ export interface VWorldMapProps {
     animateCameraChanges?: boolean;
     /**
      * Extra options forwarded to `flyTo` when `animateCameraChanges` is true.
-     * `center` and `zoom` are always taken from the corresponding props.
+     * `center`, `zoom`, `pitch`, and `bearing` are always taken from the
+     * corresponding props.
      */
-    flyToOptions?: Omit<maplibregl.FlyToOptions, 'center' | 'zoom'>;
+    flyToOptions?: Omit<maplibregl.FlyToOptions, 'center' | 'zoom' | 'pitch' | 'bearing'>;
 }
 /**
  * VWorld + MapLibre map container.

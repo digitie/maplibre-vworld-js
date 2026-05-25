@@ -69,7 +69,7 @@ export function App() {
 | `fallback` | `ReactNode \| (info) => ReactNode` | — | Rendered instead of the map for `'missing-api-key'` or `'map-init-error'`. |
 | `loadingSkeleton` | `ReactNode` | — | Overlay until `load` fires. |
 | `animateCameraChanges` | `boolean` | `true` | `false` → camera prop changes use `jumpTo`. |
-| `flyToOptions` | `Omit<FlyToOptions, 'center' \| 'zoom'>` | — | Tune flyTo duration / easing. |
+| `flyToOptions` | `Omit<FlyToOptions, 'center' \| 'zoom' \| 'pitch' \| 'bearing'>` | — | Tune flyTo duration / easing; camera coordinates come from props. |
 | `className` / `style` | — | — | Container styling. |
 
 ### Event handler example

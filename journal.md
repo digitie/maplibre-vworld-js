@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-05-25: main 브랜치 코드 리뷰 후 런타임 결함 수정
+
+### 1. stale event handler와 camera 동기화 문제 해결
+- **이슈**: `useEvent`로 최신 callback을 보장하도록 리팩토링했지만, 일부 이벤트는 mount 시점의 prop 존재 여부를 closure로 잡고 있었다. 그 결과 `<VWorldMap onError>`나 `<Marker onClick>`을 렌더 후 추가하면 MapLibre/DOM listener가 최신 handler를 호출하지 못했다.
+- **조치**:
+  1. `<VWorldMap>`의 error handler와 `<Marker>`의 click/contextmenu handler가 최신 prop 존재 여부를 ref로 판단하도록 변경했다.
+  2. 초기 load 직후 `center/zoom`을 불필요하게 다시 `flyTo`하지 않도록 마지막 camera snapshot을 추적한다.
+  3. `pitch`/`bearing` prop 변경도 camera update에 포함하고, `flyToOptions`는 camera 좌표 계열 값을 override하지 못하도록 타입과 문서를 정리했다.
+  4. `maxBounds` prop 제거 시 `map.setMaxBounds(undefined)`가 호출되어 이전 제한이 남지 않도록 했다.
+
+### 2. selector/marker/layer 렌더링 정합성 보강
+- **이슈**: `useMapSelector` 문서는 referential caching을 약속하지만 실제 구현은 selector 결과를 매번 새로 반환했다. 객체 selector는 `useSyncExternalStore` 경고나 불필요한 렌더를 만들 수 있었다. 또한 marker selected/highlighted scale은 CSS 변수만 설정하고 실제 scale 속성을 적용하지 않아 시각 효과가 빠져 있었다.
+- **조치**:
+  1. `useMapSelector`가 동일 store snapshot에서는 이전 selector 결과를 재사용하고, 새 snapshot에서도 `Object.is`로 같은 값이면 기존 참조를 유지하도록 cache를 추가했다.
+  2. marker state 적용 시 `--vworld-marker-scale`과 함께 실제 `scale` style도 갱신해 selected/highlighted 기본 효과를 복구했다.
+  3. `<ClusterMarker>` click은 child div가 아니라 `<Marker onClick>` 경로로 처리해 cluster click이 지도 click으로 bubble되는 위험을 줄였다.
+  4. `<RouteLine>`의 `dashArray` 제거 시 기존 MapLibre paint property도 `undefined`로 갱신하도록 보정했다.
+
+### 3. 검증
+- stale handler, 초기 camera replay 방지, `pitch/bearing` camera 변경, `maxBounds` 해제, selector cache, route dash reset 회귀 테스트를 추가했다.
+
+---
+
 ## 2026-05-25: 범용 라이브러리로 정리 + API/성능 리팩토링
 
 ### 1. 도메인-특화 코드 제거 (TripMate)

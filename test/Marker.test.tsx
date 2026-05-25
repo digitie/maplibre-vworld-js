@@ -73,7 +73,35 @@ describe('Marker', () => {
     expect(onContextMenu).toHaveBeenCalledWith(expect.any(MouseEvent), marker);
     expect(element.dataset.selected).toBe('true');
     expect(element.style.zIndex).toBe('7');
+    expect(element.style.getPropertyValue('scale')).toBe('1.18');
     expect(element).toHaveAttribute('aria-label', 'Selected place');
     expect(element).toHaveClass('custom-class');
+  });
+
+  it('uses event handlers added after the marker instance was created', async () => {
+    vi.clearAllMocks();
+    const onClick = vi.fn();
+    const { rerender } = render(
+      <VWorldMap apiKey="test-key" center={[127, 37]}>
+        <Marker lngLat={[127, 37]}>
+          <div>Dynamic handler</div>
+        </Marker>
+      </VWorldMap>,
+    );
+
+    await waitFor(() => expect(maplibregl.Marker).toHaveBeenCalledTimes(1));
+    const marker = latestMarkerMock();
+
+    rerender(
+      <VWorldMap apiKey="test-key" center={[127, 37]}>
+        <Marker lngLat={[127, 37]} onClick={onClick}>
+          <div>Dynamic handler</div>
+        </Marker>
+      </VWorldMap>,
+    );
+
+    marker.getElement().dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(onClick).toHaveBeenCalledWith(expect.any(MouseEvent), marker);
+    expect(maplibregl.Marker).toHaveBeenCalledTimes(1);
   });
 });
