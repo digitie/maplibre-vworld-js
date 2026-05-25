@@ -6,6 +6,9 @@ export interface PlaceMarkerProps extends Omit<MarkerProps, 'children'> {
     category: string;
     photoUrl?: string;
     link?: string;
+    /** Link button label. @default 'View more' */
+    linkLabel?: string;
+    /** Below this zoom, replace the card with a {@link PinMarker}. */
     simplifyAtZoom?: number;
 }
 export declare const PlaceMarker: React.FC<PlaceMarkerProps>;

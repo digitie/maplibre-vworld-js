@@ -1,51 +1,33 @@
 import { default as React } from 'react';
-/**
- * Props for the PolygonArea component.
- */
+import { default as maplibregl } from 'maplibre-gl';
+type PolygonGeoJSON = GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon>;
+export type PolygonAreaInput = PolygonGeoJSON | string;
+type FeatureMouseEvent = maplibregl.MapMouseEvent & {
+    features?: maplibregl.MapGeoJSONFeature[];
+};
 export interface PolygonAreaProps {
-    /**
-     * Unique identifier for the area. Used as the MapLibre layer and source ID prefix.
-     */
+    /** Unique ID — used as prefix for the MapLibre source and layer IDs. */
     id: string;
     /**
-     * GeoJSON data for the area (Feature, FeatureCollection, or URL).
-     * Usually a Polygon or MultiPolygon.
+     * GeoJSON Polygon / MultiPolygon Feature, FeatureCollection, or a URL
+     * MapLibre can fetch. Must be referentially stable — pass a memoized value
+     * or store the GeoJSON in a ref. Reference changes trigger `setData`.
      */
-    data: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon> | string;
-    /**
-     * Fill color of the area.
-     * @default 'rgba(33, 150, 243, 0.4)'
-     */
+    data: PolygonAreaInput;
+    /** @default 'rgba(33, 150, 243, 0.4)' */
     fillColor?: string;
-    /**
-     * Outline color of the area.
-     * @default '#2196F3'
-     */
+    /** @default '#2196F3' */
     outlineColor?: string;
-    /**
-     * Outline width in pixels.
-     * @default 2
-     */
+    /** @default 2 */
     outlineWidth?: number;
-    /**
-     * Fired when the area is clicked.
-     */
-    onClick?: (e: maplibregl.MapMouseEvent & {
-        features?: maplibregl.MapGeoJSONFeature[];
-    }) => void;
-    /**
-     * Fired when the mouse enters the area.
-     */
-    onMouseEnter?: (e: maplibregl.MapMouseEvent & {
-        features?: maplibregl.MapGeoJSONFeature[];
-    }) => void;
-    /**
-     * Fired when the mouse leaves the area.
-     */
-    onMouseLeave?: (e: maplibregl.MapMouseEvent) => void;
+    onClick?: (event: FeatureMouseEvent) => void;
+    onMouseEnter?: (event: FeatureMouseEvent) => void;
+    onMouseLeave?: (event: maplibregl.MapMouseEvent) => void;
 }
 /**
- * Draws a GeoJSON Polygon or MultiPolygon on the map.
- * Useful for displaying national parks, administrative boundaries, etc.
+ * Renders a GeoJSON Polygon / MultiPolygon as a MapLibre fill+line layer
+ * pair, persisting across style swaps. Suitable for administrative
+ * boundaries, parks, building footprints, etc.
  */
 export declare const PolygonArea: React.FC<PolygonAreaProps>;
+export {};

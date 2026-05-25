@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
-import { 
-  VWorldMap, Marker, WeatherMarker, PlaceMarker, SimpleMarker, 
-  PriceMarker, PulsingMarker, PinMarker, MakiMarker, MarkerClusterer, RoutePointMarker, RouteLine,
-  VWorldLayerType, PolygonArea
+import {
+  VWorldMap, Marker, WeatherMarker, PlaceMarker, SimpleMarker,
+  PriceMarker, PulsingMarker, PinMarker, MakiMarker, ClusterLayer, RoutePointMarker, RouteLine,
+  type VWorldLayerType, PolygonArea, type ClusterPoint,
 } from '../src';
 
 const API_KEY = import.meta.env.VITE_VWORLD_API_KEY || 'YOUR_API_KEY';
@@ -149,10 +149,10 @@ const App = () => {
         {/* Namsan Trail (Route) */}
         <RouteLine
           id="namsan-trail"
-          data={namsanTrailGeoJSON}
+          coordinates={namsanTrailGeoJSON.geometry.coordinates as [number, number][]}
           color={hoveredRoute ? '#FF5722' : '#795548'}
-          lineWidth={hoveredRoute ? 8 : 4}
-          lineDasharray={hoveredRoute ? undefined : [2, 2]}
+          width={hoveredRoute ? 8 : 4}
+          dashArray={hoveredRoute ? undefined : [2, 2]}
           onMouseEnter={() => setHoveredRoute('trail')}
           onMouseLeave={() => setHoveredRoute(null)}
           onClick={() => alert('남산 둘레길 경로를 클릭했습니다!')}
@@ -166,15 +166,15 @@ const App = () => {
         <PulsingMarker lngLat={[126.99, 37.54]} color="#E91E63" />
 
         {/* Dynamic Marker Clustering Showcase */}
-        <MarkerClusterer 
+        <ClusterLayer
           points={clusterPoints}
-          radius={40} // Custom cluster radius
-          maxZoom={15} // Clusters will completely break apart at zoom level 15
-          renderMarker={(point) => (
-            <SimpleMarker 
-              key={`point-${point.id}`} 
-              lngLat={point.lngLat} 
-              label={point.category} 
+          radius={40}
+          maxZoom={15}
+          renderMarker={(point: ClusterPoint) => (
+            <SimpleMarker
+              key={`point-${point.id}`}
+              lngLat={point.lngLat}
+              label={String(point.category)}
               bgColor={point.category === 'cafe' ? '#e67e22' : '#e74c3c'}
             />
           )}
@@ -182,16 +182,16 @@ const App = () => {
 
         {/* Route Point Markers - Diverse Examples */}
         {/* Route 1: Numbered Steps (e.g. Delivery or Itinerary) */}
-        <RouteLine 
+        <RouteLine
           id="route-1"
           coordinates={[
             [127.01, 37.50],
             [127.015, 37.49],
             [127.02, 37.48],
-            [127.025, 37.47]
-          ]} 
-          color="#4CAF50" 
-          lineWidth={5} 
+            [127.025, 37.47],
+          ]}
+          color="#4CAF50"
+          width={5}
         />
         <RoutePointMarker lngLat={[127.01, 37.50]} label={1} color="#4CAF50" />
         <RoutePointMarker lngLat={[127.015, 37.49]} label={2} color="#4CAF50" />
@@ -199,34 +199,34 @@ const App = () => {
         <RoutePointMarker lngLat={[127.025, 37.47]} label="도착" color="#2E7D32" size={32} />
 
         {/* Route 2: Alphabetical Points with dashed line (e.g. Points of Interest) */}
-        <RouteLine 
+        <RouteLine
           id="route-2"
           coordinates={[
             [126.96, 37.53],
             [126.97, 37.52],
-            [126.98, 37.51]
-          ]} 
-          color="#9C27B0" 
-          lineWidth={4}
-          lineDasharray={[4, 4]} // Made the dashed line more visible
+            [126.98, 37.51],
+          ]}
+          color="#9C27B0"
+          width={4}
+          dashArray={[4, 4]}
         />
         <RoutePointMarker lngLat={[126.96, 37.53]} label="A" color="#9C27B0" />
         <RoutePointMarker lngLat={[126.97, 37.52]} label="B" color="#9C27B0" />
         <RoutePointMarker lngLat={[126.98, 37.51]} label="C" color="#9C27B0" />
 
         {/* Maki Markers (Travel / Leisure) */}
-        <MakiMarker 
-          lngLat={[126.98, 37.55]} iconName="restaurant" color="#e74c3c" 
-          label="남산 레스토랑" tooltip="남산타워 뷰가 보이는 고급 레스토랑입니다." 
+        <MakiMarker
+          lngLat={[126.98, 37.55]} icon="restaurant" color="#e74c3c"
+          label="남산 레스토랑" tooltip="남산타워 뷰가 보이는 고급 레스토랑입니다."
         />
-        <MakiMarker 
-          lngLat={[126.99, 37.56]} iconName="museum" color="#3498db" 
-          label="국립박물관" tooltip="무료 입장 가능" 
+        <MakiMarker
+          lngLat={[126.99, 37.56]} icon="museum" color="#3498db"
+          label="국립박물관" tooltip="무료 입장 가능"
         />
-        <MakiMarker lngLat={[127.01, 37.55]} iconName="park" color="#2ecc71" tooltip="휴식하기 좋은 벤치가 많습니다." />
-        <MakiMarker lngLat={[127.00, 37.53]} iconName="lodging" color="#9b59b6" label="그랜드 호텔" />
-        <MakiMarker lngLat={[127.03, 37.55]} iconName="cafe" color="#e67e22" tooltip="24시간 오픈" />
-        <MakiMarker lngLat={[127.05, 37.54]} iconName="airport" color="#34495e" label="도심공항" tooltip="공항버스 탑승 장소" />
+        <MakiMarker lngLat={[127.01, 37.55]} icon="park" color="#2ecc71" tooltip="휴식하기 좋은 벤치가 많습니다." />
+        <MakiMarker lngLat={[127.00, 37.53]} icon="lodging" color="#9b59b6" label="그랜드 호텔" />
+        <MakiMarker lngLat={[127.03, 37.55]} icon="cafe" color="#e67e22" tooltip="24시간 오픈" />
+        <MakiMarker lngLat={[127.05, 37.54]} icon="airport" color="#34495e" label="도심공항" tooltip="공항버스 탑승 장소" />
       </VWorldMap>
 
       <div style={{

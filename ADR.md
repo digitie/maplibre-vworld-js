@@ -28,6 +28,18 @@
 - **결과**: 소비자는 별도 build step 없이 `import { VWorldMap } from "maplibre-vworld"`와 `import "maplibre-vworld/style.css"`를 사용할 수 있다. declaration generation은 `tsconfig.build.json`으로 `src/`만 대상으로 삼아 `dev/`와 `test/` 타입 오류가 배포 산출물에 섞이지 않도록 한다.
 - **주의**: `react`, `react-dom`, `maplibre-gl`, `zod`는 peer dependency로 둔다. `zod`는 `^4.4.3` 기준으로 빌드/테스트하며, v3는 지원하지 않는다. peer + rollup external로 둠으로써 소비자 번들에 zod 사본이 중복되지 않게 한다.
 
+## ADR 7: 범용 라이브러리 경계 — 도메인-특화 코드 비포함
+
+- **배경**: PR #10/#11에서 TripMate(소비자 앱) 도메인 지식(16색 marker palette, 7종 feature kind, 한국어 관광 카테고리 enum, `₩` currency)이 `src/tripmate.ts`, `src/components/TripmateFeatureLayer.tsx`에 박혔다. 다른 소비자가 이 라이브러리를 채택할 때 dead weight가 되고, TripMate의 schema 변경이 라이브러리 release를 강제하는 결합이 생긴다.
+- **결정**: 도메인-특화 모듈은 라이브러리에서 제거하고, 소비자 앱에 거주시킨다. 라이브러리는 **map primitive만** 제공한다 — markers, popup, layers, clustering, region-bounded zod schemas. 한국 지역 preset 같은 helper도 factory(`makeBoundedLngLatSchema`)로 일반화하고, Korea constant는 core에서 제거한다.
+- **결과**: TripMate 의존성 없이 어떤 React + MapLibre + VWorld 소비자도 사용 가능. 번들 사이즈 ~5KB 감소.
+
+## ADR 8: 외부 store + useSyncExternalStore + useEvent
+
+- **배경**: `createContext` value를 매 render마다 새 object로 만들면 모든 consumer가 churn한다. `mapRef.current`를 `useMemo` factory에서 읽으면 React가 변경을 감지 못해 stale value를 노출할 위험이 있다. prop callback이 매 render마다 새 closure면 MapLibre에 listener를 매번 다시 붙여야 한다.
+- **결정**: vanilla JS `MapStore` class를 만들고 `useSyncExternalStore`로 구독. selector 패턴으로 slice 변경 시에만 re-render. handler는 `useEvent`(canonical `useLayoutEffect + useRef + useCallback`)로 stable identity 유지하고 최신 closure 호출. 모든 DOM-touching 모듈에 `'use client'` 명시.
+- **결과**: 카메라/zoom 이벤트가 마커 트리 전체를 re-render 시키지 않음. semantic-zoom marker는 threshold cross 시에만 re-render. consumer callback 변경 시 map 재구성 0회.
+
 ## ADR 6: zod v4 강제, v3 미지원
 
 - **배경**: 초기에 PR #6에서 zod v3로 다운그레이드되었지만, 이는 의도된 기술 결정이 아니라 마이그레이션 잔존물이었다. zod v4(2025-05 stable)는 v3 대비 배열 파싱 ~7배, 문자열 파싱 ~2배 빠르고, TypeScript instantiation 카운트가 ~100배 감소해 소비자 IDE/빌드 체감을 크게 개선한다.

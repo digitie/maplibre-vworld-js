@@ -1,105 +1,78 @@
-import React, { useEffect } from 'react';
-import { useMap } from './VWorldMap';
+'use client';
 
-/**
- * Props for the RouteLine component.
- */
+import React, { useEffect, useMemo } from 'react';
+import type maplibregl from 'maplibre-gl';
+import { useMap, useEvent } from '../store/hooks';
+
+type FeatureMouseEvent = maplibregl.MapMouseEvent & {
+  features?: maplibregl.MapGeoJSONFeature[];
+};
+
 export interface RouteLineProps {
-  /**
-   * Unique identifier for the route line. Used as the MapLibre layer and source ID prefix.
-   */
+  /** Unique ID — prefixes the MapLibre source and layer IDs. */
   id?: string;
   /**
-   * Array of coordinates [longitude, latitude] that form the line.
-   * MUST be memoized or defined outside the component to prevent infinite re-renders.
+   * Polyline coordinates as `[longitude, latitude]` tuples. Must be
+   * referentially stable: reference changes trigger a `setData` call.
    */
-  coordinates?: [number, number][];
-  /**
-   * GeoJSON data for the route (Feature, FeatureCollection, or URL).
-   * If provided, overrides `coordinates`.
-   */
-  data?: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString> | GeoJSON.FeatureCollection<GeoJSON.LineString | GeoJSON.MultiLineString> | string;
-  /**
-   * Hex color for the line.
-   * @default '#2196F3'
-   */
+  coordinates: [number, number][];
+  /** @default '#2196F3' */
   color?: string;
-  /**
-   * Width of the line in pixels.
-   * @default 4
-   */
-  lineWidth?: number;
-  /**
-   * Array of numbers specifying the dash pattern (e.g. [4, 4] for 4px dash, 4px gap).
-   * Leave undefined for a solid line.
-   */
-  lineDasharray?: number[];
-  /**
-   * Fired when the line is clicked.
-   */
-  onClick?: (e: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => void;
-  /**
-   * Fired when the mouse enters the line.
-   */
-  onMouseEnter?: (e: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => void;
-  /**
-   * Fired when the mouse leaves the line.
-   */
-  onMouseLeave?: (e: maplibregl.MapMouseEvent) => void;
+  /** Width in pixels. @default 4 */
+  width?: number;
+  /** Dash pattern, e.g. `[4, 4]` for 4-on / 4-off. */
+  dashArray?: number[];
+  onClick?: (event: FeatureMouseEvent) => void;
+  onMouseEnter?: (event: FeatureMouseEvent) => void;
+  onMouseLeave?: (event: maplibregl.MapMouseEvent) => void;
 }
 
 /**
- * Draws a GeoJSON LineString on the map connecting the provided coordinates.
- * Safe to use with dynamic toggling and respects MapLibre's asynchronous style loading.
+ * Renders a polyline as a MapLibre line layer, persisting across style
+ * swaps. For multi-line or already-built GeoJSON, drop down to the raw
+ * MapLibre API via {@link useMap}.
  */
 export const RouteLine: React.FC<RouteLineProps> = ({
   id = 'route-line',
   coordinates,
-  data,
   color = '#2196F3',
-  lineWidth = 4,
-  lineDasharray,
+  width = 4,
+  dashArray,
   onClick,
   onMouseEnter,
-  onMouseLeave
+  onMouseLeave,
 }) => {
-  const { map } = useMap();
+  const map = useMap();
   const sourceId = `${id}-source`;
   const layerId = `${id}-layer`;
+
+  const stableOnClick = useEvent(onClick);
+  const stableOnMouseEnter = useEvent(onMouseEnter);
+  const stableOnMouseLeave = useEvent(onMouseLeave);
+
+  // Build the Feature once per coordinates reference. Consumers that mutate
+  // an array in place will not see updates — this is intentional, matching
+  // how React props work everywhere else.
+  const feature = useMemo<GeoJSON.Feature<GeoJSON.LineString>>(
+    () => ({
+      type: 'Feature',
+      properties: {},
+      geometry: { type: 'LineString', coordinates },
+    }),
+    [coordinates],
+  );
 
   useEffect(() => {
     if (!map) return;
 
-    const addOrUpdateLayer = () => {
-      // Validate style exists
+    const addOrUpdate = () => {
       if (!map.getStyle()) return;
 
-      let sourceData: any = data;
-
-      if (!sourceData && coordinates) {
-        sourceData = {
-          type: 'Feature',
-          properties: {},
-          geometry: {
-            type: 'LineString',
-            coordinates
-          }
-        };
-      }
-
-      if (!sourceData) return;
-
-      const source = map.getSource(sourceId) as maplibregl.GeoJSONSource;
-
+      const source = map.getSource(sourceId) as maplibregl.GeoJSONSource | undefined;
       if (source) {
-        if (typeof sourceData !== 'string') {
-          source.setData(sourceData);
-        }
+        source.setData(feature);
       } else {
-        map.addSource(sourceId, {
-          type: 'geojson',
-          data: sourceData
-        });
+        map.addSource(sourceId, { type: 'geojson', data: feature });
       }
 
       if (!map.getLayer(layerId)) {
@@ -107,71 +80,54 @@ export const RouteLine: React.FC<RouteLineProps> = ({
           id: layerId,
           type: 'line',
           source: sourceId,
-          layout: {
-            'line-join': 'round',
-            'line-cap': 'round'
-          },
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
           paint: {
             'line-color': color,
-            'line-width': lineWidth,
-            ...(lineDasharray ? { 'line-dasharray': lineDasharray } : {})
-          }
+            'line-width': width,
+            ...(dashArray ? { 'line-dasharray': dashArray } : {}),
+          },
         });
       } else {
-        // Update paint properties if they changed
         map.setPaintProperty(layerId, 'line-color', color);
-        map.setPaintProperty(layerId, 'line-width', lineWidth);
-        if (lineDasharray) {
-          map.setPaintProperty(layerId, 'line-dasharray', lineDasharray);
-        }
+        map.setPaintProperty(layerId, 'line-width', width);
+        if (dashArray) map.setPaintProperty(layerId, 'line-dasharray', dashArray);
       }
     };
 
-    // Attempt to add immediately
-    addOrUpdateLayer();
-
-    // Re-add if the style changes (e.g. from Base to Satellite)
-    // 'styledata' event fires when the style is updated or loaded
-    map.on('styledata', addOrUpdateLayer);
+    addOrUpdate();
+    map.on('styledata', addOrUpdate);
 
     return () => {
-      map.off('styledata', addOrUpdateLayer);
-      if (map.getStyle()) {
-        if (map.getLayer(layerId)) map.removeLayer(layerId);
-        if (map.getSource(sourceId)) map.removeSource(sourceId);
-      }
+      map.off('styledata', addOrUpdate);
+      if (!map.getStyle()) return;
+      if (map.getLayer(layerId)) map.removeLayer(layerId);
+      if (map.getSource(sourceId)) map.removeSource(sourceId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, JSON.stringify(coordinates), JSON.stringify(data), color, lineWidth, JSON.stringify(lineDasharray), sourceId, layerId]);
+  }, [map, feature, color, width, dashArray, sourceId, layerId]);
 
-  // Event Listeners
   useEffect(() => {
     if (!map) return;
 
-    const clickHandler = (e: any) => {
-      if (onClick) onClick(e);
+    const handleClick = (event: FeatureMouseEvent) => stableOnClick(event);
+    const handleEnter = (event: FeatureMouseEvent) => {
+      if (onMouseEnter || onClick) map.getCanvas().style.cursor = 'pointer';
+      stableOnMouseEnter(event);
     };
-
-    const mouseEnterHandler = (e: any) => {
-      map.getCanvas().style.cursor = 'pointer';
-      if (onMouseEnter) onMouseEnter(e);
-    };
-
-    const mouseLeaveHandler = (e: any) => {
+    const handleLeave = (event: maplibregl.MapMouseEvent) => {
       map.getCanvas().style.cursor = '';
-      if (onMouseLeave) onMouseLeave(e);
+      stableOnMouseLeave(event);
     };
 
-    map.on('click', layerId, clickHandler);
-    map.on('mouseenter', layerId, mouseEnterHandler);
-    map.on('mouseleave', layerId, mouseLeaveHandler);
+    map.on('click', layerId, handleClick);
+    map.on('mouseenter', layerId, handleEnter);
+    map.on('mouseleave', layerId, handleLeave);
 
     return () => {
-      map.off('click', layerId, clickHandler);
-      map.off('mouseenter', layerId, mouseEnterHandler);
-      map.off('mouseleave', layerId, mouseLeaveHandler);
+      map.off('click', layerId, handleClick);
+      map.off('mouseenter', layerId, handleEnter);
+      map.off('mouseleave', layerId, handleLeave);
     };
-  }, [map, layerId, onClick, onMouseEnter, onMouseLeave]);
+  }, [map, layerId, onClick, onMouseEnter, stableOnClick, stableOnMouseEnter, stableOnMouseLeave]);
 
   return null;
 };

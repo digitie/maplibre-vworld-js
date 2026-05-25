@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { Marker, MarkerProps } from './Marker';
+'use client';
+
+import React, { useCallback, useState } from 'react';
+import { Marker, type MarkerProps } from './Marker';
 import { PinMarker } from './PinMarker';
-import { useMapContext } from './VWorldMap';
+import { useMapSelector } from '../store/hooks';
 
 export type WeatherCondition = 'sunny' | 'cloudy' | 'rainy' | 'snowy';
 
@@ -22,15 +24,31 @@ const conditionIcons: Record<WeatherCondition, string> = {
   sunny: '☀️',
   cloudy: '☁️',
   rainy: '🌧️',
-  snowy: '❄️'
+  snowy: '❄️',
 };
 
 const conditionColors: Record<WeatherCondition, string> = {
   sunny: '#FFA500',
   cloudy: '#808080',
   rainy: '#4169E1',
-  snowy: '#ADD8E6'
+  snowy: '#ADD8E6',
 };
+
+// Inject the fade-in keyframes once per browser session, not once per marker.
+const FADE_IN_STYLE_ID = 'vworld-weather-marker-fadein';
+function ensureFadeInStyle() {
+  if (typeof document === 'undefined') return;
+  if (document.getElementById(FADE_IN_STYLE_ID)) return;
+  const style = document.createElement('style');
+  style.id = FADE_IN_STYLE_ID;
+  style.textContent = `
+    @keyframes vworld-weather-fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `;
+  document.head.appendChild(style);
+}
 
 export const WeatherMarker: React.FC<WeatherMarkerProps> = ({
   temperature,
@@ -40,25 +58,37 @@ export const WeatherMarker: React.FC<WeatherMarkerProps> = ({
   ...props
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { zoom, semanticZoomThreshold } = useMapContext();
-  
-  const threshold = simplifyAtZoom ?? semanticZoomThreshold;
-  const shouldSimplify = threshold !== undefined && zoom < threshold;
+  const shouldSimplify = useMapSelector(
+    useCallback(
+      (s) => {
+        const threshold = simplifyAtZoom ?? s.semanticZoomThreshold;
+        return threshold !== undefined && s.zoom < threshold;
+      },
+      [simplifyAtZoom],
+    ),
+  );
+
   if (shouldSimplify) {
-    return <PinMarker lngLat={props.lngLat} color={conditionColors[condition]} size={24} showInnerCircle={true} />;
+    return (
+      <PinMarker
+        lngLat={props.lngLat}
+        color={conditionColors[condition]}
+        size={24}
+        showInnerCircle
+      />
+    );
   }
+
+  ensureFadeInStyle();
+  const hasForecast = !!hourlyForecast?.length;
 
   return (
     <Marker {...props}>
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        
-        {/* Main Badge */}
-        <div 
+        <div
           onClick={(e) => {
             e.stopPropagation();
-            if (hourlyForecast && hourlyForecast.length > 0) {
-              setIsExpanded(!isExpanded);
-            }
+            if (hasForecast) setIsExpanded((prev) => !prev);
           }}
           style={{
             background: 'white',
@@ -72,65 +102,50 @@ export const WeatherMarker: React.FC<WeatherMarkerProps> = ({
             fontWeight: 'bold',
             fontSize: '14px',
             whiteSpace: 'nowrap',
-            cursor: (hourlyForecast && hourlyForecast.length > 0) ? 'pointer' : 'default',
+            cursor: hasForecast ? 'pointer' : 'default',
             transition: 'all 0.2s ease',
             transform: isExpanded ? 'scale(1.05)' : 'scale(1)',
-            zIndex: isExpanded ? 10 : 1
-        }}>
+            zIndex: isExpanded ? 10 : 1,
+          }}
+        >
           <span style={{ fontSize: '16px' }}>{conditionIcons[condition]}</span>
           <span>{temperature}°C</span>
-          {hourlyForecast && hourlyForecast.length > 0 && (
+          {hasForecast && (
             <span style={{ fontSize: '10px', color: '#999', marginLeft: '2px' }}>
               {isExpanded ? '▲' : '▼'}
             </span>
           )}
         </div>
 
-        {/* Expanded Panel */}
-        {isExpanded && hourlyForecast && hourlyForecast.length > 0 && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            marginTop: '8px',
-            background: 'white',
-            borderRadius: '12px',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-            padding: '12px',
-            display: 'flex',
-            gap: '12px',
-            zIndex: 10,
-            cursor: 'default',
-            animation: 'fadeIn 0.2s ease'
-          }}>
-            {/* Simple CSS animation injected for the popover */}
-            <style>{`
-              @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(-10px); }
-                to { opacity: 1; transform: translateY(0); }
-              }
-            `}</style>
-            
-            {hourlyForecast.map((forecast, index) => (
-              <div key={index} style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                minWidth: '40px'
-              }}>
-                <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                  {forecast.time}
-                </div>
-                <div style={{ fontSize: '18px', marginBottom: '4px' }}>
-                  {conditionIcons[forecast.condition]}
-                </div>
-                <div style={{ fontSize: '13px', fontWeight: 'bold' }}>
-                  {forecast.temperature}°
-                </div>
+        {isExpanded && hasForecast && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '100%',
+              marginTop: '8px',
+              background: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+              padding: '12px',
+              display: 'flex',
+              gap: '12px',
+              zIndex: 10,
+              cursor: 'default',
+              animation: 'vworld-weather-fadeIn 0.2s ease',
+            }}
+          >
+            {hourlyForecast!.map((forecast, index) => (
+              <div
+                key={index}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: '40px' }}
+              >
+                <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>{forecast.time}</div>
+                <div style={{ fontSize: '18px', marginBottom: '4px' }}>{conditionIcons[forecast.condition]}</div>
+                <div style={{ fontSize: '13px', fontWeight: 'bold' }}>{forecast.temperature}°</div>
               </div>
             ))}
           </div>
         )}
-
       </div>
     </Marker>
   );

@@ -1,7 +1,9 @@
-import React from 'react';
-import { Marker, MarkerProps } from './Marker';
+'use client';
+
+import React, { useCallback } from 'react';
+import { Marker, type MarkerProps } from './Marker';
 import { PinMarker } from './PinMarker';
-import { useMapContext } from './VWorldMap';
+import { useMapSelector } from '../store/hooks';
 
 export interface PlaceMarkerProps extends Omit<MarkerProps, 'children'> {
   title: string;
@@ -9,6 +11,9 @@ export interface PlaceMarkerProps extends Omit<MarkerProps, 'children'> {
   category: string;
   photoUrl?: string;
   link?: string;
+  /** Link button label. @default 'View more' */
+  linkLabel?: string;
+  /** Below this zoom, replace the card with a {@link PinMarker}. */
   simplifyAtZoom?: number;
 }
 
@@ -18,12 +23,19 @@ export const PlaceMarker: React.FC<PlaceMarkerProps> = ({
   category,
   photoUrl,
   link,
+  linkLabel = 'View more',
   simplifyAtZoom,
   ...props
 }) => {
-  const { zoom, semanticZoomThreshold } = useMapContext();
-  const threshold = simplifyAtZoom ?? semanticZoomThreshold;
-  const shouldSimplify = threshold !== undefined && zoom < threshold;
+  const shouldSimplify = useMapSelector(
+    useCallback(
+      (s) => {
+        const threshold = simplifyAtZoom ?? s.semanticZoomThreshold;
+        return threshold !== undefined && s.zoom < threshold;
+      },
+      [simplifyAtZoom],
+    ),
+  );
 
   if (shouldSimplify) {
     return <PinMarker lngLat={props.lngLat} color="#333" size={24} showInnerCircle={false} />;
@@ -31,35 +43,50 @@ export const PlaceMarker: React.FC<PlaceMarkerProps> = ({
 
   return (
     <Marker {...props}>
-      <div style={{
-        background: 'white',
-        borderRadius: '8px',
-        overflow: 'hidden',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        width: '200px',
-        fontFamily: 'sans-serif',
-        cursor: 'default',
-        transform: 'translate(-50%, -100%)', // align bottom center to lngLat
-        marginTop: '-10px' // small offset
-      }}>
-        {/* Custom arrow pointing down */}
-        <div style={{
-          position: 'absolute',
-          bottom: '-8px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          borderWidth: '8px 8px 0',
-          borderStyle: 'solid',
-          borderColor: 'white transparent transparent transparent',
-          display: 'block',
-          width: 0,
-        }} />
-        
+      <div
+        style={{
+          background: 'white',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          width: '200px',
+          fontFamily: 'sans-serif',
+          cursor: 'default',
+          transform: 'translate(-50%, -100%)',
+          marginTop: '-10px',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '-8px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            borderWidth: '8px 8px 0',
+            borderStyle: 'solid',
+            borderColor: 'white transparent transparent transparent',
+            display: 'block',
+            width: 0,
+          }}
+        />
+
         {photoUrl && (
-          <img src={photoUrl} alt={title} style={{ width: '100%', height: '100px', objectFit: 'cover', display: 'block' }} />
+          <img
+            src={photoUrl}
+            alt={title}
+            style={{ width: '100%', height: '100px', objectFit: 'cover', display: 'block' }}
+          />
         )}
         <div style={{ padding: '12px' }}>
-          <div style={{ fontSize: '10px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>
+          <div
+            style={{
+              fontSize: '10px',
+              color: '#888',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              marginBottom: '4px',
+            }}
+          >
             {category}
           </div>
           <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '4px', color: '#333' }}>
@@ -69,8 +96,13 @@ export const PlaceMarker: React.FC<PlaceMarkerProps> = ({
             {description}
           </div>
           {link && (
-            <a href={link} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#0066cc', textDecoration: 'none', fontWeight: 'bold' }}>
-              더 보기 →
+            <a
+              href={link}
+              target="_blank"
+              rel="noreferrer"
+              style={{ fontSize: '12px', color: '#0066cc', textDecoration: 'none', fontWeight: 'bold' }}
+            >
+              {linkLabel} →
             </a>
           )}
         </div>
