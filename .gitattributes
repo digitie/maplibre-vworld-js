@@ -1,0 +1,3 @@
+# Force LF for built artifacts so the CI dist-drift check is stable across
+# Windows (CRLF) and Linux (LF) checkouts.
+dist/** text eol=lf

@@ -18,13 +18,14 @@ export default defineConfig({
       fileName: 'maplibre-vworld-js',
     },
     rollupOptions: {
-      // `react/jsx-runtime` is intentionally bundled (not externalized): UMD
-      // consumers cannot expose a `jsxRuntime` global, so externalizing breaks
-      // the UMD build path. The duplicate cost in ESM is a few hundred bytes.
+      // NOTE: `react/jsx-runtime` is intentionally bundled (not externalized).
+      // Externalizing it would force UMD consumers to expose a `jsxRuntime`
+      // global, which they cannot do, breaking the UMD build path. The duplicate
+      // cost in ESM is a few hundred bytes — acceptable tradeoff.
       //
-      // `zod` IS externalized: it's a declared peer dep, so consumers always
-      // have a copy. Externalizing avoids shipping a ~50 kB duplicate of
-      // zod v4 inside the consumer's final bundle.
+      // `zod` IS externalized: it's a declared peer dep, consumers must install
+      // it anyway, and externalizing avoids a ~50kB duplicate copy of zod v4 in
+      // the consumer's final bundle.
       external: ['react', 'react-dom', 'maplibre-gl', 'zod'],
       output: {
         globals: {
