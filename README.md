@@ -29,12 +29,16 @@
 ## 📦 설치 (Installation)
 
 ```bash
-npm install maplibre-vworld maplibre-gl zod
+npm install maplibre-vworld maplibre-gl 'zod@^3.25.76'
 # 또는
-yarn add maplibre-vworld maplibre-gl zod
+yarn add maplibre-vworld maplibre-gl 'zod@^3.25.76'
 ```
 
 `react`, `react-dom`, `maplibre-gl`, `zod`는 peer dependency입니다. React 애플리케이션에는 보통 `react`/`react-dom`이 이미 있으므로, 지도 엔진과 검증 스키마만 함께 설치하면 됩니다. GitHub 의존성으로 설치하는 경우에도 저장소에 커밋된 `dist/` 산출물을 사용하므로, 소비자 프로젝트에서 별도 빌드 스크립트를 실행할 필요가 없습니다.
+
+> **⚠️ zod 버전 주의**: 현재 이 라이브러리는 **zod v3** (`^3.25.76`)에 대해 빌드/테스트됩니다. 소비자 프로젝트가 zod v4를 사용하고 있다면 peer dependency 경고가 발생하고 schemas가 정상 동작하지 않을 수 있습니다. v4 지원은 추후 별도 메이저 릴리스에서 다룰 예정입니다.
+
+> **💡 apiKey 정규화**: `<VWorldMap apiKey={...} />`는 입력된 키의 앞뒤 공백/개행을 자동으로 제거하고 URL-encode합니다. 복사·붙여넣기 사고를 막기 위한 동작이지만, "왜 키가 다르게 보이지?"라고 디버깅할 때 참고하세요.
 
 ---
 
