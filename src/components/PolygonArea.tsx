@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useEffect } from 'react';
-import { useMap } from './VWorldMap';
+import { useMap } from '../store/hooks';
 
 /**
  * Props for the PolygonArea component.
@@ -57,7 +59,7 @@ export const PolygonArea: React.FC<PolygonAreaProps> = ({
   onMouseEnter,
   onMouseLeave
 }) => {
-  const { map } = useMap();
+  const map = useMap();
   const sourceId = `${id}-source`;
   const fillLayerId = `${id}-fill-layer`;
   const lineLayerId = `${id}-line-layer`;

@@ -1,7 +1,9 @@
-import React from 'react';
+'use client';
+
+import React, { useCallback } from 'react';
 import { Marker, MarkerProps } from './Marker';
 import { PinMarker } from './PinMarker';
-import { useMapContext } from './VWorldMap';
+import { useMapSelector } from '../store/hooks';
 
 export interface PlaceMarkerProps extends Omit<MarkerProps, 'children'> {
   title: string;
@@ -21,9 +23,17 @@ export const PlaceMarker: React.FC<PlaceMarkerProps> = ({
   simplifyAtZoom,
   ...props
 }) => {
-  const { zoom, semanticZoomThreshold } = useMapContext();
-  const threshold = simplifyAtZoom ?? semanticZoomThreshold;
-  const shouldSimplify = threshold !== undefined && zoom < threshold;
+  // Re-renders only when crossing the simplify threshold, not on every
+  // zoomend. See SimpleMarker for the rationale.
+  const shouldSimplify = useMapSelector(
+    useCallback(
+      (s) => {
+        const threshold = simplifyAtZoom ?? s.semanticZoomThreshold;
+        return threshold !== undefined && s.zoom < threshold;
+      },
+      [simplifyAtZoom]
+    )
+  );
 
   if (shouldSimplify) {
     return <PinMarker lngLat={props.lngLat} color="#333" size={24} showInnerCircle={false} />;

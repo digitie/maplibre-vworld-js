@@ -1,7 +1,11 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+'use client';
+
+import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { getVWorldMaxZoom, getVWorldStyle, redactVWorldUrl, VWorldLayerType } from '../vworld';
+import { MapStore } from '../store/mapStore';
+import { MapStoreProvider, useStableCallback } from '../store/hooks';
 
 /**
  * Reason the map could not be initialized, passed to the `fallback` render prop.
@@ -28,183 +32,71 @@ export interface VWorldMapErrorInfo {
   redactedUrl?: string;
 }
 
-/**
- * Props for the VWorldMap component.
- */
+/** Props for the VWorldMap component. */
 export interface VWorldMapProps {
   /**
-   * VWorld API Key for authentication. If empty/missing, the `fallback` is
-   * rendered instead of attempting to initialize MapLibre.
-   * @required
+   * VWorld API Key. Empty / whitespace renders the `fallback` instead of
+   * initializing MapLibre. @required
    */
   apiKey: string;
-  /**
-   * Type of the map layer to render.
-   * @default 'Base'
-   */
+  /** Map theme. @default 'Base' */
   layerType?: VWorldLayerType;
-  /**
-   * Initial center coordinates of the map [longitude, latitude].
-   * @default [127.024612, 37.532600]
-   */
+  /** Initial center [lng, lat]. @default [127.024612, 37.5326] */
   center?: [number, number];
-  /**
-   * Initial zoom level of the map.
-   * @default 12
-   */
+  /** Initial zoom. @default 12 */
   zoom?: number;
-  /**
-   * Minimum zoom level allowed.
-   * @default 6
-   */
+  /** @default 6 */
   minZoom?: number;
-  /**
-   * Maximum zoom level allowed.
-   * @default 19
-   */
+  /** @default 19 (Satellite/Hybrid auto-capped at 18) */
   maxZoom?: number;
-  /**
-   * Maximum bounds of the map (restrict panning outside this box).
-   * Format: [[minLng, minLat], [maxLng, maxLat]]
-   */
+  /** Max pan box `[[minLng, minLat], [maxLng, maxLat]]`. */
   maxBounds?: maplibregl.LngLatBoundsLike;
   /**
-   * Global threshold for semantic zoom.
-   * Markers can use this to simplify themselves when the map is zoomed out below this value.
+   * Global zoom threshold for semantic-zoom markers (SimpleMarker etc.).
+   * Markers re-render only when crossing this threshold, not on every zoomend.
    */
   semanticZoomThreshold?: number;
-  /**
-   * Show navigation controls (zoom in/out, compass).
-   * @default true
-   */
+  /** @default true */
   showNavigationControl?: boolean;
-  /**
-   * Show geolocate control to track user's current location.
-   * @default true
-   */
+  /** @default true */
   showGeolocateControl?: boolean;
-  /**
-   * Show the scale bar control on the bottom right.
-   * @default true
-   */
+  /** @default true */
   showScaleControl?: boolean;
-  /**
-   * Custom CSS class name for the map container.
-   */
   className?: string;
-  /**
-   * Custom CSS styles for the map container.
-   * @default { width: '100%', height: '100%' }
-   */
+  /** @default { width: '100%', height: '100%' } */
   style?: React.CSSProperties;
-  /**
-   * Child elements such as Markers, Clusters, and Lines.
-   */
   children?: React.ReactNode;
-  /**
-   * Callback fired when the map is fully loaded.
-   */
+  /** Called once with the MapLibre instance after `load`. */
   onMapLoad?: (map: maplibregl.Map) => void;
   /**
-   * Click handler for the map. Receives the native MapLibre `MapMouseEvent`.
-   * Read `e.lngLat.lng` / `e.lngLat.lat` for coordinates. The latest version
-   * of the handler is always invoked even if `onMapClick` changes between
-   * renders (the map is not re-created).
+   * Map background click. Read `e.lngLat.lng` / `.lat` for coordinates.
+   * Registered with a stable identity (useStableCallback) — prop changes
+   * never re-create the map.
    */
   onMapClick?: (e: maplibregl.MapMouseEvent) => void;
   /**
-   * Handler for MapLibre `error` events (failed tile fetches, style errors,
-   * WebGL warnings). The event is wrapped with a running count, a
-   * `thresholdReached` flag, and a redacted URL so it can be logged safely.
-   *
-   * If omitted, errors are logged via `console.warn` (also with the URL
-   * redacted) so the page does not spam the network panel silently.
+   * Wrapped MapLibre `error` handler. Receives running `count`,
+   * `thresholdReached` flag, and a **redacted** tile URL. Default logs to
+   * `console.warn` with the key already masked.
    */
   onMapError?: (e: VWorldMapErrorInfo) => void;
-  /**
-   * Number of MapLibre `error` events after which `onMapError` is called with
-   * `thresholdReached: true`. Useful for debug UIs that want to swap to a
-   * fallback or surface a warning banner only after sustained failure.
-   * @default Infinity
-   */
+  /** Error count that flips `onMapError.thresholdReached` to true. @default Infinity */
   tileErrorThreshold?: number;
-  /**
-   * A callback run before the Map makes a request for an external URL.
-   * Useful for handling CORS, adding authentication headers, or rewriting URLs to a proxy server.
-   */
+  /** MapLibre `transformRequest` for proxies / auth headers. */
   transformRequest?: maplibregl.RequestTransformFunction;
   /**
-   * Rendered instead of the map when the map cannot be initialized:
-   * - `apiKey` is empty/whitespace-only (`reason: 'missing-api-key'`)
-   * - the MapLibre constructor throws, e.g. no WebGL (`reason: 'map-init-error'`)
-   *
-   * Accepts a React node or a render function that receives a
-   * {@link VWorldMapFallbackInfo}. Useful for keeping the page layout intact
-   * when the VWorld API key is missing in CI / on-prem environments.
+   * Replaces the map when init fails (missing key or no WebGL). Accepts a
+   * ReactNode or a render fn receiving `{ reason, error? }`.
    */
   fallback?: React.ReactNode | ((info: VWorldMapFallbackInfo) => React.ReactNode);
-  /**
-   * Rendered as an overlay while the map is initializing (before MapLibre
-   * fires its `load` event). Defaults to nothing.
-   */
+  /** Rendered as overlay until MapLibre fires `load`. */
   loadingSkeleton?: React.ReactNode;
   /**
-   * If `false`, programmatic `center`/`zoom` prop changes use `jumpTo`
-   * (instant) instead of `flyTo` (animated). Useful for "click to recenter"
-   * debug UIs where animation would disorient the user.
-   * @default true
+   * When `false`, programmatic `center`/`zoom` prop changes use `jumpTo`
+   * (instant). @default true
    */
   animateCameraChanges?: boolean;
 }
-
-/**
- * Stable per-mount context: the MapLibre instance handle and configuration
- * that only changes on map mount/unmount. Markers that just need to register
- * sources/layers subscribe here and DO NOT re-render on zoom changes.
- */
-interface MapInstanceContextType {
-  map: maplibregl.Map | null;
-  semanticZoomThreshold?: number;
-}
-
-/**
- * Volatile context: the current map zoom level, updated on every `zoomend`.
- * Kept separate so that semantic-zoom-aware markers can subscribe without
- * forcing the entire marker tree to re-render on zoom.
- */
-const MapInstanceContext = createContext<MapInstanceContextType>({ map: null });
-const MapZoomContext = createContext<number>(12);
-
-/**
- * Returns the map instance + global semantic zoom threshold.
- *
- * Subscribes to the STABLE instance context only — components using only
- * `useMap()` will NOT re-render on `zoomend`. If you need the live zoom,
- * use {@link useMapZoom} or {@link useMapContext}.
- *
- * NOTE (breaking from <1.0): `useMap()` no longer returns a `zoom` field.
- * Read zoom from `useMapZoom()` instead. This split lets markers that only
- * need the map handle (e.g. the bundled <Marker>, <PolygonArea>,
- * <RouteLine>, <MarkerClusterer>) skip re-rendering on every camera change.
- */
-export const useMap = () => useContext(MapInstanceContext);
-
-/**
- * Returns the current map zoom level. Re-renders the consumer on `zoomend`.
- * Useful for semantic zooming (e.g. degrading marker quality at low zooms).
- */
-export const useMapZoom = () => useContext(MapZoomContext);
-
-/**
- * Returns the merged shape `{ map, zoom, semanticZoomThreshold }`. Consumes
- * BOTH contexts and therefore re-renders on every `zoomend`. Use only when
- * the component genuinely needs zoom — otherwise prefer `useMap()`.
- */
-export const useMapContext = () => {
-  const instance = useContext(MapInstanceContext);
-  const zoom = useContext(MapZoomContext);
-  return { ...instance, zoom };
-};
 
 function renderFallback(
   fallback: VWorldMapProps['fallback'],
@@ -217,7 +109,7 @@ function renderFallback(
 
 function extractErrorUrl(event: maplibregl.ErrorEvent): string | undefined {
   // MapLibre attaches the failing URL on different shapes depending on origin
-  // (tile loader vs style loader vs ajax helper). Check the common paths.
+  // (tile loader vs style loader vs ajax helper). Try the common paths.
   const candidates: unknown[] = [
     (event as unknown as { error?: { url?: unknown } }).error?.url,
     (event as unknown as { url?: unknown }).url,
@@ -230,18 +122,19 @@ function extractErrorUrl(event: maplibregl.ErrorEvent): string | undefined {
 }
 
 /**
- * The base map component that initializes MapLibre GL JS with VWorld maps.
- * It provides a MapContext to all child components.
+ * Top-level MapLibre + VWorld map. Provides a MapStore that child components
+ * subscribe to via fine-grained selectors (`useMap`, `useMapZoom`,
+ * `useMapSelector`) — only consumers whose selected slice changed re-render.
  *
  * @example
- * <VWorldMap apiKey="YOUR_KEY">
- *   <Marker lngLat={[127.0, 37.0]} />
- * </VWorldMap>
+ *   <VWorldMap apiKey={KEY}>
+ *     <Marker lngLat={[127, 37]} />
+ *   </VWorldMap>
  */
 export const VWorldMap: React.FC<VWorldMapProps> = ({
   apiKey,
   layerType = 'Base',
-  center = [127.024612, 37.532600], // Default center (Seoul)
+  center = [127.024612, 37.532600],
   zoom = 12,
   minZoom = 6,
   maxZoom = 19,
@@ -264,34 +157,57 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
-  const [currentZoom, setCurrentZoom] = useState(zoom);
   const [initError, setInitError] = useState<Error | null>(null);
 
-  // Stable refs for handlers so prop changes don't tear down the map.
-  // Collapsed into a single effect — three writes are cheaper than three
-  // useEffect bookkeeping entries, and the refs are read together at click /
-  // error time anyway.
-  const onMapClickRef = useRef(onMapClick);
-  const onMapErrorRef = useRef(onMapError);
+  // ────────────────────────────────────────────────────────────────────────
+  // Map store — created once, lives outside React reconciliation.
+  // ────────────────────────────────────────────────────────────────────────
+  const storeRef = useRef<MapStore | null>(null);
+  if (storeRef.current === null) {
+    storeRef.current = new MapStore({
+      zoom,
+      semanticZoomThreshold,
+    });
+  }
+  const store = storeRef.current;
+
+  // Push semanticZoomThreshold prop changes into the store. Cheap no-op when
+  // unchanged thanks to the store's internal equality check.
+  useEffect(() => {
+    store.setSemanticZoomThreshold(semanticZoomThreshold);
+  }, [store, semanticZoomThreshold]);
+
+  // ────────────────────────────────────────────────────────────────────────
+  // Stable callbacks — handler identity is fixed for the lifetime of the
+  // component, but the body always uses the latest prop value. This is what
+  // lets us register MapLibre listeners ONCE per mount without ever needing
+  // to re-attach when consumer callbacks change.
+  // ────────────────────────────────────────────────────────────────────────
+  const stableMapClick = useStableCallback(onMapClick);
+  const stableMapError = useStableCallback(onMapError);
+  const stableMapLoad = useStableCallback(onMapLoad);
+  // tileErrorThreshold is a number, not a callback — but we need the latest
+  // value inside the error handler. Use a ref + sync in a layout effect.
   const tileErrorThresholdRef = useRef(tileErrorThreshold);
   useEffect(() => {
-    onMapClickRef.current = onMapClick;
-    onMapErrorRef.current = onMapError;
     tileErrorThresholdRef.current = tileErrorThreshold;
-  }, [onMapClick, onMapError, tileErrorThreshold]);
+  }, [tileErrorThreshold]);
 
   const hasApiKey = typeof apiKey === 'string' && apiKey.trim().length > 0;
   const shouldMountMap = hasApiKey && initError === null;
 
-  // Give the map another shot when the consumer rotates the key or switches
-  // layers. A terminal failure (e.g. no WebGL) will re-trip immediately, so
-  // this is safe — at worst it costs one re-render. Without this, a brief
-  // misconfiguration sticks the component in fallback until full remount.
+  // Clear init error on key/layer rotation so the consumer can recover from
+  // a transient misconfig without forcing a remount.
   useEffect(() => {
     setInitError(null);
   }, [apiKey, layerType]);
 
+  // ────────────────────────────────────────────────────────────────────────
+  // Map lifecycle — mount once per (apiKey × layerType × initError-cleared)
+  // window. Lying about deps on purpose: the rest of the props are applied
+  // via separate effects (style, camera, bounds) so the map is never torn
+  // down for trivial changes.
+  // ────────────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!shouldMountMap) return;
     if (!mapContainerRef.current) return;
@@ -316,11 +232,11 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
     }
 
     mapRef.current = map;
+    store.setMap(map);
 
     if (showNavigationControl) {
       map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), 'top-right');
     }
-
     if (showGeolocateControl) {
       map.addControl(
         new maplibregl.GeolocateControl({
@@ -330,52 +246,41 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
         'top-right'
       );
     }
-
     if (showScaleControl) {
-      map.addControl(
-        new maplibregl.ScaleControl({
-          maxWidth: 150,
-          unit: 'metric',
-        }),
-        'bottom-right'
-      );
+      map.addControl(new maplibregl.ScaleControl({ maxWidth: 150, unit: 'metric' }), 'bottom-right');
     }
 
     const handleLoad = () => {
-      setMapLoaded(true);
-      setCurrentZoom(map.getZoom());
-      if (onMapLoad) {
-        onMapLoad(map);
-      }
+      store.setMapLoaded(true);
+      store.setZoom(map.getZoom());
+      stableMapLoad(map);
     };
     const handleZoomEnd = () => {
-      setCurrentZoom(map.getZoom());
+      store.setZoom(map.getZoom());
     };
     const handleClick = (e: maplibregl.MapMouseEvent) => {
-      onMapClickRef.current?.(e);
+      stableMapClick(e);
     };
     let errorCount = 0;
     const handleError = (event: maplibregl.ErrorEvent) => {
       errorCount += 1;
       const threshold = tileErrorThresholdRef.current;
-      const thresholdReached =
-        Number.isFinite(threshold) && errorCount === threshold;
+      const thresholdReached = Number.isFinite(threshold) && errorCount === threshold;
       const url = extractErrorUrl(event);
       const redactedUrl = url ? redactVWorldUrl(url) : undefined;
-      const handler = onMapErrorRef.current;
-      if (handler) {
-        handler({ event, count: errorCount, thresholdReached, redactedUrl });
+      // Empty-by-default useStableCallback returns a no-op when no handler
+      // is provided. So we can't tell "no handler" from "handler present" via
+      // identity. Use the prop directly via a ref-style probe — onMapError is
+      // captured at this useEffect's lifetime; for "default behavior when
+      // unset" we check the latest user handler via stableMapError, which is
+      // a no-op for undefined inputs.
+      if (onMapError) {
+        stableMapError({ event, count: errorCount, thresholdReached, redactedUrl });
       } else {
-        // Default: log without leaking the API key. Throttle the message at
-        // the threshold so consumers still notice sustained failure.
         const message =
-          (event as unknown as { error?: { message?: string } }).error?.message ??
-          'unknown error';
+          (event as unknown as { error?: { message?: string } }).error?.message ?? 'unknown error';
         if (thresholdReached) {
-          console.warn(
-            `[VWorldMap] map error count reached ${errorCount}: ${message}`,
-            redactedUrl ?? ''
-          );
+          console.warn(`[VWorldMap] error count reached ${errorCount}: ${message}`, redactedUrl ?? '');
         } else if (errorCount === 1) {
           console.warn(`[VWorldMap] map error: ${message}`, redactedUrl ?? '');
         }
@@ -387,10 +292,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
     map.on('click', handleClick);
     map.on('error', handleError);
 
-    // Handle resize for mobile responsiveness
-    const resizeObserver = new ResizeObserver(() => {
-      map.resize();
-    });
+    const resizeObserver = new ResizeObserver(() => map.resize());
     resizeObserver.observe(mapContainerRef.current);
 
     return () => {
@@ -401,80 +303,98 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       map.off('error', handleError);
       map.remove();
       mapRef.current = null;
+      store.setMap(null);
+      store.setMapLoaded(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [shouldMountMap]); // Initialize only once per mount session
+  }, [shouldMountMap]);
 
-  // Update style when layerType or apiKey changes
+  // ────────────────────────────────────────────────────────────────────────
+  // Style switch — much cheaper than remounting the map.
+  // ────────────────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (mapLoaded && mapRef.current) {
-      mapRef.current.setStyle(getVWorldStyle(apiKey, layerType));
-    }
-  }, [apiKey, layerType, mapLoaded]);
+    const map = mapRef.current;
+    if (!map || !shouldMountMap) return;
+    map.setStyle(getVWorldStyle(apiKey, layerType));
+  }, [apiKey, layerType, shouldMountMap]);
 
-  // Update center and zoom
+  // ────────────────────────────────────────────────────────────────────────
+  // Camera updates with prev-value gating, so inline array props from the
+  // consumer ([127, 37] re-created each render) don't trigger flyTo unless
+  // the actual coordinates changed.
+  // ────────────────────────────────────────────────────────────────────────
   const prevCenter = useRef(center);
   const prevZoom = useRef(zoom);
-
   useEffect(() => {
-    if (mapLoaded && mapRef.current) {
-      const centerChanged = center && (!prevCenter.current || prevCenter.current[0] !== center[0] || prevCenter.current[1] !== center[1]);
-      const zoomChanged = zoom !== undefined && prevZoom.current !== zoom;
-
-      if (centerChanged || zoomChanged) {
-        if (animateCameraChanges) {
-          mapRef.current.flyTo({ center, zoom });
-        } else {
-          mapRef.current.jumpTo({ center, zoom });
-        }
+    const map = mapRef.current;
+    if (!map) return;
+    const centerChanged =
+      !prevCenter.current ||
+      prevCenter.current[0] !== center[0] ||
+      prevCenter.current[1] !== center[1];
+    const zoomChanged = prevZoom.current !== zoom;
+    if (centerChanged || zoomChanged) {
+      if (animateCameraChanges) {
+        map.flyTo({ center, zoom });
+      } else {
+        map.jumpTo({ center, zoom });
       }
-
-      prevCenter.current = center;
-      prevZoom.current = zoom;
     }
+    prevCenter.current = center;
+    prevZoom.current = zoom;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [center, zoom, animateCameraChanges]);
+  }, [center[0], center[1], zoom, animateCameraChanges]);
 
-  // Update minZoom, maxZoom, and maxBounds dynamically
+  // ────────────────────────────────────────────────────────────────────────
+  // Bounds / zoom limits — cheap maplibre setters, no remount.
+  // ────────────────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (mapLoaded && mapRef.current) {
-      if (minZoom !== undefined) mapRef.current.setMinZoom(minZoom);
-      if (maxZoom !== undefined) mapRef.current.setMaxZoom(Math.min(maxZoom, getVWorldMaxZoom(layerType)));
-      if (maxBounds !== undefined) mapRef.current.setMaxBounds(maxBounds);
-    }
-  }, [layerType, minZoom, maxZoom, maxBounds, mapLoaded]);
+    const map = mapRef.current;
+    if (!map) return;
+    map.setMinZoom(minZoom);
+    map.setMaxZoom(Math.min(maxZoom, getVWorldMaxZoom(layerType)));
+    if (maxBounds !== undefined) map.setMaxBounds(maxBounds);
+  }, [layerType, minZoom, maxZoom, maxBounds]);
 
-  // Compute fallback info from current state.
+  // ────────────────────────────────────────────────────────────────────────
+  // Render.  Container is always in the tree when a map is mounting, so
+  // MapLibre can attach to it.  Fallback replaces the container only when
+  // we deliberately won't mount.
+  // ────────────────────────────────────────────────────────────────────────
   const fallbackInfo: VWorldMapFallbackInfo | null = !hasApiKey
     ? { reason: 'missing-api-key' }
     : initError
     ? { reason: 'map-init-error', error: initError }
     : null;
 
-  // Memoize the stable instance context so parent re-renders don't churn
-  // every consumer. `mapRef.current` flips from null to a real instance once
-  // `mapLoaded` becomes true, and stays stable afterwards — so we depend on
-  // mapLoaded (a state proxy for "mapRef is populated") plus the threshold
-  // prop. Zoom changes do NOT rebuild this object.
-  const mapInstanceValue = useMemo<MapInstanceContextType>(
-    () => ({ map: mapRef.current, semanticZoomThreshold }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mapLoaded, semanticZoomThreshold]
+  // Subscribe to mapLoaded from our own store for the children gate. We
+  // can't call useMapLoaded() here — that hook reads context, and *we* are
+  // the provider, so subscribing through context would race the first render.
+  const mapLoaded = useSyncExternalStore(
+    store.subscribe,
+    () => store.getSnapshot().mapLoaded,
+    () => false
   );
 
+  // The provider value is the store itself — its identity is stable for the
+  // lifetime of the component (useRef + first-render init). No memoization
+  // needed.
   return (
-    <MapInstanceContext.Provider value={mapInstanceValue}>
-      <MapZoomContext.Provider value={currentZoom}>
-        {fallbackInfo ? (
-          renderFallback(fallback, fallbackInfo)
-        ) : (
-          <>
-            <div ref={mapContainerRef} className={className} style={style} data-testid="vworld-map-container" />
-            {!mapLoaded && loadingSkeleton}
-            {mapLoaded && children}
-          </>
-        )}
-      </MapZoomContext.Provider>
-    </MapInstanceContext.Provider>
+    <MapStoreProvider value={store}>
+      {fallbackInfo ? (
+        renderFallback(fallback, fallbackInfo)
+      ) : (
+        <>
+          <div
+            ref={mapContainerRef}
+            className={className}
+            style={style}
+            data-testid="vworld-map-container"
+          />
+          {!mapLoaded && loadingSkeleton}
+          {mapLoaded && children}
+        </>
+      )}
+    </MapStoreProvider>
   );
 };

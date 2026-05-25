@@ -1,7 +1,9 @@
-import React from 'react';
+'use client';
+
+import React, { useCallback } from 'react';
 import { Marker, MarkerProps } from './Marker';
 import { PinMarker } from './PinMarker';
-import { useMapContext } from './VWorldMap';
+import { useMapSelector } from '../store/hooks';
 
 export interface SimpleMarkerProps extends Omit<MarkerProps, 'children'> {
   label: string;
@@ -17,9 +19,18 @@ export const SimpleMarker: React.FC<SimpleMarkerProps> = ({
   simplifyAtZoom,
   ...props
 }) => {
-  const { zoom, semanticZoomThreshold } = useMapContext();
-  const threshold = simplifyAtZoom ?? semanticZoomThreshold;
-  const shouldSimplify = threshold !== undefined && zoom < threshold;
+  // Selector computes the boolean directly — the component re-renders only
+  // when crossing the threshold, NOT on every zoomend. With N markers and M
+  // zoom events, this is N*M wasted renders avoided.
+  const shouldSimplify = useMapSelector(
+    useCallback(
+      (s) => {
+        const threshold = simplifyAtZoom ?? s.semanticZoomThreshold;
+        return threshold !== undefined && s.zoom < threshold;
+      },
+      [simplifyAtZoom]
+    )
+  );
 
   if (shouldSimplify) {
     return <PinMarker lngLat={props.lngLat} color={bgColor} size={20} showInnerCircle={false} />;

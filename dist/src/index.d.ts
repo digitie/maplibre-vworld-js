@@ -1,6 +1,7 @@
 export * from './vworld';
-export type { VWorldMapFallbackInfo, VWorldMapErrorInfo, } from './components/VWorldMap';
-export * from './components/VWorldMap';
+export * from './store';
+export type { VWorldMapFallbackInfo, VWorldMapErrorInfo, VWorldMapProps, } from './components/VWorldMap';
+export { VWorldMap } from './components/VWorldMap';
 export * from './components/Marker';
 export * from './components/WeatherMarker';
 export * from './components/PlaceMarker';

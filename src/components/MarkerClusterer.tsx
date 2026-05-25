@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+'use client';
+
+import React, { useEffect, useMemo, useState } from 'react';
 import useSupercluster from 'use-supercluster';
-import { useMap } from './VWorldMap';
+import { useMap } from '../store/hooks';
 import { ClusterMarker } from './ClusterMarker';
 
 export interface PointFeature {
@@ -69,7 +71,7 @@ export const MarkerClusterer: React.FC<MarkerClustererProps> = ({
   radius = 50, // Reduced from 75: points must be closer to cluster, so they break apart easier
   maxZoom = 16 // Reduced from 20: stop clustering entirely when zoomed past 16
 }) => {
-  const { map } = useMap();
+  const map = useMap();
   const [bounds, setBounds] = useState<[number, number, number, number] | null>(null);
   const [zoom, setZoom] = useState<number>(12);
 
@@ -101,18 +103,24 @@ export const MarkerClusterer: React.FC<MarkerClustererProps> = ({
     };
   }, [map]);
 
-  // Convert raw points to GeoJSON features for supercluster
-  const features: PointFeature[] = points.map(point => ({
-    type: 'Feature',
-    properties: {
-      cluster: false,
-      ...point
-    },
-    geometry: {
-      type: 'Point',
-      coordinates: point.lngLat
-    }
-  }));
+  // Convert raw points to GeoJSON features for supercluster. Memoized on
+  // `points` identity — consumers should pass a stable / referentially-equal
+  // array (typical pattern: useMemo in the parent).
+  const features: PointFeature[] = useMemo(
+    () =>
+      points.map((point) => ({
+        type: 'Feature' as const,
+        properties: {
+          cluster: false,
+          ...point,
+        },
+        geometry: {
+          type: 'Point' as const,
+          coordinates: point.lngLat,
+        },
+      })),
+    [points]
+  );
 
   const { clusters, supercluster } = useSupercluster({
     points: features,

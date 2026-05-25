@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useEffect } from 'react';
-import { useMap } from './VWorldMap';
+import { useMap } from '../store/hooks';
 
 /**
  * Props for the RouteLine component.
@@ -63,7 +65,7 @@ export const RouteLine: React.FC<RouteLineProps> = ({
   onMouseEnter,
   onMouseLeave
 }) => {
-  const { map } = useMap();
+  const map = useMap();
   const sourceId = `${id}-source`;
   const layerId = `${id}-layer`;
 

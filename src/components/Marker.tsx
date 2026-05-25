@@ -1,7 +1,9 @@
+'use client';
+
 import React, { useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import maplibregl from 'maplibre-gl';
-import { useMap } from './VWorldMap';
+import { useMap } from '../store/hooks';
 
 export interface MarkerProps {
   lngLat: [number, number];
@@ -18,7 +20,7 @@ export const Marker: React.FC<MarkerProps> = ({
   onDragEnd,
   children,
 }) => {
-  const { map } = useMap();
+  const map = useMap();
   const markerRef = useRef<maplibregl.Marker | null>(null);
 
   // Create a container element for the portal

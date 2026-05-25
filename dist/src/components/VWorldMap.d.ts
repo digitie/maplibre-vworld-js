@@ -24,179 +24,79 @@ export interface VWorldMapErrorInfo {
     /** Tile URL with the API key redacted, when one can be extracted. */
     redactedUrl?: string;
 }
-/**
- * Props for the VWorldMap component.
- */
+/** Props for the VWorldMap component. */
 export interface VWorldMapProps {
     /**
-     * VWorld API Key for authentication. If empty/missing, the `fallback` is
-     * rendered instead of attempting to initialize MapLibre.
-     * @required
+     * VWorld API Key. Empty / whitespace renders the `fallback` instead of
+     * initializing MapLibre. @required
      */
     apiKey: string;
-    /**
-     * Type of the map layer to render.
-     * @default 'Base'
-     */
+    /** Map theme. @default 'Base' */
     layerType?: VWorldLayerType;
-    /**
-     * Initial center coordinates of the map [longitude, latitude].
-     * @default [127.024612, 37.532600]
-     */
+    /** Initial center [lng, lat]. @default [127.024612, 37.5326] */
     center?: [number, number];
-    /**
-     * Initial zoom level of the map.
-     * @default 12
-     */
+    /** Initial zoom. @default 12 */
     zoom?: number;
-    /**
-     * Minimum zoom level allowed.
-     * @default 6
-     */
+    /** @default 6 */
     minZoom?: number;
-    /**
-     * Maximum zoom level allowed.
-     * @default 19
-     */
+    /** @default 19 (Satellite/Hybrid auto-capped at 18) */
     maxZoom?: number;
-    /**
-     * Maximum bounds of the map (restrict panning outside this box).
-     * Format: [[minLng, minLat], [maxLng, maxLat]]
-     */
+    /** Max pan box `[[minLng, minLat], [maxLng, maxLat]]`. */
     maxBounds?: maplibregl.LngLatBoundsLike;
     /**
-     * Global threshold for semantic zoom.
-     * Markers can use this to simplify themselves when the map is zoomed out below this value.
+     * Global zoom threshold for semantic-zoom markers (SimpleMarker etc.).
+     * Markers re-render only when crossing this threshold, not on every zoomend.
      */
     semanticZoomThreshold?: number;
-    /**
-     * Show navigation controls (zoom in/out, compass).
-     * @default true
-     */
+    /** @default true */
     showNavigationControl?: boolean;
-    /**
-     * Show geolocate control to track user's current location.
-     * @default true
-     */
+    /** @default true */
     showGeolocateControl?: boolean;
-    /**
-     * Show the scale bar control on the bottom right.
-     * @default true
-     */
+    /** @default true */
     showScaleControl?: boolean;
-    /**
-     * Custom CSS class name for the map container.
-     */
     className?: string;
-    /**
-     * Custom CSS styles for the map container.
-     * @default { width: '100%', height: '100%' }
-     */
+    /** @default { width: '100%', height: '100%' } */
     style?: React.CSSProperties;
-    /**
-     * Child elements such as Markers, Clusters, and Lines.
-     */
     children?: React.ReactNode;
-    /**
-     * Callback fired when the map is fully loaded.
-     */
+    /** Called once with the MapLibre instance after `load`. */
     onMapLoad?: (map: maplibregl.Map) => void;
     /**
-     * Click handler for the map. Receives the native MapLibre `MapMouseEvent`.
-     * Read `e.lngLat.lng` / `e.lngLat.lat` for coordinates. The latest version
-     * of the handler is always invoked even if `onMapClick` changes between
-     * renders (the map is not re-created).
+     * Map background click. Read `e.lngLat.lng` / `.lat` for coordinates.
+     * Registered with a stable identity (useStableCallback) — prop changes
+     * never re-create the map.
      */
     onMapClick?: (e: maplibregl.MapMouseEvent) => void;
     /**
-     * Handler for MapLibre `error` events (failed tile fetches, style errors,
-     * WebGL warnings). The event is wrapped with a running count, a
-     * `thresholdReached` flag, and a redacted URL so it can be logged safely.
-     *
-     * If omitted, errors are logged via `console.warn` (also with the URL
-     * redacted) so the page does not spam the network panel silently.
+     * Wrapped MapLibre `error` handler. Receives running `count`,
+     * `thresholdReached` flag, and a **redacted** tile URL. Default logs to
+     * `console.warn` with the key already masked.
      */
     onMapError?: (e: VWorldMapErrorInfo) => void;
-    /**
-     * Number of MapLibre `error` events after which `onMapError` is called with
-     * `thresholdReached: true`. Useful for debug UIs that want to swap to a
-     * fallback or surface a warning banner only after sustained failure.
-     * @default Infinity
-     */
+    /** Error count that flips `onMapError.thresholdReached` to true. @default Infinity */
     tileErrorThreshold?: number;
-    /**
-     * A callback run before the Map makes a request for an external URL.
-     * Useful for handling CORS, adding authentication headers, or rewriting URLs to a proxy server.
-     */
+    /** MapLibre `transformRequest` for proxies / auth headers. */
     transformRequest?: maplibregl.RequestTransformFunction;
     /**
-     * Rendered instead of the map when the map cannot be initialized:
-     * - `apiKey` is empty/whitespace-only (`reason: 'missing-api-key'`)
-     * - the MapLibre constructor throws, e.g. no WebGL (`reason: 'map-init-error'`)
-     *
-     * Accepts a React node or a render function that receives a
-     * {@link VWorldMapFallbackInfo}. Useful for keeping the page layout intact
-     * when the VWorld API key is missing in CI / on-prem environments.
+     * Replaces the map when init fails (missing key or no WebGL). Accepts a
+     * ReactNode or a render fn receiving `{ reason, error? }`.
      */
     fallback?: React.ReactNode | ((info: VWorldMapFallbackInfo) => React.ReactNode);
-    /**
-     * Rendered as an overlay while the map is initializing (before MapLibre
-     * fires its `load` event). Defaults to nothing.
-     */
+    /** Rendered as overlay until MapLibre fires `load`. */
     loadingSkeleton?: React.ReactNode;
     /**
-     * If `false`, programmatic `center`/`zoom` prop changes use `jumpTo`
-     * (instant) instead of `flyTo` (animated). Useful for "click to recenter"
-     * debug UIs where animation would disorient the user.
-     * @default true
+     * When `false`, programmatic `center`/`zoom` prop changes use `jumpTo`
+     * (instant). @default true
      */
     animateCameraChanges?: boolean;
 }
 /**
- * Stable per-mount context: the MapLibre instance handle and configuration
- * that only changes on map mount/unmount. Markers that just need to register
- * sources/layers subscribe here and DO NOT re-render on zoom changes.
- */
-interface MapInstanceContextType {
-    map: maplibregl.Map | null;
-    semanticZoomThreshold?: number;
-}
-/**
- * Returns the map instance + global semantic zoom threshold.
- *
- * Subscribes to the STABLE instance context only — components using only
- * `useMap()` will NOT re-render on `zoomend`. If you need the live zoom,
- * use {@link useMapZoom} or {@link useMapContext}.
- *
- * NOTE (breaking from <1.0): `useMap()` no longer returns a `zoom` field.
- * Read zoom from `useMapZoom()` instead. This split lets markers that only
- * need the map handle (e.g. the bundled <Marker>, <PolygonArea>,
- * <RouteLine>, <MarkerClusterer>) skip re-rendering on every camera change.
- */
-export declare const useMap: () => MapInstanceContextType;
-/**
- * Returns the current map zoom level. Re-renders the consumer on `zoomend`.
- * Useful for semantic zooming (e.g. degrading marker quality at low zooms).
- */
-export declare const useMapZoom: () => number;
-/**
- * Returns the merged shape `{ map, zoom, semanticZoomThreshold }`. Consumes
- * BOTH contexts and therefore re-renders on every `zoomend`. Use only when
- * the component genuinely needs zoom — otherwise prefer `useMap()`.
- */
-export declare const useMapContext: () => {
-    zoom: number;
-    map: maplibregl.Map | null;
-    semanticZoomThreshold?: number;
-};
-/**
- * The base map component that initializes MapLibre GL JS with VWorld maps.
- * It provides a MapContext to all child components.
+ * Top-level MapLibre + VWorld map. Provides a MapStore that child components
+ * subscribe to via fine-grained selectors (`useMap`, `useMapZoom`,
+ * `useMapSelector`) — only consumers whose selected slice changed re-render.
  *
  * @example
- * <VWorldMap apiKey="YOUR_KEY">
- *   <Marker lngLat={[127.0, 37.0]} />
- * </VWorldMap>
+ *   <VWorldMap apiKey={KEY}>
+ *     <Marker lngLat={[127, 37]} />
+ *   </VWorldMap>
  */
 export declare const VWorldMap: React.FC<VWorldMapProps>;
-export {};

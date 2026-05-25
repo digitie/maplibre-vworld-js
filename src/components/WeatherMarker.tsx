@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+'use client';
+
+import React, { useCallback, useState } from 'react';
 import { Marker, MarkerProps } from './Marker';
 import { PinMarker } from './PinMarker';
-import { useMapContext } from './VWorldMap';
+import { useMapSelector } from '../store/hooks';
 
 export type WeatherCondition = 'sunny' | 'cloudy' | 'rainy' | 'snowy';
 
@@ -40,10 +42,17 @@ export const WeatherMarker: React.FC<WeatherMarkerProps> = ({
   ...props
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { zoom, semanticZoomThreshold } = useMapContext();
-  
-  const threshold = simplifyAtZoom ?? semanticZoomThreshold;
-  const shouldSimplify = threshold !== undefined && zoom < threshold;
+  // Re-renders only when crossing the simplify threshold, not on every
+  // zoomend. See SimpleMarker for the rationale.
+  const shouldSimplify = useMapSelector(
+    useCallback(
+      (s) => {
+        const threshold = simplifyAtZoom ?? s.semanticZoomThreshold;
+        return threshold !== undefined && s.zoom < threshold;
+      },
+      [simplifyAtZoom]
+    )
+  );
   if (shouldSimplify) {
     return <PinMarker lngLat={props.lngLat} color={conditionColors[condition]} size={24} showInnerCircle={true} />;
   }
