@@ -4,7 +4,6 @@ import {
   getVWorldStyle,
   getVWorldTileUrl,
   isVWorldTileError,
-  redactVWorldTileUrl,
   redactVWorldUrl,
 } from '../src/vworld';
 
@@ -126,14 +125,8 @@ describe('VWorld Utilities', () => {
       ).toBe(true);
     });
 
-    it('redacts the VWorld API key from WMTS URLs (redactVWorldTileUrl)', () => {
-      expect(redactVWorldTileUrl('https://api.vworld.kr/req/wmts/1.0.0/SECRET/Base/1/2/3.png')).toBe(
-        'https://api.vworld.kr/req/wmts/1.0.0/[redacted]/Base/1/2/3.png'
-      );
-    });
-
-    it('returns undefined for undefined input (redactVWorldTileUrl)', () => {
-      expect(redactVWorldTileUrl(undefined)).toBeUndefined();
+    it('returns undefined when redactVWorldUrl is called with undefined', () => {
+      expect(redactVWorldUrl(undefined)).toBeUndefined();
     });
   });
 });

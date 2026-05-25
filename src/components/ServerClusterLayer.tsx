@@ -1,8 +1,10 @@
+'use client';
+
 import React, { useCallback } from 'react';
-import maplibregl from 'maplibre-gl';
-import { Bounds } from '../schemas';
+import type maplibregl from 'maplibre-gl';
+import { type Bounds } from '../schemas';
 import { ClusterMarker } from './ClusterMarker';
-import { useMap } from './VWorldMap';
+import { useMap } from '../store/hooks';
 
 export interface ServerClusterPoint {
   id: string | number;
@@ -38,7 +40,7 @@ export const ServerClusterLayer: React.FC<ServerClusterLayerProps> = ({
   fitBoundsOptions,
   flyToOptions,
 }) => {
-  const { map } = useMap();
+  const map = useMap();
   const handleClusterClick = useCallback((cluster: ServerClusterPoint) => {
     if (!map) return;
     onClusterClick?.(cluster);

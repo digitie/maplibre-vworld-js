@@ -1,37 +1,64 @@
+'use client';
+
 import React, { useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import maplibregl from 'maplibre-gl';
-import { useMap } from './VWorldMap';
+import { useMap, useEvent } from '../store/hooks';
 
 export interface MarkerProps {
+  /** Marker position as `[longitude, latitude]`. */
   lngLat: [number, number];
+  /**
+   * Color of the built-in pin SVG. Ignored when `children` is provided.
+   * @default '#3FB1CE'
+   */
   color?: string;
+  /** Allow the user to drag the marker. */
   draggable?: boolean;
+  /** Fired after a drag ends, with the new `[lng, lat]`. */
   onDragEnd?: (lngLat: [number, number]) => void;
+  /** Fired on click of the marker DOM. */
   onClick?: (event: MouseEvent, marker: maplibregl.Marker) => void;
+  /** Fired on right-click of the marker DOM. */
   onContextMenu?: (event: MouseEvent, marker: maplibregl.Marker) => void;
+  /** Visual selected state — sets `data-selected="true"` and applies a scale + shadow. */
   selected?: boolean;
+  /** Visual highlighted state — sets `data-highlighted="true"` and applies a softer scale + shadow. */
   highlighted?: boolean;
+  /** CSS `z-index` for stacking among other markers. */
   zIndex?: number;
+  /** `aria-label` for accessibility. When set, the element also gets `role="button"`. */
   ariaLabel?: string;
+  /** Additional CSS class names. */
   className?: string;
+  /**
+   * Custom marker content. When provided, the built-in pin SVG is replaced
+   * with the children rendered via React portal into a `<div>` element.
+   */
   children?: React.ReactNode;
 }
 
 function applyMarkerState(
   element: HTMLElement,
+  prevClassName: string | undefined,
   {
     selected,
     highlighted,
     zIndex,
     ariaLabel,
     className,
-  }: Pick<MarkerProps, 'selected' | 'highlighted' | 'zIndex' | 'ariaLabel' | 'className'>
-) {
+  }: Pick<MarkerProps, 'selected' | 'highlighted' | 'zIndex' | 'ariaLabel' | 'className'>,
+): void {
   element.dataset.selected = selected ? 'true' : 'false';
   element.dataset.highlighted = highlighted ? 'true' : 'false';
   element.style.zIndex = zIndex === undefined ? '' : String(zIndex);
-  element.style.setProperty('scale', selected ? '1.18' : highlighted ? '1.1' : '');
+  // Use `transform` (CSS2) instead of `scale` (CSS3 standalone) for broader
+  // browser support. MapLibre also sets `transform` on the element root, but
+  // it uses CSS variables / will-change so this composes cleanly.
+  element.style.setProperty(
+    '--vworld-marker-scale',
+    selected ? '1.18' : highlighted ? '1.1' : '1',
+  );
   element.style.filter = selected
     ? 'drop-shadow(0 6px 14px rgba(0,0,0,0.34))'
     : highlighted
@@ -44,6 +71,13 @@ function applyMarkerState(
     element.removeAttribute('aria-label');
     element.removeAttribute('role');
   }
+  // Remove previous tokens before adding new ones, so the className prop is
+  // truly the source of truth.
+  if (prevClassName) {
+    for (const token of prevClassName.split(/\s+/)) {
+      if (token) element.classList.remove(token);
+    }
+  }
   if (className) {
     for (const token of className.split(/\s+/)) {
       if (token) element.classList.add(token);
@@ -51,6 +85,15 @@ function applyMarkerState(
   }
 }
 
+/**
+ * Renders a MapLibre marker. With no `children`, MapLibre's default pin SVG
+ * is used (color customizable). With `children`, a custom DOM element hosts
+ * the children via React portal.
+ *
+ * The MapLibre marker instance is created once per `(map, hasChildren)`
+ * pair and reused across prop changes. Callbacks (`onClick`, `onDragEnd`,
+ * `onContextMenu`) can change freely without re-creating the marker.
+ */
 export const Marker: React.FC<MarkerProps> = ({
   lngLat,
   color = '#3FB1CE',
@@ -65,97 +108,88 @@ export const Marker: React.FC<MarkerProps> = ({
   className,
   children,
 }) => {
-  const { map } = useMap();
+  const map = useMap();
   const markerRef = useRef<maplibregl.Marker | null>(null);
-  const classNameRef = useRef<string | undefined>(undefined);
-  const onClickRef = useRef(onClick);
-  const onContextMenuRef = useRef(onContextMenu);
-  const onDragEndRef = useRef(onDragEnd);
+  const prevClassNameRef = useRef<string | undefined>(undefined);
+  const hasChildren = children !== undefined && children !== null && children !== false;
 
-  useEffect(() => {
-    onClickRef.current = onClick;
-    onContextMenuRef.current = onContextMenu;
-    onDragEndRef.current = onDragEnd;
-  }, [onClick, onContextMenu, onDragEnd]);
+  const stableOnClick = useEvent(onClick);
+  const stableOnContextMenu = useEvent(onContextMenu);
+  const stableOnDragEnd = useEvent(onDragEnd);
 
-  // Create a container element for the portal
-  const container = useMemo(() => {
-    const div = document.createElement('div');
-    // Ensure the container doesn't have default pointer events that might block dragging 
-    // unless necessary, but we'll leave it default for interaction.
-    return div;
+  // Stable portal container — created once per component instance (only
+  // when used). SSR-safe: the effect that uses it never runs on the server.
+  const container = useMemo<HTMLDivElement | null>(() => {
+    if (typeof document === 'undefined') return null;
+    return document.createElement('div');
   }, []);
 
   useEffect(() => {
     if (!map) return;
 
-    let markerOptions: maplibregl.MarkerOptions = { color, draggable };
-    
-    // If children are provided, use the portal container
-    if (children) {
-      markerOptions = { element: container, draggable };
-    }
+    const options: maplibregl.MarkerOptions = hasChildren && container
+      ? { element: container, draggable }
+      : { color, draggable };
 
-    const marker = new maplibregl.Marker(markerOptions)
-      .setLngLat(lngLat)
-      .addTo(map);
+    const marker = new maplibregl.Marker(options).setLngLat(lngLat).addTo(map);
     const element = marker.getElement();
+
     const handleClick = (event: MouseEvent) => {
-      if (!onClickRef.current) return;
+      if (!onClick) return;
       event.stopPropagation();
-      onClickRef.current(event, marker);
+      stableOnClick(event, marker);
     };
     const handleContextMenu = (event: MouseEvent) => {
-      if (!onContextMenuRef.current) return;
+      if (!onContextMenu) return;
       event.preventDefault();
       event.stopPropagation();
-      onContextMenuRef.current(event, marker);
+      stableOnContextMenu(event, marker);
+    };
+    const handleDragEnd = () => {
+      const { lng, lat } = marker.getLngLat();
+      stableOnDragEnd([lng, lat]);
     };
 
     element.addEventListener('click', handleClick);
     element.addEventListener('contextmenu', handleContextMenu);
-
-    if (draggable) {
-      marker.on('dragend', () => {
-        const newLngLat = marker.getLngLat();
-        onDragEndRef.current?.([newLngLat.lng, newLngLat.lat]);
-      });
-    }
+    if (draggable) marker.on('dragend', handleDragEnd);
 
     markerRef.current = marker;
 
     return () => {
       element.removeEventListener('click', handleClick);
       element.removeEventListener('contextmenu', handleContextMenu);
+      if (draggable) marker.off('dragend', handleDragEnd);
       marker.remove();
+      markerRef.current = null;
     };
+    // `hasChildren`, `color`, `draggable` affect the construction options
+    // and so genuinely require a re-create. lngLat/state are applied via the
+    // dedicated effects below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, children ? container : null]); // Re-create if switching between default and custom
+  }, [map, hasChildren, color, draggable, container]);
 
-  // Update position if lngLat changes
+  // Update position when lngLat changes (cheap; no re-create needed).
   useEffect(() => {
-    if (markerRef.current) {
-      markerRef.current.setLngLat(lngLat);
-    }
-  }, [lngLat]);
+    markerRef.current?.setLngLat(lngLat);
+  }, [lngLat[0], lngLat[1]]);
 
+  // Apply visual state.
   useEffect(() => {
     const marker = markerRef.current;
     if (!marker) return;
-    const element = marker.getElement();
-    if (classNameRef.current) {
-      for (const token of classNameRef.current.split(/\s+/)) {
-        if (token) element.classList.remove(token);
-      }
-    }
-    applyMarkerState(element, { selected, highlighted, zIndex, ariaLabel, className });
-    classNameRef.current = className;
+    applyMarkerState(marker.getElement(), prevClassNameRef.current, {
+      selected,
+      highlighted,
+      zIndex,
+      ariaLabel,
+      className,
+    });
+    prevClassNameRef.current = className;
   }, [selected, highlighted, zIndex, ariaLabel, className]);
 
-  // If using custom children, render them into the container using a portal
-  if (children) {
+  if (hasChildren && container) {
     return createPortal(children, container);
   }
-
   return null;
 };

@@ -3,268 +3,225 @@
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/VWorld-Korea-blue?style=for-the-badge" alt="VWorld" />
-  <img src="https://img.shields.io/badge/Antigravity-2.0-8A2BE2?style=for-the-badge" alt="Antigravity 2.0" />
-  <img src="https://img.shields.io/badge/Gemini-3.1_Pro-1A73E8?style=for-the-badge" alt="Gemini 3.1 Pro" />
-  
-  <h1>🗺️ MapLibre VWorld JS</h1>
-  <p><strong>MapLibre GL JS를 활용하여 브이월드(VWorld) 지도를 렌더링하는 고성능 React 라이브러리</strong></p>
-  <p><em>Built entirely by <b>Antigravity 2.0</b> powered by <b>Gemini 3.1 Pro</b></em></p>
+
+  <h1>🗺️ maplibre-vworld-js</h1>
+  <p><strong>React bindings for MapLibre GL JS rendering Korean VWorld tiles.</strong></p>
 </div>
 
 <br />
 
-`maplibre-vworld-js`는 GPU 가속(WebGL) 기반의 지도 렌더링 엔진인 **MapLibre GL JS**를 사용하여, 국토교통부 **VWorld**의 고해상도 지도를 React 환경에서 네이티브 앱처럼 부드럽게 렌더링할 수 있도록 돕는 프리미엄 라이브러리입니다.
+A small, focused React wrapper around MapLibre GL JS for VWorld basemaps. The library is **just the map primitives** — markers, popups, layers, clustering — and stays out of the way of application concerns like data fetching, state management, and routing.
 
-## ✨ 주요 기능 (Features)
+## Features
 
-- 🚀 **순수 WebGL GPU 렌더링**: 기존 Canvas 기반 지도 대비 압도적으로 부드러운 60fps 렌더링 (Fractional Zoom 지원)
-- 🎯 **100% 선언형(Declarative) React 설계**: `map.panTo()` 등의 명령형 API 없이 Props 조작만으로 완벽한 상태 동기화
-- 🌌 **초고속 클러스터링 내장**: 10만 건 이상의 데이터를 즉시 병합하는 Viewport Culling 및 KDBush 알고리즘 탑재 (`MarkerClusterer`)
-- 🎨 **커스텀 마커 지원**: React 노드(Tailwind CSS, SVG 애니메이션 등)를 지도 위에 직접 올릴 수 있는 Portal 컴포넌트 제공
-- 🛡️ **타입 안정성 보장**: TypeScript로 작성되었으며, `zod` 기반의 좌표 유효성 검사 스키마 제공
-- 🌐 **SSR 완벽 지원**: Next.js (App/Pages Router) 및 Vite 환경에서 충돌 없이 렌더링 가능
+- **Native WebGL rendering** via MapLibre GL JS v5 — fractional zoom, vector & raster sources, 60 fps interactions.
+- **Declarative React API** — props in, raw MapLibre events out. No two-way binding wrappers.
+- **External store** based on `useSyncExternalStore` — children subscribe to the slices they care about, and zoom/pan does **not** re-render the whole tree.
+- **Stable callbacks** through a built-in `useEvent` hook — your handlers always run the latest closure without re-mounting MapLibre.
+- **Built-in clustering** with `supercluster` — viewport-culled, only visible markers render.
+- **SSR-safe** — every DOM-touching module is marked `'use client'`; runs cleanly in Next.js App Router.
+- **Zod schemas** with a factory for region-bounded coordinates (Korea preset included).
 
----
-
-## 📦 설치 (Installation)
+## Install
 
 ```bash
 npm install maplibre-vworld maplibre-gl 'zod@^4.4.3'
-# 또는
-yarn add maplibre-vworld maplibre-gl 'zod@^4.4.3'
 ```
 
-`react`, `react-dom`, `maplibre-gl`, `zod`는 peer dependency입니다. React 애플리케이션에는 보통 `react`/`react-dom`이 이미 있으므로, 지도 엔진과 검증 스키마만 함께 설치하면 됩니다. GitHub 의존성으로 설치하는 경우에도 저장소에 커밋된 `dist/` 산출물을 사용하므로, 소비자 프로젝트에서 별도 빌드 스크립트를 실행할 필요가 없습니다.
+`react`, `react-dom`, `maplibre-gl`, `zod` are peer dependencies.
 
-> **⚠️ zod 버전 주의**: 이 라이브러리는 **zod v4** (`^4.4.3`)에 대해 빌드/테스트됩니다. v4는 v3 대비 배열 파싱 ~7배 빠르고 TypeScript instantiation이 ~100배 감소하여 빌드 속도가 크게 향상됩니다. zod v3를 쓰는 프로젝트는 v4로 업그레이드하거나, 이 라이브러리의 v3 호환 릴리스 태그를 사용하세요.
+> The `apiKey` prop is trimmed of surrounding whitespace and URL-encoded automatically. zod v4 is required (v3 is not supported).
 
-> **💡 apiKey 정규화**: `<VWorldMap apiKey={...} />`는 입력된 키의 앞뒤 공백/개행을 자동으로 제거하고 URL-encode합니다. 복사·붙여넣기 사고를 막기 위한 동작이지만, "왜 키가 다르게 보이지?"라고 디버깅할 때 참고하세요.
-
----
-
-## 🚀 빠른 시작 (Quick Start)
-
-### 기본 사용법 (Vite / CRA)
+## Quick start
 
 ```tsx
-import React from 'react';
-import { VWorldMap, MakiMarker } from 'maplibre-vworld';
+import { VWorldMap, Marker } from 'maplibre-vworld';
 import 'maplibre-vworld/style.css';
 
-function App() {
+export function App() {
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
-      <VWorldMap 
-        // 환경 변수(.env)에서 API Key를 불러오는 것을 권장합니다.
-        apiKey={import.meta.env.VITE_VWORLD_API_KEY} 
-        layerType="Base" 
-        center={[127.0246, 37.5326]} 
-        zoom={14}
-      >
-        <MakiMarker 
-          lngLat={[127.0246, 37.5326]} 
-          icon="cafe" 
-          color="#FF5722" 
-          size="large" 
-        />
-      </VWorldMap>
-    </div>
-  );
-}
-
-export default App;
-```
-
----
-
-## 💻 Next.js (App Router) 통합 가이드
-
-MapLibre GL JS는 브라우저의 WebGL 환경(`window` 및 `document`)에 의존하므로, Next.js 환경에서는 반드시 **클라이언트 사이드 동적 임포트(Dynamic Import)**를 사용하여 SSR을 비활성화해야 합니다.
-
-```tsx
-'use client';
-import dynamic from 'next/dynamic';
-import { LngLatSchema } from 'maplibre-vworld';
-import 'maplibre-vworld/style.css';
-
-// 🚨 SSR을 끄기 위해 dynamic import를 사용합니다.
-const VWorldMap = dynamic(
-  () => import('maplibre-vworld').then((mod) => mod.VWorldMap),
-  { ssr: false, loading: () => <p>지도를 불러오는 중입니다...</p> }
-);
-
-const PlaceMarker = dynamic(
-  () => import('maplibre-vworld').then((mod) => mod.PlaceMarker),
-  { ssr: false }
-);
-
-export default function MapPage() {
-  // 백엔드에서 받아온 좌표의 유효성을 Zod로 안전하게 검증
-  const parsedCoord = LngLatSchema.safeParse([127.024, 37.532]);
-
-  if (!parsedCoord.success) return <p>잘못된 좌표입니다!</p>;
-
-  return (
-    <div style={{ width: '100%', height: '500px' }}>
-      <VWorldMap apiKey={process.env.NEXT_PUBLIC_VWORLD_API_KEY}>
-        <PlaceMarker 
-          lngLat={parsedCoord.data} 
-          title="내 위치" 
-          description="대한민국 서울" 
-        />
-      </VWorldMap>
-    </div>
+    <VWorldMap apiKey={process.env.VWORLD_API_KEY!} center={[127.024, 37.532]} zoom={12}>
+      <Marker lngLat={[127.024, 37.532]} color="#ff0000" />
+    </VWorldMap>
   );
 }
 ```
 
----
+## `<VWorldMap>` props
 
-## 🔒 CORS 및 VWorld API 보안/도메인 에러 해결
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `apiKey` | `string` | **required** | Empty / whitespace → `fallback` renders, no MapLibre instance. |
+| `center` | `[lng, lat]` | **required** | No implicit Seoul default — pick a center appropriate for your app. |
+| `zoom` | `number` | `12` | |
+| `pitch` / `bearing` | `number` | `0` / `0` | |
+| `layerType` | `'Base' \| 'gray' \| 'midnight' \| 'Hybrid' \| 'Satellite'` | `'Base'` | |
+| `minZoom` / `maxZoom` | `number` | `6` / `19` | `Satellite`/`Hybrid` are clamped to z18 automatically. |
+| `maxBounds` | `LngLatBoundsLike` | — | |
+| `navigation` / `geolocate` / `scale` | `boolean` | `true` | Built-in MapLibre controls. |
+| `semanticZoomThreshold` | `number` | — | Global zoom below which markers may simplify (`SimpleMarker`, `PlaceMarker`, `WeatherMarker`). |
+| `onLoad` | `(map) => void` | — | Fires once after MapLibre `load`. |
+| `onClick` | `(MapMouseEvent) => void` | — | Raw MapLibre click — read `e.lngLat.lng/lat`. |
+| `onContextMenu` | `(MapMouseEvent) => void` | — | Raw right-click. |
+| `onMoveEnd` / `onZoomEnd` / `onIdle` | `(MapLibreEvent) => void` | — | Raw camera events — split so consumers only pay for what they use. |
+| `onError` | `(ErrorEvent) => void` | console.warn | Raw MapLibre `error` event. Combine with `isVWorldTileError()` and `redactVWorldUrl()`. |
+| `transformRequest` | `RequestTransformFunction` | — | CORS / auth / proxy hook. |
+| `fallback` | `ReactNode \| (info) => ReactNode` | — | Rendered instead of the map for `'missing-api-key'` or `'map-init-error'`. |
+| `loadingSkeleton` | `ReactNode` | — | Overlay until `load` fires. |
+| `animateCameraChanges` | `boolean` | `true` | `false` → camera prop changes use `jumpTo`. |
+| `flyToOptions` | `Omit<FlyToOptions, 'center' \| 'zoom'>` | — | Tune flyTo duration / easing. |
+| `className` / `style` | — | — | Container styling. |
 
-VWorld 지도 타일(WMTS)을 요청할 때 브라우저 콘솔에 **CORS 에러** 또는 **403 Forbidden** 에러가 발생한다면 다음을 확인하세요.
-
-1. **VWorld 개발자 센터 도메인 등록**: API Key를 발급받은 VWorld 개발자 센터에서 `허용 도메인`에 현재 개발 중인 로컬 주소(예: `http://localhost:5173` 또는 `http://127.0.0.1:5173`) 및 상용 배포 도메인을 정확히 입력해야 합니다. 도메인이 일치하지 않으면 VWorld 서버가 의도적으로 CORS 헤더를 내려주지 않거나 403 에러를 반환합니다.
-2. **프록시 우회 (`transformRequest`)**: 사내망이나 특정 보안 정책으로 인해 브라우저에서 직접 외부 API 호출이 막혀 있는 경우, 프록시 서버를 통해 호출해야 합니다. 이때 `<VWorldMap>`의 `transformRequest` Prop을 사용하여 요청 URL을 가로채고 수정할 수 있습니다.
-
-```tsx
-<VWorldMap 
-  apiKey={API_KEY}
-  transformRequest={(url, resourceType) => {
-    // VWorld API 요청을 로컬 프록시 서버로 우회
-    if (url.includes('api.vworld.kr')) {
-      return {
-        url: url.replace('https://api.vworld.kr', '/api/vworld-proxy'),
-        // 필요한 경우 인증 헤더 추가
-        // headers: { 'Authorization': 'Bearer ...' }
-      };
-    }
-    return { url };
-  }}
->
-```
-
----
-
-## 📚 컴포넌트 API 레퍼런스
-
-### 1. `<VWorldMap>`
-지도를 렌더링하는 최상위 컨테이너입니다.
-| 속성 (Prop) | 타입 (Type) | 기본값 (Default) | 설명 |
-|---|---|---|---|
-| `apiKey` | `string` | **필수** | 브이월드(VWorld)에서 발급받은 API Key. 비어 있거나 공백만 있으면 `fallback`이 렌더된다 |
-| `layerType` | `VWorldLayerType` | `'Base'` | 지도 테마 (`Base`, `gray`, `midnight`, `Satellite`, `Hybrid`) |
-| `center` | `[number, number]` | `[127.02, 37.53]` | 초기 카메라 중심 좌표 (경도, 위도) |
-| `zoom` | `number` | `12` | 초기 줌 레벨 |
-| `maxZoom` | `number` | `19` | 레이어별 상한과 함께 적용된다. `Satellite`/`Hybrid`는 VWorld 타일 한계에 맞춰 최대 z18까지만 요청한다 |
-| `onMapClick` | `(e: MapMouseEvent) => void` | `undefined` | 지도 클릭 콜백. `e.lngLat.lng/lat`로 좌표 추출. 디버그 UI에서 클릭→입력 갱신 패턴에 사용 |
-| `onMapContextMenu` | `(e: VWorldMapContextMenuInfo) => void` | `undefined` | 지도 우클릭 콜백. `e.lngLat`는 `[lng, lat]`로 정규화된다 |
-| `onViewportChange` | `(e: VWorldViewportInfo) => void` | `undefined` | `load/moveend/zoomend/idle` 이후 `center/zoom/bounds`를 정규화해 전달 |
-| `onMapError` | `(e: VWorldMapErrorInfo) => void` | `console.warn` | MapLibre 오류 이벤트를 래핑(누적 카운트, 임계치 도달 플래그, **redacted URL**). 미지정 시 키가 가려진 채로 콘솔에 기록 |
-| `tileErrorThreshold` | `number` | `Infinity` | `onMapError`에 `thresholdReached: true`가 전달되는 누적 오류 횟수 |
-| `fallback` | `ReactNode \| (info) => ReactNode` | `undefined` | `apiKey` 누락 또는 MapLibre 초기화 실패 시 지도 자리에 렌더. 좌표 프리뷰 fallback UI에 사용 |
-| `loadingSkeleton` | `ReactNode` | `undefined` | MapLibre `load` 이벤트 전까지 보여줄 스피너/스켈레톤 |
-| `animateCameraChanges` | `boolean` | `true` | `false`면 prop 기반 `center`/`zoom` 변경 시 `flyTo` 대신 `jumpTo` 사용 (애니메이션 끔) |
-
-또한 `redactVWorldUrl(url)` 헬퍼를 export하여 임의 문자열에서 키 segment만 안전하게 `***`로 마스킹할 수 있습니다.
+### Event handler example
 
 ```tsx
-import { VWorldMap, redactVWorldUrl, type VWorldMapErrorInfo } from 'maplibre-vworld';
-
 <VWorldMap
-  apiKey={process.env.NEXT_PUBLIC_VWORLD_API_KEY ?? ''}
-  fallback={(info) => (
-    <div>지도 미사용 ({info.reason})</div>
-  )}
-  loadingSkeleton={<div>지도 로딩 중...</div>}
-  animateCameraChanges={false}
-  tileErrorThreshold={5}
-  onMapClick={(e) => onPick({ x: e.lngLat.lng, y: e.lngLat.lat })}
-  onMapError={(e: VWorldMapErrorInfo) => {
-    if (e.thresholdReached) {
-      // 5회 누적 후 한 번만 사용자에게 알림
-      toast.warn(`지도 타일 로딩 지연: ${e.redactedUrl ?? ''}`);
+  apiKey={key}
+  center={[127.024, 37.532]}
+  onClick={(e) => setPicked([e.lngLat.lng, e.lngLat.lat])}
+  onError={(e) => {
+    if (isVWorldTileError(e)) {
+      const url = (e.error as VWorldResourceError)?.url;
+      logger.warn('tile fetch failed', redactVWorldUrl(url));
     }
   }}
+  fallback={({ reason }) => <div>map unavailable: {reason}</div>}
 />
 ```
 
-### 2. `<MarkerClusterer>`
-만 개 이상의 마커를 그릴 때 필수적으로 사용해야 하는 고성능 클러스터링 엔진입니다. (화면 밖 마커 자동 제거 기능 포함)
-| 속성 (Prop) | 타입 (Type) | 기본값 (Default) | 설명 |
-|---|---|---|---|
-| `points` | `ClusterPoint[]` | **필수** | 렌더링할 마커 데이터 객체 배열 |
-| `radius` | `number` | `50` | 마커를 병합할 거리 반경 (픽셀) |
-| `maxZoom` | `number` | `16` | 병합을 해제할 최대 줌 레벨 |
-| `renderMarker` | `(point) => ReactNode` | **필수** | 개별 마커 렌더링 함수 |
+## Hooks
 
-### 3. TripMate 지도 primitive
-TripMate 같은 소비자 앱이 서버 클러스터, 7종 feature, popup, 16색 marker palette를 반복 구현하지 않도록 얕은 public contract를 제공합니다. API 호출, Zustand/TanStack Query, 위치 동의/감사 로그는 소비자 앱 책임입니다.
+All hooks must be used inside `<VWorldMap>`.
+
+```tsx
+import { useMap, useMapZoom, useMapLoaded, useMapSelector, useEvent } from 'maplibre-vworld';
+
+useMap();          // MapLibre instance, or null until mounted. Stable identity.
+useMapZoom();      // current zoom; re-renders on zoomend
+useMapLoaded();    // true once load fired
+useMapSelector(s => s.zoom < 12);  // arbitrary slice with referential caching
+useEvent(handler); // stable callback that always invokes the latest version
+```
+
+The selector pattern is the recommended way to react to threshold crossings:
+
+```tsx
+const simplified = useMapSelector(
+  useCallback((s) => s.zoom < (s.semanticZoomThreshold ?? 12), []),
+);
+```
+
+This re-renders the consumer only when the boolean flips — not on every zoom event.
+
+## Markers
+
+| Component | Use case |
+| --- | --- |
+| `Marker` | Built-in pin (color customizable) or arbitrary React children via portal. |
+| `PinMarker` | Teardrop pin with optional icon, label, tooltip. |
+| `MakiMarker` | Pin with a [Maki](https://labs.mapbox.com/maki-icons/) icon (loaded as CSS mask). |
+| `PulsingMarker` | Animated ripple dot — good for "user here" indicators. |
+| `SimpleMarker` | Label pill with optional zoom simplification. |
+| `PlaceMarker` | Card with title / description / photo. |
+| `PriceMarker` | Airbnb-style price chip. |
+| `WeatherMarker` | Condition badge with optional hourly forecast popover. |
+| `RoutePointMarker` | Numbered/lettered route point. |
+| `ClusterMarker` | Default cluster bubble rendered by `<ClusterLayer>`. |
+
+Markers accept `selected`, `highlighted`, `zIndex`, `ariaLabel`, `className` for state styling. The element exposes `data-selected` / `data-highlighted` attributes for CSS hooks.
+
+## Layers
+
+```tsx
+<RouteLine id="route" coordinates={[[127, 37], [127.1, 37.1]]} color="#2196F3" width={4} />
+
+<PolygonArea id="park" data={geojsonFeature} fillColor="..." outlineColor="..." />
+```
+
+`RouteLine` and `PolygonArea` persist across `setStyle()` (layer swap) — they re-register on `styledata`.
+
+## Popup
+
+```tsx
+import { Popup } from 'maplibre-vworld';
+
+<Popup lngLat={[127, 37]} onClose={() => setOpen(false)}>
+  <h3>Hello</h3>
+</Popup>
+```
+
+## Clustering
+
+Client-side via supercluster:
+
+```tsx
+<ClusterLayer
+  points={points}
+  radius={50}
+  maxZoom={16}
+  renderMarker={(p) => <Marker key={p.id} lngLat={p.lngLat} />}
+/>
+```
+
+Server-side (your backend already grouped points by zoom):
+
+```tsx
+<ServerClusterLayer
+  clusters={serverClusters}
+  onClusterClick={(c) => console.log(c.id)}
+/>
+```
+
+`ServerClusterPoint.bounds` triggers `fitBounds`; otherwise `flyTo` is used.
+
+## VWorld utilities
 
 ```tsx
 import {
-  ServerClusterLayer,
-  TripmateFeatureLayer,
-  MapPopup,
-  resolveTripmateMarkerStyle,
+  getVWorldTileUrl,
+  getVWorldStyle,
+  getVWorldMaxZoom,
+  redactVWorldUrl,
+  isVWorldTileError,
 } from 'maplibre-vworld';
 
-<VWorldMap
-  apiKey={apiKey}
-  onViewportChange={({ bounds, zoom }) => {
-    // debounce/fetch/cache는 앱에서 처리
-    setViewport({ bounds, zoom });
-  }}
-  onMapContextMenu={({ lngLat, originalEvent }) => {
-    openRightClickMenu({ lngLat, x: originalEvent.clientX, y: originalEvent.clientY });
-  }}
->
-  <ServerClusterLayer clusters={serverClusters} />
-  <TripmateFeatureLayer features={features} iconBaseUrl="/maki" />
-  {selected && <MapPopup lngLat={selected.lngLat}>{selected.name}</MapPopup>}
-</VWorldMap>
+const style = getVWorldStyle(apiKey, 'Hybrid');
+// → MapLibre StyleSpecification with the Hybrid (Satellite + label) raster sources
+
+const safeForLog = redactVWorldUrl(error.url);
+// → 'https://api.vworld.kr/req/wmts/1.0.0/***/Base/14/8000/12000.png'
+
+if (isVWorldTileError(event)) { /* … */ }
 ```
 
-주요 export:
+## Zod schemas
 
-| Export | 설명 |
-|---|---|
-| `TRIPMATE_MARKER_PALETTE` | P-01~P-16 색상과 label color |
-| `TRIPMATE_CATEGORY_MARKERS` | TripMate 기본 category → Maki icon/color 매핑 |
-| `resolveTripmateMarkerStyle` | DB override / 사용자 custom marker fallback 계산 |
-| `KoreaLngLatSchema`, `KoreaBoundsSchema` | 대한민국 범위의 broad coordinate guard |
-| `serializeBounds`, `parseBoundsParam` | `GET /features/in-bounds` query param 준비용 helper |
+```tsx
+import {
+  LngLatSchema,
+  BoundsSchema,
+  PointSchema,
+  extendPointSchema,
+  makeBoundedLngLatSchema,
+  formatLngLat,
+} from 'maplibre-vworld';
 
-### 4. `<PolygonArea>`
-국립공원, 읍면동 등 폴리곤(다각형) 형태의 영역을 렌더링하고 클릭/호버 이벤트를 처리합니다.
-| 속성 (Prop) | 타입 (Type) | 기본값 (Default) | 설명 |
-|---|---|---|---|
-| `id` | `string` | **필수** | 레이어 식별용 고유 ID |
-| `data` | `GeoJSON \| string` | **필수** | GeoJSON Polygon/MultiPolygon 객체 또는 URL |
-| `fillColor` | `string` | `'rgba(33, 150, 243, 0.4)'` | 영역 내부 색상 |
-| `outlineColor` | `string` | `'#2196F3'` | 영역 테두리 색상 |
-| `onClick` | `function` | `undefined` | 영역 클릭 이벤트 콜백 |
-| `onMouseEnter` | `function` | `undefined` | 영역 마우스 진입 이벤트 콜백 |
+// Generic, WGS84-bounded:
+LngLatSchema.parse([127.024, 37.532]); // ✓
 
-### 5. `<RouteLine>`
-복수의 좌표나 GeoJSON LineString 데이터를 받아 선(등산로, 트래킹 코스 등)을 그립니다.
-| 속성 (Prop) | 타입 (Type) | 기본값 (Default) | 설명 |
-|---|---|---|---|
-| `id` | `string` | **필수** | 레이어 식별용 고유 ID |
-| `coordinates` | `[number, number][]`| `undefined` | 연결할 좌표들의 배열 |
-| `data` | `GeoJSON \| string` | `undefined` | GeoJSON LineString 객체 또는 URL |
-| `color` | `string` | `'#2196F3'` | 선 색상 (Hex 코드) |
-| `lineDasharray`| `number[]` | `undefined` | 점선 속성 (예: `[4, 4]`) |
-| `onClick` | `function` | `undefined` | 선 클릭 이벤트 콜백 |
+// Region-bounded factory (e.g. Korea preset):
+const KoreaLngLat = makeBoundedLngLatSchema([124, 132], [33, 43]);
 
----
+// Extend the point shape with your own properties:
+const PlaceSchema = extendPointSchema({ name: z.string(), rating: z.number() });
+```
 
-## 🤖 AI 에이전트 연동 가이드
-이 라이브러리를 기반으로 Cursor, GitHub Copilot 등 AI에게 코드를 작성하게 할 때는, 프로젝트 루트 디렉토리에 있는 **[AGENTS.md](./AGENTS.md)** 및 **[AI_AGENT_GUIDE.md](./AI_AGENT_GUIDE.md)** 내용을 프롬프트에 제공해주세요. Race Condition이나 SSR 렌더링 충돌 없이 완벽한 코드를 자동 생성할 수 있습니다.
+## Bundle / SSR
 
-TripMate 소비자 앱에서 필요한 추가 지도 계약은 **[TripMate 연동 추가 구현 백로그](./docs/tripmate-implementation-roadmap.md)**에 정리되어 있습니다. 이 문서는 `tripmate` 최신 `main` 문서를 기준으로 viewport 이벤트, context menu, 16색 마커 팔레트, Maki icon vendor path, 서버 클러스터, feature kind 렌더링 등 후속 구현 범위를 구분합니다.
+- ESM (`.mjs`) and UMD (`.umd.js`) builds, with declaration files.
+- `react`, `react-dom`, `maplibre-gl`, `zod` externalized.
+- All DOM-touching files carry `'use client'` — safe to import from a Next.js React Server Component, the directive boundary moves the work to the client bundle.
 
----
+## License
 
-## 📄 라이선스 (License)
-MIT License © 2026
+MIT.

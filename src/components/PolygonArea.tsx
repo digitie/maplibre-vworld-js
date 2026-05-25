@@ -1,51 +1,43 @@
-import React, { useEffect } from 'react';
-import { useMap } from './VWorldMap';
+'use client';
 
-/**
- * Props for the PolygonArea component.
- */
+import React, { useEffect } from 'react';
+import type maplibregl from 'maplibre-gl';
+import { useMap, useEvent } from '../store/hooks';
+
+type PolygonGeoJSON =
+  | GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>
+  | GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon>;
+
+export type PolygonAreaInput = PolygonGeoJSON | string;
+
+type FeatureMouseEvent = maplibregl.MapMouseEvent & {
+  features?: maplibregl.MapGeoJSONFeature[];
+};
+
 export interface PolygonAreaProps {
-  /**
-   * Unique identifier for the area. Used as the MapLibre layer and source ID prefix.
-   */
+  /** Unique ID — used as prefix for the MapLibre source and layer IDs. */
   id: string;
   /**
-   * GeoJSON data for the area (Feature, FeatureCollection, or URL).
-   * Usually a Polygon or MultiPolygon.
+   * GeoJSON Polygon / MultiPolygon Feature, FeatureCollection, or a URL
+   * MapLibre can fetch. Must be referentially stable — pass a memoized value
+   * or store the GeoJSON in a ref. Reference changes trigger `setData`.
    */
-  data: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | GeoJSON.FeatureCollection<GeoJSON.Polygon | GeoJSON.MultiPolygon> | string;
-  /**
-   * Fill color of the area.
-   * @default 'rgba(33, 150, 243, 0.4)'
-   */
+  data: PolygonAreaInput;
+  /** @default 'rgba(33, 150, 243, 0.4)' */
   fillColor?: string;
-  /**
-   * Outline color of the area.
-   * @default '#2196F3'
-   */
+  /** @default '#2196F3' */
   outlineColor?: string;
-  /**
-   * Outline width in pixels.
-   * @default 2
-   */
+  /** @default 2 */
   outlineWidth?: number;
-  /**
-   * Fired when the area is clicked.
-   */
-  onClick?: (e: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => void;
-  /**
-   * Fired when the mouse enters the area.
-   */
-  onMouseEnter?: (e: maplibregl.MapMouseEvent & { features?: maplibregl.MapGeoJSONFeature[] }) => void;
-  /**
-   * Fired when the mouse leaves the area.
-   */
-  onMouseLeave?: (e: maplibregl.MapMouseEvent) => void;
+  onClick?: (event: FeatureMouseEvent) => void;
+  onMouseEnter?: (event: FeatureMouseEvent) => void;
+  onMouseLeave?: (event: maplibregl.MapMouseEvent) => void;
 }
 
 /**
- * Draws a GeoJSON Polygon or MultiPolygon on the map.
- * Useful for displaying national parks, administrative boundaries, etc.
+ * Renders a GeoJSON Polygon / MultiPolygon as a MapLibre fill+line layer
+ * pair, persisting across style swaps. Suitable for administrative
+ * boundaries, parks, building footprints, etc.
  */
 export const PolygonArea: React.FC<PolygonAreaProps> = ({
   id,
@@ -55,56 +47,47 @@ export const PolygonArea: React.FC<PolygonAreaProps> = ({
   outlineWidth = 2,
   onClick,
   onMouseEnter,
-  onMouseLeave
+  onMouseLeave,
 }) => {
-  const { map } = useMap();
+  const map = useMap();
   const sourceId = `${id}-source`;
   const fillLayerId = `${id}-fill-layer`;
   const lineLayerId = `${id}-line-layer`;
 
+  const stableOnClick = useEvent(onClick);
+  const stableOnMouseEnter = useEvent(onMouseEnter);
+  const stableOnMouseLeave = useEvent(onMouseLeave);
+
   useEffect(() => {
     if (!map) return;
 
-    const addOrUpdateLayer = () => {
+    const addOrUpdate = () => {
       if (!map.getStyle()) return;
 
-      const source = map.getSource(sourceId) as maplibregl.GeoJSONSource;
-
+      const source = map.getSource(sourceId) as maplibregl.GeoJSONSource | undefined;
       if (source) {
-        if (typeof data !== 'string') {
-          source.setData(data as GeoJSON.Feature | GeoJSON.FeatureCollection);
-        }
+        if (typeof data !== 'string') source.setData(data);
       } else {
-        map.addSource(sourceId, {
-          type: 'geojson',
-          data
-        });
+        map.addSource(sourceId, { type: 'geojson', data });
       }
 
-      // Add Fill Layer
       if (!map.getLayer(fillLayerId)) {
         map.addLayer({
           id: fillLayerId,
           type: 'fill',
           source: sourceId,
-          paint: {
-            'fill-color': fillColor,
-          }
+          paint: { 'fill-color': fillColor },
         });
       } else {
         map.setPaintProperty(fillLayerId, 'fill-color', fillColor);
       }
 
-      // Add Outline Layer
       if (!map.getLayer(lineLayerId)) {
         map.addLayer({
           id: lineLayerId,
           type: 'line',
           source: sourceId,
-          paint: {
-            'line-color': outlineColor,
-            'line-width': outlineWidth
-          }
+          paint: { 'line-color': outlineColor, 'line-width': outlineWidth },
         });
       } else {
         map.setPaintProperty(lineLayerId, 'line-color', outlineColor);
@@ -112,49 +95,46 @@ export const PolygonArea: React.FC<PolygonAreaProps> = ({
       }
     };
 
-    addOrUpdateLayer();
-    map.on('styledata', addOrUpdateLayer);
+    addOrUpdate();
+    // Re-add layers after a setStyle() so child layers survive style swaps.
+    map.on('styledata', addOrUpdate);
 
     return () => {
-      map.off('styledata', addOrUpdateLayer);
-      if (map.getStyle()) {
-        if (map.getLayer(fillLayerId)) map.removeLayer(fillLayerId);
-        if (map.getLayer(lineLayerId)) map.removeLayer(lineLayerId);
-        if (map.getSource(sourceId)) map.removeSource(sourceId);
-      }
+      map.off('styledata', addOrUpdate);
+      if (!map.getStyle()) return;
+      if (map.getLayer(fillLayerId)) map.removeLayer(fillLayerId);
+      if (map.getLayer(lineLayerId)) map.removeLayer(lineLayerId);
+      if (map.getSource(sourceId)) map.removeSource(sourceId);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [map, JSON.stringify(data), fillColor, outlineColor, outlineWidth, sourceId, fillLayerId, lineLayerId]);
+  }, [map, data, fillColor, outlineColor, outlineWidth, sourceId, fillLayerId, lineLayerId]);
 
-  // Event Listeners
+  // Event bindings — stable callbacks let us register once and not churn.
   useEffect(() => {
     if (!map) return;
 
-    const clickHandler = (e: any) => {
-      if (onClick) onClick(e);
+    const handleClick = (event: FeatureMouseEvent) => stableOnClick(event);
+    const handleEnter = (event: FeatureMouseEvent) => {
+      if (onMouseEnter || onClick) map.getCanvas().style.cursor = 'pointer';
+      stableOnMouseEnter(event);
     };
-
-    const mouseEnterHandler = (e: any) => {
-      map.getCanvas().style.cursor = 'pointer';
-      if (onMouseEnter) onMouseEnter(e);
-    };
-
-    const mouseLeaveHandler = (e: any) => {
+    const handleLeave = (event: maplibregl.MapMouseEvent) => {
       map.getCanvas().style.cursor = '';
-      if (onMouseLeave) onMouseLeave(e);
+      stableOnMouseLeave(event);
     };
 
-    // We only attach events to the fill layer since it covers the entire area
-    map.on('click', fillLayerId, clickHandler);
-    map.on('mouseenter', fillLayerId, mouseEnterHandler);
-    map.on('mouseleave', fillLayerId, mouseLeaveHandler);
+    map.on('click', fillLayerId, handleClick);
+    map.on('mouseenter', fillLayerId, handleEnter);
+    map.on('mouseleave', fillLayerId, handleLeave);
 
     return () => {
-      map.off('click', fillLayerId, clickHandler);
-      map.off('mouseenter', fillLayerId, mouseEnterHandler);
-      map.off('mouseleave', fillLayerId, mouseLeaveHandler);
+      map.off('click', fillLayerId, handleClick);
+      map.off('mouseenter', fillLayerId, handleEnter);
+      map.off('mouseleave', fillLayerId, handleLeave);
     };
-  }, [map, fillLayerId, onClick, onMouseEnter, onMouseLeave]);
+    // We bind only on map / layerId — `useEvent` keeps the handlers stable.
+    // `onMouseEnter` / `onClick` are still in deps so the cursor-pointer
+    // gate updates when the consumer adds/removes those callbacks.
+  }, [map, fillLayerId, onMouseEnter, onClick, stableOnClick, stableOnMouseEnter, stableOnMouseLeave]);
 
   return null;
 };

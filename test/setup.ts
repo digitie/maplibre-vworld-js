@@ -17,6 +17,8 @@ vi.mock('maplibre-gl', () => {
       flyTo: vi.fn(),
       fitBounds: vi.fn(),
       jumpTo: vi.fn(),
+      isMoving: vi.fn(() => false),
+      isEasing: vi.fn(() => false),
       resize: vi.fn(),
       getZoom: vi.fn().mockReturnValue(12),
       getCenter: vi.fn().mockReturnValue({ lng: 127, lat: 37 }),

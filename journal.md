@@ -1,8 +1,60 @@
 # 개발 작업 일지 (Journal)
 
-이 문서는 프로젝트의 진행 과정, 문제 해결 내역, 그리고 각 단계별 핵심 인사이트를 상세하게 기록하는 작업 일지입니다. 추후 개발자가 변경 사항을 추적하거나 새로운 인력(또는 AI 에이전트)이 프로젝트에 투입되었을 때 문맥(Context)을 빠르게 복구하기 위해 작성됩니다.
+이 문서는 프로젝트의 진행 과정, 문제 해결 내역, 그리고 각 단계별 핵심 인사이트를 상세하게 기록하는 작업 일지입니다.
 
 ---
+
+## 2026-05-25: 범용 라이브러리로 정리 + API/성능 리팩토링
+
+### 1. 도메인-특화 코드 제거 (TripMate)
+- **이슈**: PR #10/#11에서 `src/tripmate.ts`, `src/components/TripmateFeatureLayer.tsx`, `docs/tripmate-implementation-roadmap.md`가 추가되며 라이브러리에 TripMate 도메인 지식(`TRIPMATE_MARKER_PALETTE` P-01~P-16, 한국어 관광 카테고리 enum, 7종 feature kind enum, `₩` currency hardcode)이 박혔다. 범용 지도 라이브러리의 책임 경계를 벗어남.
+- **조치**: 위 파일들 + 대응 테스트(`test/tripmate.test.ts`, `test/TripmateFeatureLayer.test.tsx`) 삭제, README/AI_AGENT_GUIDE에서 TripMate 섹션 제거. 범용 패턴인 `ServerClusterLayer`, `MapPopup`(→`Popup`), `MakiMarker`, `Marker.selected/highlighted/zIndex/ariaLabel/className`은 유지.
+- **결과**: 다운로드 사이즈 약 5KB 감소, 외부 도메인 지식 0.
+
+### 2. API 네이밍: React 생태계 컨벤션 정합
+- `onMapClick` → `onClick`, `onMapLoad` → `onLoad`, `onMapError` → `onError`, `onMapContextMenu` → `onContextMenu` (`react-map-gl`/`react-leaflet` 따름).
+- `showNavigationControl`/`showGeolocateControl`/`showScaleControl` → `navigation`/`geolocate`/`scale`.
+- `MarkerClusterer` → `ClusterLayer`, `MapPopup` → `Popup` — singular convention.
+- `RouteLine`: `lineWidth`/`lineDasharray` → `width`/`dashArray`. `data` prop 제거하고 `coordinates`만 받음 (raw GeoJSON이 필요하면 `useMap()`으로 직접 처리).
+- `MakiMarker`: `icon`/`iconName`/`fallbackIcon` 3종 alias → `icon: string` 하나로.
+- `VWorldMapErrorInfo`/`VWorldMapContextMenuInfo`/`VWorldViewportInfo` wrapper 제거 — raw MapLibre event 그대로 노출. 카운트/임계치는 앱에서 구현 (라이브러리 책임 외).
+- `onViewportChange(eventType=…)` → `onMoveEnd`/`onZoomEnd`/`onIdle` 분리.
+- `redactVWorldTileUrl` 제거 (`redactVWorldUrl`에 흡수, overload로 `undefined` 통과).
+
+### 3. 기본값/필수값 정리
+- `center` 필수화 — 한국 좌표(서울) 기본값 제거. 라이브러리가 위치를 결정하지 않음.
+- `KOREA_LNG_RANGE`/`KoreaLngLatSchema`/`KoreaBoundsSchema` 제거. `makeBoundedLngLatSchema(lngRange, latRange)` factory로 대체.
+- `BasePointDataSchema` → `PointSchema`, `createPointDataSchema` → `extendPointSchema`.
+
+### 4. 아키텍처: external store + selector 패턴
+- 신설: `src/store/{mapStore,hooks}.ts`. `MapStore`는 vanilla JS class, `useSyncExternalStore`로 React 구독. `useMap`/`useMapZoom`/`useMapLoaded`/`useMapSelector`/`useEvent` export.
+- 기존 dual createContext(`MapInstanceContext`/`MapZoomContext`)와 `mapRef + mapLoaded` proxy 패턴 제거 → store가 단일 source of truth.
+- `useMap()`이 `Map | null` 직접 반환 (`{ map }` 객체 wrapping 제거). `useMapContext()` 삭제.
+- `useEvent`(canonical pattern: `useLayoutEffect + useRef + useCallback`)로 핸들러 ID 안정화 → prop callback 변경 시 MapLibre 재구성 없음.
+- `useMapSelector`로 thresh-crossing만 re-render → SimpleMarker/PlaceMarker/WeatherMarker는 zoom 매번 re-render 안 함.
+
+### 5. React/MapLibre 베스트 프랙티스 수정
+- 모든 DOM-touching 모듈에 `'use client'` 추가 (RSC 환경에서 직접 import 가능).
+- 카메라 업데이트 effect에 `map.isMoving() || map.isEasing()` 가드 → 사용자 제스처 중 prop change 시 진동 방지.
+- `mapRef.current`를 `useMemo` factory에서 읽던 antipattern 제거 — store가 instance 변경을 제대로 emit.
+- `PulsingMarker`/`WeatherMarker`의 `<style>` 인스턴스별 주입 → 모듈-레벨 single-injection.
+- `Marker` element scale: CSS3 `scale` 단독 속성 → `--vworld-marker-scale` CSS var로 변경 (Safari 호환).
+- `applyMarkerState`의 className 누락 제거: 직전 className 토큰만 빼고 새 토큰 add (idempotent).
+- `RouteLine`/`PolygonArea`: `JSON.stringify(coordinates)` deps 제거 → 참조 안정성 명시 (consumer가 memoize). 큰 GeoJSON 시 main thread stall 위험 제거.
+- `isVWorldTileError`의 `error.message` null 안전성 강화.
+- `(e: any)` 타입 캐스트 제거, `MapMouseEvent & { features?: MapGeoJSONFeature[] }`로 정확히 타이핑.
+- `ClusterLayer`의 `supercluster: any` → `Supercluster` 타입.
+- `ResizeObserver` 존재 가드 (구형 브라우저).
+
+### 6. 결과
+- `src/store/` 신설 (3개 파일).
+- 17개 컴포넌트 + 2개 helper 모듈 갱신.
+- 테스트: 34/34 통과. type-check 통과. build 통과 (mjs 51KB / umd 39KB, gzip 16KB / 14KB).
+- README, AI_AGENT_GUIDE 전면 재작성 — 새 API만 문서화.
+
+---
+
+## (이전 기록은 history로 보존)
 
 ## 2026-05-25: TripMate 지도 primitive P0/P1 구현
 

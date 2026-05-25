@@ -1,9 +1,7 @@
 import { z } from 'zod';
 
 /**
- * Zod schema for validating [longitude, latitude] coordinates.
- * - Longitude must be between -180 and 180.
- * - Latitude must be between -90 and 90.
+ * `[longitude, latitude]` tuple validated against the full WGS84 range.
  */
 export const LngLatSchema = z.tuple([
   z.number().min(-180).max(180),
@@ -13,7 +11,8 @@ export const LngLatSchema = z.tuple([
 export type LngLat = z.infer<typeof LngLatSchema>;
 
 /**
- * Zod schema for Map Bounds [WestLng, SouthLat, EastLng, NorthLat].
+ * Map bounds tuple `[westLng, southLat, eastLng, northLat]` validated
+ * against the full WGS84 range.
  */
 export const BoundsSchema = z.tuple([
   z.number().min(-180).max(180),
@@ -24,37 +23,49 @@ export const BoundsSchema = z.tuple([
 
 export type Bounds = z.infer<typeof BoundsSchema>;
 
-export const KOREA_LNG_RANGE = [124, 132] as const;
-export const KOREA_LAT_RANGE = [33, 43] as const;
+/**
+ * Build a bounded `[lng, lat]` schema. Useful when the application only
+ * cares about coordinates in a specific country / region and wants to reject
+ * obviously-wrong inputs (mis-typed latitude/longitude order, default zero,
+ * etc.) earlier than the map render.
+ *
+ * @example
+ * const SeoulLngLat = makeBoundedLngLatSchema([126, 128], [37, 38]);
+ */
+export function makeBoundedLngLatSchema(
+  lngRange: readonly [number, number],
+  latRange: readonly [number, number],
+) {
+  return z.tuple([
+    z.number().min(lngRange[0]).max(lngRange[1]),
+    z.number().min(latRange[0]).max(latRange[1]),
+  ]);
+}
 
 /**
- * Zod schema for validating [longitude, latitude] coordinates in Korea.
- * This is intentionally a broad web-map guard, not a cadastral/CRS validator.
+ * Build a bounded `[westLng, southLat, eastLng, northLat]` schema.
  */
-export const KoreaLngLatSchema = z.tuple([
-  z.number().min(KOREA_LNG_RANGE[0]).max(KOREA_LNG_RANGE[1]),
-  z.number().min(KOREA_LAT_RANGE[0]).max(KOREA_LAT_RANGE[1]),
-]);
-
-export type KoreaLngLat = z.infer<typeof KoreaLngLatSchema>;
-
-/**
- * Zod schema for Map Bounds [WestLng, SouthLat, EastLng, NorthLat] in Korea.
- */
-export const KoreaBoundsSchema = z.tuple([
-  z.number().min(KOREA_LNG_RANGE[0]).max(KOREA_LNG_RANGE[1]),
-  z.number().min(KOREA_LAT_RANGE[0]).max(KOREA_LAT_RANGE[1]),
-  z.number().min(KOREA_LNG_RANGE[0]).max(KOREA_LNG_RANGE[1]),
-  z.number().min(KOREA_LAT_RANGE[0]).max(KOREA_LAT_RANGE[1]),
-]);
-
-export type KoreaBounds = z.infer<typeof KoreaBoundsSchema>;
+export function makeBoundedBoundsSchema(
+  lngRange: readonly [number, number],
+  latRange: readonly [number, number],
+) {
+  return z.tuple([
+    z.number().min(lngRange[0]).max(lngRange[1]),
+    z.number().min(latRange[0]).max(latRange[1]),
+    z.number().min(lngRange[0]).max(lngRange[1]),
+    z.number().min(latRange[0]).max(latRange[1]),
+  ]);
+}
 
 function roundCoordinate(value: number, precision: number): number {
   const factor = 10 ** precision;
   return Math.round(value * factor) / factor;
 }
 
+/**
+ * Round a `[lng, lat]` tuple to `precision` decimal places. Default 4 digits
+ * (~11m resolution) is appropriate for URL params and analytics.
+ */
 export function formatLngLat(lngLat: LngLat, precision = 4): LngLat {
   return [
     roundCoordinate(lngLat[0], precision),
@@ -62,35 +73,52 @@ export function formatLngLat(lngLat: LngLat, precision = 4): LngLat {
   ];
 }
 
+/**
+ * Serialize a bounds tuple to a comma-separated string suitable for URL
+ * query params. Default 6 digits (~10cm) preserves enough precision for
+ * round-trip without bloating the URL.
+ */
 export function serializeBounds(bounds: Bounds, precision = 6): string {
   return bounds.map((value) => roundCoordinate(value, precision)).join(',');
 }
 
+/**
+ * Parse a comma-separated bounds string. Throws a `ZodError` if the result
+ * is not a valid `[W, S, E, N]` tuple.
+ */
 export function parseBoundsParam(value: string): Bounds {
   const parts = value.split(',').map((part) => Number(part.trim()));
   return BoundsSchema.parse(parts);
 }
 
 /**
- * Basic Point Data schema for clustering and markers.
+ * Minimum point schema used by the clustering / marker APIs: an `id`
+ * (string or number) and an `lngLat`. Extend this with `extendPointSchema`
+ * when you need additional properties.
  */
-export const BasePointDataSchema = z.object({
+export const PointSchema = z.object({
   id: z.union([z.string(), z.number()]),
   lngLat: LngLatSchema,
 });
 
-export type BasePointData = z.infer<typeof BasePointDataSchema>;
+export type Point = z.infer<typeof PointSchema>;
 
 /**
- * Generic Point Data schema constructor to validate custom properties.
+ * Extend the {@link PointSchema} with custom properties.
+ *
+ * @example
+ * const PlaceSchema = extendPointSchema({ name: z.string(), category: z.string() });
  */
-export const createPointDataSchema = <T extends z.ZodRawShape>(properties: T) => {
-  return BasePointDataSchema.extend(properties);
-};
+export function extendPointSchema<T extends z.ZodRawShape>(properties: T) {
+  return PointSchema.extend(properties);
+}
 
 /**
- * Route coordinates validation schema.
+ * Route coordinates: at least 2 points. Each point is validated against the
+ * full WGS84 range.
  */
-export const RouteCoordinatesSchema = z.array(LngLatSchema).min(2, "Route must have at least 2 points");
+export const RouteCoordinatesSchema = z
+  .array(LngLatSchema)
+  .min(2, 'Route must have at least 2 points');
 
 export type RouteCoordinates = z.infer<typeof RouteCoordinatesSchema>;

@@ -15,7 +15,7 @@ describe('ServerClusterLayer', () => {
   it('renders server clusters and fits their bounds on click', async () => {
     vi.clearAllMocks();
     render(
-      <VWorldMap apiKey="test-key">
+      <VWorldMap apiKey="test-key" center={[127, 37]}>
         <ServerClusterLayer
           clusters={[
             {

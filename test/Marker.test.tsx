@@ -13,11 +13,11 @@ function latestMarkerMock() {
 describe('Marker', () => {
   it('creates and adds a marker to the map', async () => {
     render(
-      <VWorldMap apiKey="test-key">
+      <VWorldMap apiKey="test-key" center={[127, 37]}>
         <Marker lngLat={[127, 37]} />
-      </VWorldMap>
+      </VWorldMap>,
     );
-    
+
     await waitFor(() => {
       expect(maplibregl.Marker).toHaveBeenCalledWith({
         color: '#3FB1CE',
@@ -26,21 +26,19 @@ describe('Marker', () => {
     });
   });
 
-  it('supports custom child elements', async () => {
+  it('uses a custom element when children are provided', async () => {
     render(
-      <VWorldMap apiKey="test-key">
+      <VWorldMap apiKey="test-key" center={[127, 37]}>
         <Marker lngLat={[127, 37]}>
           <div data-testid="custom-marker">Hello</div>
         </Marker>
-      </VWorldMap>
+      </VWorldMap>,
     );
-    
+
     await waitFor(() => {
-      // It creates an HTML element to pass to Marker options
-      expect(maplibregl.Marker).toHaveBeenCalledWith(expect.objectContaining({
-        element: expect.any(HTMLDivElement),
-        draggable: false,
-      }));
+      expect(maplibregl.Marker).toHaveBeenCalledWith(
+        expect.objectContaining({ element: expect.any(HTMLDivElement), draggable: false }),
+      );
     });
   });
 
@@ -49,7 +47,7 @@ describe('Marker', () => {
     const onClick = vi.fn();
     const onContextMenu = vi.fn();
     render(
-      <VWorldMap apiKey="test-key">
+      <VWorldMap apiKey="test-key" center={[127, 37]}>
         <Marker
           lngLat={[127, 37]}
           onClick={onClick}
@@ -57,11 +55,11 @@ describe('Marker', () => {
           selected
           zIndex={7}
           ariaLabel="Selected place"
-          className="tripmate-marker"
+          className="custom-class"
         >
           <div data-testid="custom-marker">Hello</div>
         </Marker>
-      </VWorldMap>
+      </VWorldMap>,
     );
 
     await waitFor(() => expect(maplibregl.Marker).toHaveBeenCalled());
@@ -76,6 +74,6 @@ describe('Marker', () => {
     expect(element.dataset.selected).toBe('true');
     expect(element.style.zIndex).toBe('7');
     expect(element).toHaveAttribute('aria-label', 'Selected place');
-    expect(element).toHaveClass('tripmate-marker');
+    expect(element).toHaveClass('custom-class');
   });
 });
