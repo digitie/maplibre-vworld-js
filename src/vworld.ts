@@ -1,9 +1,16 @@
-import { StyleSpecification } from 'maplibre-gl';
+import type { ErrorEvent, StyleSpecification } from 'maplibre-gl';
 
 export type VWorldLayerType = 'Base' | 'gray' | 'midnight' | 'Hybrid' | 'Satellite';
 
 const LIMITED_ZOOM_LAYER_TYPES = new Set<VWorldLayerType>(['Hybrid', 'Satellite']);
 const VWORLD_ATTRIBUTION = '공간정보 오픈플랫폼 브이월드';
+const TRANSIENT_TILE_ERROR_STATUSES = new Set([404, 408, 429, 500, 502, 503, 504]);
+
+export type VWorldMapResourceError = Error & {
+  status?: number;
+  statusText?: string;
+  url?: string;
+};
 
 export function getVWorldTileUrl(apiKey: string, layerType: VWorldLayerType): string {
   const ext = layerType === 'Satellite' ? 'jpeg' : 'png';
@@ -57,4 +64,23 @@ export function getVWorldStyle(apiKey: string, layerType: VWorldLayerType): Styl
     sources,
     layers,
   };
+}
+
+export function isVWorldTileError(event: ErrorEvent): boolean {
+  const error = event.error as VWorldMapResourceError;
+  const message = error.message.toLowerCase();
+  const sourceId = 'sourceId' in event ? String(event.sourceId) : '';
+  const url = error.url ?? '';
+
+  return (
+    sourceId.startsWith('vworld') ||
+    url.includes('/req/wmts/') ||
+    message.includes('tile') ||
+    message.includes('failed to fetch') ||
+    TRANSIENT_TILE_ERROR_STATUSES.has(error.status ?? 0)
+  );
+}
+
+export function redactVWorldTileUrl(url: string | undefined): string | undefined {
+  return url?.replace(/\/req\/wmts\/1\.0\.0\/[^/]+/, '/req/wmts/1.0.0/[redacted]');
 }

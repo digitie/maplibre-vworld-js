@@ -26,4 +26,9 @@
 - **배경**: `maplibre-vworld`를 npm registry 배포 전 GitHub dependency로 설치하는 소비자 프로젝트가 있다. `package.json`의 `exports`는 `dist/`를 가리키는데 저장소에 `dist/`가 없으면, 소비자 `npm install` 또는 Next.js build가 package root import 단계에서 실패한다. `prepare` 스크립트로 GitHub 설치 시 빌드하는 방식은 소비자 설치 중 dev dependency 설치와 Puppeteer postinstall 비용을 유발한다.
 - **결정**: `dist/`를 `.gitignore`에서 제거하고, `vite build` 산출물(`mjs`, `umd`, CSS, declaration files)을 저장소에 커밋한다. npm publish 전에는 `prepack`으로 다시 빌드하되, GitHub dependency 소비자는 커밋된 `dist/`만으로 import할 수 있게 한다.
 - **결과**: 소비자는 별도 build step 없이 `import { VWorldMap } from "maplibre-vworld"`와 `import "maplibre-vworld/style.css"`를 사용할 수 있다. declaration generation은 `tsconfig.build.json`으로 `src/`만 대상으로 삼아 `dev/`와 `test/` 타입 오류가 배포 산출물에 섞이지 않도록 한다.
-- **주의**: `react`, `react-dom`, `maplibre-gl`, `zod`는 peer dependency로 둔다. 특히 `zod`는 현재 `^3.25.76` 계열 declaration을 기준으로 빌드하므로, 소비자 프로젝트의 중복 zod 설치를 막기 위해 runtime dependency로 끌어오지 않는다.
+- **주의**: `react`, `react-dom`, `maplibre-gl`, `zod`는 peer dependency로 둔다. 특히 `zod`는 현재 `^4.4.3` 계열 declaration을 기준으로 빌드하므로, 소비자 프로젝트의 중복 zod 설치를 막기 위해 runtime dependency로 끌어오지 않는다.
+
+## ADR 6: 디버그·운영 UI를 위한 원시 MapLibre 이벤트 훅을 제공한다
+- **배경**: `python-kraddr-geo`의 디버그 UI처럼 지도 click 좌표를 입력 폼에 반영하거나, VWorld tile 오류를 redaction 후 임계치 기반 overlay로 처리해야 하는 소비자가 있다. 이런 동작을 각 소비자 프로젝트가 MapLibre 인스턴스에 직접 붙이면, source id(`vworld-${layerType}`), `Hybrid` 이중 source, tile URL redaction 같은 VWorld 고유 계약이 흩어진다.
+- **결정**: `<VWorldMap>`에 `onMapClick`, `onMapError`, `flyToOptions`를 추가한다. 또한 `isVWorldTileError(event)`와 `redactVWorldTileUrl(url)` helper를 package API로 노출한다. 이 기능은 지도 표시 자체와 무관한 정책 overlay를 강제하지 않고, 소비자가 필요한 UI를 직접 만들 수 있도록 원시 이벤트와 VWorld 판별 helper만 제공한다.
+- **결과**: 범용 컴포넌트는 단순함을 유지하면서도 운영·디버그 UI가 click callback, marker 이동, tile 오류 redaction/분류를 같은 의미로 구현할 수 있다. 후속 소비자 프로젝트는 로컬 MapLibre wiring을 줄이고 이 helper/API를 기준으로 테스트할 수 있다.

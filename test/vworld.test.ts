@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { getVWorldMaxZoom, getVWorldTileUrl, getVWorldStyle } from '../src/vworld';
+import {
+  getVWorldMaxZoom,
+  getVWorldStyle,
+  getVWorldTileUrl,
+  isVWorldTileError,
+  redactVWorldTileUrl,
+} from '../src/vworld';
 
 describe('VWorld Utilities', () => {
   const API_KEY = 'TEST_KEY';
@@ -31,6 +37,11 @@ describe('VWorld Utilities', () => {
       expect(url).toContain('/KEY_WITH_SPACES/');
       expect(url).not.toContain('%20');
       expect(url).not.toContain('%0A');
+    });
+
+    it('maps gray option to the VWorld white WMTS layer', () => {
+      const url = getVWorldTileUrl(API_KEY, 'gray');
+      expect(url).toBe('https://api.vworld.kr/req/wmts/1.0.0/TEST_KEY/white/{z}/{y}/{x}.png');
     });
   });
 
@@ -66,6 +77,34 @@ describe('VWorld Utilities', () => {
       expect(getVWorldMaxZoom('Base')).toBe(19);
       expect(getVWorldMaxZoom('Satellite')).toBe(18);
       expect(getVWorldMaxZoom('Hybrid')).toBe(18);
+    });
+  });
+
+  describe('tile error helpers', () => {
+    it('detects VWorld source and WMTS URL tile errors', () => {
+      expect(
+        isVWorldTileError({
+          error: Object.assign(new Error('not found'), {
+            status: 404,
+            url: 'https://api.vworld.kr/req/wmts/1.0.0/KEY/Base/1/2/3.png',
+          }),
+          sourceId: 'vworld-Base',
+        } as any)
+      ).toBe(true);
+    });
+
+    it('detects transient network messages even when source id is missing', () => {
+      expect(
+        isVWorldTileError({
+          error: new Error('Failed to fetch tile'),
+        } as any)
+      ).toBe(true);
+    });
+
+    it('redacts the VWorld API key from WMTS URLs', () => {
+      expect(redactVWorldTileUrl('https://api.vworld.kr/req/wmts/1.0.0/SECRET/Base/1/2/3.png')).toBe(
+        'https://api.vworld.kr/req/wmts/1.0.0/[redacted]/Base/1/2/3.png'
+      );
     });
   });
 });

@@ -157,6 +157,38 @@ VWorld 지도 타일(WMTS)을 요청할 때 브라우저 콘솔에 **CORS 에러
 | `center` | `[number, number]` | `[127.02, 37.53]` | 초기 카메라 중심 좌표 (경도, 위도) |
 | `zoom` | `number` | `12` | 초기 줌 레벨 |
 | `maxZoom` | `number` | `19` | 레이어별 상한과 함께 적용된다. `Satellite`/`Hybrid`는 VWorld 타일 한계에 맞춰 최대 z18까지만 요청한다. |
+| `onMapClick` | `(event) => void` | `undefined` | 지도 바탕 클릭 이벤트. `event.lngLat.lng`, `event.lngLat.lat`로 경도/위도를 읽는다. |
+| `onMapError` | `(event) => void` | `undefined` | MapLibre error event를 그대로 전달한다. VWorld tile 오류 판별은 `isVWorldTileError()` 사용. |
+| `flyToOptions` | `FlyToOptions` 일부 | `undefined` | `center`/`zoom` prop 변경 시 호출되는 `flyTo`에 추가할 옵션. 예: `{ animate: false, duration: 0 }` |
+
+#### 디버그/운영 UI용 이벤트 처리 예시
+
+```tsx
+import { VWorldMap, isVWorldTileError, redactVWorldTileUrl } from 'maplibre-vworld';
+
+<VWorldMap
+  apiKey={API_KEY}
+  center={[127, 37]}
+  flyToOptions={{ animate: false, duration: 0 }}
+  onMapClick={(event) => {
+    const point = { x: event.lngLat.lng, y: event.lngLat.lat };
+    console.log(point);
+  }}
+  onMapError={(event) => {
+    if (isVWorldTileError(event)) {
+      console.warn('VWorld tile warning', {
+        sourceId: 'sourceId' in event ? event.sourceId : undefined,
+        url: redactVWorldTileUrl((event.error as Error & { url?: string }).url),
+      });
+      return;
+    }
+
+    throw event.error;
+  }}
+/>
+```
+
+이벤트 훅은 overlay나 fallback UI를 강제하지 않습니다. API key 미설정 fallback, 오류 임계치, 로깅 정책은 각 운영 콘솔에서 결정하고, VWorld tile 오류 판별·URL redaction만 이 라이브러리 helper를 공유합니다.
 
 ### 2. `<MarkerClusterer>`
 만 개 이상의 마커를 그릴 때 필수적으로 사용해야 하는 고성능 클러스터링 엔진입니다. (화면 밖 마커 자동 제거 기능 포함)

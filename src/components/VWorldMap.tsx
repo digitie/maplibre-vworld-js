@@ -80,6 +80,19 @@ export interface VWorldMapProps {
    */
   onMapLoad?: (map: maplibregl.Map) => void;
   /**
+   * Callback fired when the user clicks the map canvas.
+   */
+  onMapClick?: (event: maplibregl.MapMouseEvent) => void;
+  /**
+   * Callback fired for MapLibre error events.
+   */
+  onMapError?: (event: maplibregl.ErrorEvent) => void;
+  /**
+   * Additional options used when center or zoom props change and the map calls `flyTo`.
+   * The `center` and `zoom` values always come from the corresponding props.
+   */
+  flyToOptions?: Omit<maplibregl.FlyToOptions, 'center' | 'zoom'>;
+  /**
    * A callback run before the Map makes a request for an external URL. 
    * Useful for handling CORS, adding authentication headers, or rewriting URLs to a proxy server.
    */
@@ -136,12 +149,25 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   style = { width: '100%', height: '100%' },
   children,
   onMapLoad,
+  onMapClick,
+  onMapError,
+  flyToOptions,
   transformRequest,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const onMapClickRef = useRef(onMapClick);
+  const onMapErrorRef = useRef(onMapError);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(zoom);
+
+  useEffect(() => {
+    onMapClickRef.current = onMapClick;
+  }, [onMapClick]);
+
+  useEffect(() => {
+    onMapErrorRef.current = onMapError;
+  }, [onMapError]);
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -185,17 +211,27 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       );
     }
 
-    map.on('load', () => {
+    const handleLoad = () => {
       setMapLoaded(true);
       setCurrentZoom(map.getZoom());
       if (onMapLoad) {
         onMapLoad(map);
       }
-    });
-
-    map.on('zoomend', () => {
+    };
+    const handleZoomEnd = () => {
       setCurrentZoom(map.getZoom());
-    });
+    };
+    const handleClick = (event: maplibregl.MapMouseEvent) => {
+      onMapClickRef.current?.(event);
+    };
+    const handleError = (event: maplibregl.ErrorEvent) => {
+      onMapErrorRef.current?.(event);
+    };
+
+    map.on('load', handleLoad);
+    map.on('zoomend', handleZoomEnd);
+    map.on('click', handleClick);
+    map.on('error', handleError);
 
     // Handle resize for mobile responsiveness
     const resizeObserver = new ResizeObserver(() => {
@@ -205,7 +241,12 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
 
     return () => {
       resizeObserver.disconnect();
+      map.off('error', handleError);
+      map.off('click', handleClick);
+      map.off('zoomend', handleZoomEnd);
+      map.off('load', handleLoad);
       map.remove();
+      mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Initialize only once
@@ -227,14 +268,14 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       const zoomChanged = zoom !== undefined && prevZoom.current !== zoom;
 
       if (centerChanged || zoomChanged) {
-        mapRef.current.flyTo({ center, zoom });
+        mapRef.current.flyTo({ ...flyToOptions, center, zoom });
       }
 
       prevCenter.current = center;
       prevZoom.current = zoom;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [center, zoom]);
+  }, [center, zoom, flyToOptions]);
 
   // Update minZoom, maxZoom, and maxBounds dynamically
   useEffect(() => {

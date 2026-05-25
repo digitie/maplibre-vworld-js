@@ -78,6 +78,19 @@ export interface VWorldMapProps {
      */
     onMapLoad?: (map: maplibregl.Map) => void;
     /**
+     * Callback fired when the user clicks the map canvas.
+     */
+    onMapClick?: (event: maplibregl.MapMouseEvent) => void;
+    /**
+     * Callback fired for MapLibre error events.
+     */
+    onMapError?: (event: maplibregl.ErrorEvent) => void;
+    /**
+     * Additional options used when center or zoom props change and the map calls `flyTo`.
+     * The `center` and `zoom` values always come from the corresponding props.
+     */
+    flyToOptions?: Omit<maplibregl.FlyToOptions, 'center' | 'zoom'>;
+    /**
      * A callback run before the Map makes a request for an external URL.
      * Useful for handling CORS, adding authentication headers, or rewriting URLs to a proxy server.
      */
