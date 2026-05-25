@@ -29,7 +29,7 @@ describe('VWorldMap', () => {
 
   it('initializes maplibre-gl map with correct options', () => {
     render(<VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} layerType="Satellite" />);
-    
+
     expect(maplibregl.Map).toHaveBeenCalledWith(expect.objectContaining({
       center: [127, 37],
       zoom: 10,
@@ -41,7 +41,7 @@ describe('VWorldMap', () => {
 
   it('adds NavigationControl and GeolocateControl by default', () => {
     render(<VWorldMap apiKey="test-key" />);
-    
+
     expect(maplibregl.NavigationControl).toHaveBeenCalled();
     expect(maplibregl.GeolocateControl).toHaveBeenCalled();
   });
@@ -49,51 +49,140 @@ describe('VWorldMap', () => {
   it('can disable controls via props', () => {
     vi.clearAllMocks();
     render(<VWorldMap apiKey="test-key" showNavigationControl={false} showGeolocateControl={false} />);
-    
+
     expect(maplibregl.NavigationControl).not.toHaveBeenCalled();
     expect(maplibregl.GeolocateControl).not.toHaveBeenCalled();
   });
 
-  it('passes raw MapLibre click events to onMapClick', () => {
-    const onMapClick = vi.fn();
-    render(<VWorldMap apiKey="test-key" onMapClick={onMapClick} />);
+  describe('fallback', () => {
+    it('renders fallback when apiKey is missing', () => {
+      vi.clearAllMocks();
+      const { queryByTestId, getByText } = render(
+        <VWorldMap apiKey="" fallback={<div>NO KEY</div>} />
+      );
+      expect(queryByTestId('vworld-map-container')).not.toBeInTheDocument();
+      expect(getByText('NO KEY')).toBeInTheDocument();
+      expect(maplibregl.Map).not.toHaveBeenCalled();
+    });
 
-    const map = latestMapMock();
-    const event = { lngLat: { lng: 127, lat: 37 } };
-    mapHandler<typeof event>(map, 'click')(event);
+    it('renders fallback when apiKey is whitespace-only', () => {
+      vi.clearAllMocks();
+      const { queryByTestId } = render(
+        <VWorldMap apiKey={'   \n  '} fallback={<div>NO KEY</div>} />
+      );
+      expect(queryByTestId('vworld-map-container')).not.toBeInTheDocument();
+      expect(maplibregl.Map).not.toHaveBeenCalled();
+    });
 
-    expect(onMapClick).toHaveBeenCalledWith(event);
+    it('passes reason to fallback render function', () => {
+      vi.clearAllMocks();
+      const fallback = vi.fn((info) => <div>reason: {info.reason}</div>);
+      const { getByText } = render(<VWorldMap apiKey="" fallback={fallback} />);
+      expect(fallback).toHaveBeenCalledWith({ reason: 'missing-api-key' });
+      expect(getByText('reason: missing-api-key')).toBeInTheDocument();
+    });
+
+    it('renders nothing when fallback is omitted and apiKey is missing', () => {
+      vi.clearAllMocks();
+      const { queryByTestId } = render(<VWorldMap apiKey="" />);
+      expect(queryByTestId('vworld-map-container')).not.toBeInTheDocument();
+      expect(maplibregl.Map).not.toHaveBeenCalled();
+    });
   });
 
-  it('passes raw MapLibre error events to onMapError', () => {
-    const onMapError = vi.fn();
-    render(<VWorldMap apiKey="test-key" onMapError={onMapError} />);
+  describe('event wiring', () => {
+    it('attaches click/error handlers when map is created', () => {
+      vi.clearAllMocks();
+      const onMapClick = vi.fn();
+      const onMapError = vi.fn();
+      render(
+        <VWorldMap apiKey="test-key" onMapClick={onMapClick} onMapError={onMapError} />
+      );
+      const mapInstance = (maplibregl.Map as any).mock.results[0].value;
+      const registered = mapInstance.on.mock.calls.map((c: any[]) => c[0]);
+      expect(registered).toContain('click');
+      expect(registered).toContain('error');
+      expect(registered).toContain('load');
+    });
 
-    const map = latestMapMock();
-    const event = { error: new Error('tile failed'), sourceId: 'vworld-Base' };
-    mapHandler<typeof event>(map, 'error')(event);
+    it('passes raw MapLibre click events to onMapClick', () => {
+      vi.clearAllMocks();
+      const onMapClick = vi.fn();
+      render(<VWorldMap apiKey="test-key" onMapClick={onMapClick} />);
 
-    expect(onMapError).toHaveBeenCalledWith(event);
+      const map = latestMapMock();
+      const event = { lngLat: { lng: 127, lat: 37 } };
+      mapHandler<typeof event>(map, 'click')(event);
+
+      expect(onMapClick).toHaveBeenCalledWith(event);
+    });
+
+    it('wraps MapLibre error events in VWorldMapErrorInfo for onMapError', () => {
+      vi.clearAllMocks();
+      const onMapError = vi.fn();
+      render(<VWorldMap apiKey="test-key" onMapError={onMapError} />);
+
+      const map = latestMapMock();
+      const rawEvent = { error: new Error('tile failed'), sourceId: 'vworld-Base' };
+      mapHandler<typeof rawEvent>(map, 'error')(rawEvent);
+
+      expect(onMapError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: rawEvent,
+          count: 1,
+          thresholdReached: false,
+        })
+      );
+    });
   });
 
-  it('applies flyToOptions when center or zoom props change', async () => {
-    const { rerender } = render(
-      <VWorldMap apiKey="test-key" center={[127, 37]} flyToOptions={{ animate: false, duration: 0 }} zoom={10} />
-    );
-    const map = latestMapMock();
+  describe('loadingSkeleton', () => {
+    it('renders skeleton before the map fires load', () => {
+      vi.clearAllMocks();
+      const { getByText } = render(
+        <VWorldMap apiKey="test-key" loadingSkeleton={<div>SKELETON</div>} />
+      );
+      // The mocked Map fires `load` asynchronously via setTimeout, so on the
+      // synchronous render the skeleton is visible.
+      expect(getByText('SKELETON')).toBeInTheDocument();
+    });
+  });
 
-    await waitFor(() => expect(map.getZoom).toHaveBeenCalled());
-    rerender(
-      <VWorldMap apiKey="test-key" center={[128, 38]} flyToOptions={{ animate: false, duration: 0 }} zoom={10} />
-    );
+  describe('flyToOptions', () => {
+    it('forwards flyToOptions to flyTo when center prop changes', async () => {
+      vi.clearAllMocks();
+      const { rerender } = render(
+        <VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} flyToOptions={{ duration: 500 }} />
+      );
+      const map = latestMapMock();
 
-    await waitFor(() => {
-      expect(map.flyTo).toHaveBeenCalledWith({
-        animate: false,
-        center: [128, 38],
-        duration: 0,
-        zoom: 10,
+      await waitFor(() => expect(map.getZoom).toHaveBeenCalled());
+      rerender(
+        <VWorldMap apiKey="test-key" center={[128, 38]} zoom={10} flyToOptions={{ duration: 500 }} />
+      );
+
+      await waitFor(() => {
+        expect(map.flyTo).toHaveBeenCalledWith({
+          duration: 500,
+          center: [128, 38],
+          zoom: 10,
+        });
       });
+    });
+
+    it('does not call flyTo when animateCameraChanges is false', async () => {
+      vi.clearAllMocks();
+      const { rerender } = render(
+        <VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} animateCameraChanges={false} />
+      );
+      const map = latestMapMock();
+
+      await waitFor(() => expect(map.getZoom).toHaveBeenCalled());
+      rerender(
+        <VWorldMap apiKey="test-key" center={[128, 38]} zoom={10} animateCameraChanges={false} />
+      );
+
+      await waitFor(() => expect(map.flyTo).not.toHaveBeenCalled());
     });
   });
 });

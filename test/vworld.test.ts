@@ -5,6 +5,7 @@ import {
   getVWorldTileUrl,
   isVWorldTileError,
   redactVWorldTileUrl,
+  redactVWorldUrl,
 } from '../src/vworld';
 
 describe('VWorld Utilities', () => {
@@ -48,24 +49,24 @@ describe('VWorld Utilities', () => {
   describe('getVWorldStyle', () => {
     it('returns valid MapLibre style specification for Base', () => {
       const style = getVWorldStyle(API_KEY, 'Base');
-      
+
       expect(style.version).toBe(8);
       expect(style.sources).toHaveProperty('vworld-Base');
       expect(style.sources['vworld-Base'].type).toBe('raster');
       expect((style.sources['vworld-Base'] as any).attribution).toBe('공간정보 오픈플랫폼 브이월드');
       expect((style.sources['vworld-Base'] as any).maxzoom).toBe(19);
       expect((style.sources['vworld-Base'] as any).tiles[0]).toContain('/Base/');
-      
+
       expect(style.layers).toHaveLength(1);
       expect(style.layers[0].id).toBe('vworld-Base-layer');
     });
 
     it('returns Satellite as base layer and Hybrid on top when layerType is Hybrid', () => {
       const style = getVWorldStyle(API_KEY, 'Hybrid');
-      
+
       expect(style.sources).toHaveProperty('vworld-satellite');
       expect(style.sources).toHaveProperty('vworld-Hybrid');
-      
+
       expect(style.layers).toHaveLength(2);
       expect(style.layers[0].id).toBe('vworld-satellite-layer');
       expect(style.layers[1].id).toBe('vworld-Hybrid-layer');
@@ -77,6 +78,30 @@ describe('VWorld Utilities', () => {
       expect(getVWorldMaxZoom('Base')).toBe(19);
       expect(getVWorldMaxZoom('Satellite')).toBe(18);
       expect(getVWorldMaxZoom('Hybrid')).toBe(18);
+    });
+  });
+
+  describe('redactVWorldUrl', () => {
+    it('masks the API key segment of a WMTS tile URL', () => {
+      const url =
+        'https://api.vworld.kr/req/wmts/1.0.0/ABCD-1234-SECRET/Base/14/8000/12000.png';
+      expect(redactVWorldUrl(url)).toBe(
+        'https://api.vworld.kr/req/wmts/1.0.0/***/Base/14/8000/12000.png'
+      );
+      expect(redactVWorldUrl(url)).not.toContain('ABCD-1234-SECRET');
+    });
+
+    it('handles URL-encoded keys with special characters', () => {
+      const url =
+        'https://api.vworld.kr/req/wmts/1.0.0/a%2Fb%20c%2Bd/Satellite/10/200/300.jpeg';
+      expect(redactVWorldUrl(url)).toBe(
+        'https://api.vworld.kr/req/wmts/1.0.0/***/Satellite/10/200/300.jpeg'
+      );
+    });
+
+    it('returns the input unchanged for non-WMTS URLs', () => {
+      const url = 'https://example.com/not-a-vworld-tile';
+      expect(redactVWorldUrl(url)).toBe(url);
     });
   });
 
@@ -101,10 +126,14 @@ describe('VWorld Utilities', () => {
       ).toBe(true);
     });
 
-    it('redacts the VWorld API key from WMTS URLs', () => {
+    it('redacts the VWorld API key from WMTS URLs (redactVWorldTileUrl)', () => {
       expect(redactVWorldTileUrl('https://api.vworld.kr/req/wmts/1.0.0/SECRET/Base/1/2/3.png')).toBe(
         'https://api.vworld.kr/req/wmts/1.0.0/[redacted]/Base/1/2/3.png'
       );
+    });
+
+    it('returns undefined for undefined input (redactVWorldTileUrl)', () => {
+      expect(redactVWorldTileUrl(undefined)).toBeUndefined();
     });
   });
 });

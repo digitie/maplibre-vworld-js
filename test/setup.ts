@@ -15,6 +15,7 @@ vi.mock('maplibre-gl', () => {
       setStyle: vi.fn(),
       addControl: vi.fn(),
       flyTo: vi.fn(),
+      jumpTo: vi.fn(),
       resize: vi.fn(),
       getZoom: vi.fn().mockReturnValue(12),
       setMinZoom: vi.fn(),
