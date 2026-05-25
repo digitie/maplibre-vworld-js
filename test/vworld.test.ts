@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
   getVWorldMaxZoom,
-  getVWorldTileUrl,
   getVWorldStyle,
+  getVWorldTileUrl,
+  isVWorldTileError,
+  redactVWorldTileUrl,
   redactVWorldUrl,
 } from '../src/vworld';
 
@@ -37,29 +39,34 @@ describe('VWorld Utilities', () => {
       expect(url).not.toContain('%20');
       expect(url).not.toContain('%0A');
     });
+
+    it('maps gray option to the VWorld white WMTS layer', () => {
+      const url = getVWorldTileUrl(API_KEY, 'gray');
+      expect(url).toBe('https://api.vworld.kr/req/wmts/1.0.0/TEST_KEY/white/{z}/{y}/{x}.png');
+    });
   });
 
   describe('getVWorldStyle', () => {
     it('returns valid MapLibre style specification for Base', () => {
       const style = getVWorldStyle(API_KEY, 'Base');
-      
+
       expect(style.version).toBe(8);
       expect(style.sources).toHaveProperty('vworld-Base');
       expect(style.sources['vworld-Base'].type).toBe('raster');
       expect((style.sources['vworld-Base'] as any).attribution).toBe('공간정보 오픈플랫폼 브이월드');
       expect((style.sources['vworld-Base'] as any).maxzoom).toBe(19);
       expect((style.sources['vworld-Base'] as any).tiles[0]).toContain('/Base/');
-      
+
       expect(style.layers).toHaveLength(1);
       expect(style.layers[0].id).toBe('vworld-Base-layer');
     });
 
     it('returns Satellite as base layer and Hybrid on top when layerType is Hybrid', () => {
       const style = getVWorldStyle(API_KEY, 'Hybrid');
-      
+
       expect(style.sources).toHaveProperty('vworld-satellite');
       expect(style.sources).toHaveProperty('vworld-Hybrid');
-      
+
       expect(style.layers).toHaveLength(2);
       expect(style.layers[0].id).toBe('vworld-satellite-layer');
       expect(style.layers[1].id).toBe('vworld-Hybrid-layer');
@@ -95,6 +102,38 @@ describe('VWorld Utilities', () => {
     it('returns the input unchanged for non-WMTS URLs', () => {
       const url = 'https://example.com/not-a-vworld-tile';
       expect(redactVWorldUrl(url)).toBe(url);
+    });
+  });
+
+  describe('tile error helpers', () => {
+    it('detects VWorld source and WMTS URL tile errors', () => {
+      expect(
+        isVWorldTileError({
+          error: Object.assign(new Error('not found'), {
+            status: 404,
+            url: 'https://api.vworld.kr/req/wmts/1.0.0/KEY/Base/1/2/3.png',
+          }),
+          sourceId: 'vworld-Base',
+        } as any)
+      ).toBe(true);
+    });
+
+    it('detects transient network messages even when source id is missing', () => {
+      expect(
+        isVWorldTileError({
+          error: new Error('Failed to fetch tile'),
+        } as any)
+      ).toBe(true);
+    });
+
+    it('redacts the VWorld API key from WMTS URLs (redactVWorldTileUrl)', () => {
+      expect(redactVWorldTileUrl('https://api.vworld.kr/req/wmts/1.0.0/SECRET/Base/1/2/3.png')).toBe(
+        'https://api.vworld.kr/req/wmts/1.0.0/[redacted]/Base/1/2/3.png'
+      );
+    });
+
+    it('returns undefined for undefined input (redactVWorldTileUrl)', () => {
+      expect(redactVWorldTileUrl(undefined)).toBeUndefined();
     });
   });
 });

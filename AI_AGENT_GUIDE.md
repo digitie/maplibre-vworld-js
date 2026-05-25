@@ -54,11 +54,20 @@ interface VWorldMapProps {
   showNavigationControl?: boolean; // 기본값: true
   showGeolocateControl?: boolean; // 기본값: true
   showScaleControl?: boolean; // 기본값: true
+  onMapClick?: (event: maplibregl.MapMouseEvent) => void; // 지도 바탕 클릭 이벤트
+  onMapError?: (event: maplibregl.ErrorEvent) => void; // MapLibre error 이벤트
+  flyToOptions?: Omit<maplibregl.FlyToOptions, 'center' | 'zoom'>; // center/zoom 변경 시 flyTo 추가 옵션
   transformRequest?: (url: string, resourceType: string) => { url: string, headers?: any }; // CORS 우회용 프록시 훅
 }
 ```
 
 **AI 지시사항**: `Satellite`와 `Hybrid`는 VWorld 타일 한계에 맞춰 z18까지만 요청해야 합니다. `Base`, `gray`, `midnight`는 z19까지 사용할 수 있습니다. 유틸 함수 `getVWorldMaxZoom(layerType)`를 사용해 지도 옵션과 style source의 `maxzoom`을 일관되게 맞추세요.
+
+**AI 지시사항 (디버그/운영 UI 이벤트)**:
+- 지도 클릭 좌표가 필요한 화면은 `onMapClick`을 사용하고, 좌표 순서는 항상 `[lng, lat]` 또는 `{ x: lng, y: lat }`로 유지하세요.
+- VWorld tile 오류를 사용자 overlay로 처리할 때는 `onMapError`에서 `isVWorldTileError(event)`로 먼저 분류하고, 로그에는 `redactVWorldTileUrl(url)`을 사용해 API key를 제거하세요.
+- marker나 입력 폼 동기화 때문에 지도 이동 애니메이션을 끄고 싶다면 `flyToOptions={{ animate: false, duration: 0 }}`를 전달하세요.
+- API key 미설정 fallback UI는 이 라이브러리가 강제하지 않습니다. Next.js 운영 콘솔에서는 `VWorldMap`을 렌더링하기 전에 환경변수를 확인하고, 없으면 같은 크기의 placeholder를 렌더링하세요.
 
 **🚨 AI 지시사항 (CORS / 보안 에러 처리)**:
 - 사용자가 `CORS` 또는 `403 Forbidden` 에러를 겪는다고 보고하면, 가장 먼저 **"VWorld 개발자 센터에 현재 로컬 주소(예: localhost:5173)가 도메인으로 등록되어 있는지"** 확인하라고 안내하세요. VWorld는 등록되지 않은 도메인에 대해 의도적으로 CORS 헤더를 제거합니다.

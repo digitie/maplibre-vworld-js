@@ -155,6 +155,13 @@ export interface VWorldMapProps {
    * @default true
    */
   animateCameraChanges?: boolean;
+  /**
+   * Additional options forwarded to `flyTo` when `center` or `zoom` props
+   * change and `animateCameraChanges` is `true`. The `center` and `zoom`
+   * values always come from the corresponding props. Useful for tuning
+   * animation speed / easing without switching off animation entirely.
+   */
+  flyToOptions?: Omit<maplibregl.FlyToOptions, 'center' | 'zoom'>;
 }
 
 /**
@@ -261,6 +268,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   fallback,
   loadingSkeleton,
   animateCameraChanges = true,
+  flyToOptions,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
@@ -423,7 +431,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
 
       if (centerChanged || zoomChanged) {
         if (animateCameraChanges) {
-          mapRef.current.flyTo({ center, zoom });
+          mapRef.current.flyTo({ ...flyToOptions, center, zoom });
         } else {
           mapRef.current.jumpTo({ center, zoom });
         }
@@ -433,7 +441,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       prevZoom.current = zoom;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [center, zoom, animateCameraChanges]);
+  }, [center, zoom, animateCameraChanges, flyToOptions]);
 
   // Update minZoom, maxZoom, and maxBounds dynamically
   useEffect(() => {

@@ -151,6 +151,13 @@ export interface VWorldMapProps {
      * @default true
      */
     animateCameraChanges?: boolean;
+    /**
+     * Additional options forwarded to `flyTo` when `center` or `zoom` props
+     * change and `animateCameraChanges` is `true`. The `center` and `zoom`
+     * values always come from the corresponding props. Useful for tuning
+     * animation speed / easing without switching off animation entirely.
+     */
+    flyToOptions?: Omit<maplibregl.FlyToOptions, 'center' | 'zoom'>;
 }
 /**
  * Stable per-mount context: the MapLibre instance handle and configuration

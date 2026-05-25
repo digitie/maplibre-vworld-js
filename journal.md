@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-05-25: 디버그 UI 동작 정합화를 위한 Map event hook 보강
+
+### 1. `python-kraddr-geo` 디버그 지도와 공통화할 이벤트 표면 추가
+- **이슈**: `kraddr-geo-ui`는 지도 click 좌표를 `(lon, lat)` 입력값으로 반영하고, VWorld tile 오류를 API key redaction 후 transient warning/overlay로 처리한다. 기존 `<VWorldMap>`은 지도 표시와 marker/cluster 중심이라 이 디버그 UI 동작을 공통 package API로 옮기기 어려웠다.
+- **조치**:
+  1. `<VWorldMap>`에 `onMapClick`, `onMapError`, `flyToOptions` props를 추가했다.
+  2. `isVWorldTileError(event)`와 `redactVWorldTileUrl(url)` helper를 `src/vworld.ts`에서 export했다.
+  3. `Hybrid` 이중 source와 `vworld-${layerType}` source id를 고려해 VWorld tile 오류를 `vworld` prefix, WMTS URL, transient HTTP status, fetch/tile message 기준으로 판별한다.
+  4. README, `AI_AGENT_GUIDE.md`, `ADR.md`에 운영·디버그 UI에서 이 hook을 사용하는 기준을 추가했다.
+- **결과**: 소비자 프로젝트는 overlay/fallback 정책은 자체적으로 유지하되, click/error/flyTo와 VWorld tile redaction 계약은 이 라이브러리와 같은 helper로 검증할 수 있다.
+
+### 2. 검증
+- `PATH=/tmp/node-v20.19.5-linux-x64/bin:$PATH npm run test` → 3 files / 21 tests 통과.
+- `PATH=/tmp/node-v20.19.5-linux-x64/bin:$PATH npm run type-check` → 통과.
+- `PATH=/tmp/node-v20.19.5-linux-x64/bin:$PATH npm run build` → 통과.
+- `PATH=/tmp/node-v20.19.5-linux-x64/bin:$PATH npm run pack:check` → 통과. tarball에 `dist/`와 declaration files 포함 확인.
+- `git diff --check` → 통과.
+
 ## 2026-05-25: GitHub dependency 소비 가능 패키징 보강
 
 ### 1. `dist/` 산출물 누락 문제 해결
