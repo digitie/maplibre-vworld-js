@@ -24,6 +24,20 @@ export interface VWorldMapErrorInfo {
     /** Tile URL with the API key redacted, when one can be extracted. */
     redactedUrl?: string;
 }
+export type VWorldViewportEventType = 'load' | 'moveend' | 'zoomend' | 'idle';
+export interface VWorldViewportInfo {
+    map: maplibregl.Map;
+    center: [number, number];
+    zoom: number;
+    bounds: [number, number, number, number];
+    eventType: VWorldViewportEventType;
+}
+export interface VWorldMapContextMenuInfo {
+    event: maplibregl.MapMouseEvent;
+    lngLat: [number, number];
+    point: maplibregl.MapMouseEvent['point'];
+    originalEvent: maplibregl.MapMouseEvent['originalEvent'];
+}
 /**
  * Props for the VWorldMap component.
  */
@@ -108,6 +122,18 @@ export interface VWorldMapProps {
      * renders (the map is not re-created).
      */
     onMapClick?: (e: maplibregl.MapMouseEvent) => void;
+    /**
+     * Context menu handler for the map canvas. The payload normalizes the click
+     * coordinate to `[lng, lat]` so apps can open custom right-click menus
+     * without touching the MapLibre instance.
+     */
+    onMapContextMenu?: (e: VWorldMapContextMenuInfo) => void;
+    /**
+     * Fired after map load and camera-settled events with normalized viewport
+     * state. Data fetching, debounce, aborting, and cache policy should stay in
+     * the consuming app.
+     */
+    onViewportChange?: (viewport: VWorldViewportInfo) => void;
     /**
      * Handler for MapLibre `error` events (failed tile fetches, style errors,
      * WebGL warnings). The event is wrapped with a running count, a

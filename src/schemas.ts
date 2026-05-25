@@ -24,6 +24,53 @@ export const BoundsSchema = z.tuple([
 
 export type Bounds = z.infer<typeof BoundsSchema>;
 
+export const KOREA_LNG_RANGE = [124, 132] as const;
+export const KOREA_LAT_RANGE = [33, 43] as const;
+
+/**
+ * Zod schema for validating [longitude, latitude] coordinates in Korea.
+ * This is intentionally a broad web-map guard, not a cadastral/CRS validator.
+ */
+export const KoreaLngLatSchema = z.tuple([
+  z.number().min(KOREA_LNG_RANGE[0]).max(KOREA_LNG_RANGE[1]),
+  z.number().min(KOREA_LAT_RANGE[0]).max(KOREA_LAT_RANGE[1]),
+]);
+
+export type KoreaLngLat = z.infer<typeof KoreaLngLatSchema>;
+
+/**
+ * Zod schema for Map Bounds [WestLng, SouthLat, EastLng, NorthLat] in Korea.
+ */
+export const KoreaBoundsSchema = z.tuple([
+  z.number().min(KOREA_LNG_RANGE[0]).max(KOREA_LNG_RANGE[1]),
+  z.number().min(KOREA_LAT_RANGE[0]).max(KOREA_LAT_RANGE[1]),
+  z.number().min(KOREA_LNG_RANGE[0]).max(KOREA_LNG_RANGE[1]),
+  z.number().min(KOREA_LAT_RANGE[0]).max(KOREA_LAT_RANGE[1]),
+]);
+
+export type KoreaBounds = z.infer<typeof KoreaBoundsSchema>;
+
+function roundCoordinate(value: number, precision: number): number {
+  const factor = 10 ** precision;
+  return Math.round(value * factor) / factor;
+}
+
+export function formatLngLat(lngLat: LngLat, precision = 4): LngLat {
+  return [
+    roundCoordinate(lngLat[0], precision),
+    roundCoordinate(lngLat[1], precision),
+  ];
+}
+
+export function serializeBounds(bounds: Bounds, precision = 6): string {
+  return bounds.map((value) => roundCoordinate(value, precision)).join(',');
+}
+
+export function parseBoundsParam(value: string): Bounds {
+  const parts = value.split(',').map((part) => Number(part.trim()));
+  return BoundsSchema.parse(parts);
+}
+
 /**
  * Basic Point Data schema for clustering and markers.
  */

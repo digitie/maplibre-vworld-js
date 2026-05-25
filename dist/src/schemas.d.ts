@@ -11,6 +11,22 @@ export type LngLat = z.infer<typeof LngLatSchema>;
  */
 export declare const BoundsSchema: z.ZodTuple<[z.ZodNumber, z.ZodNumber, z.ZodNumber, z.ZodNumber], null>;
 export type Bounds = z.infer<typeof BoundsSchema>;
+export declare const KOREA_LNG_RANGE: readonly [124, 132];
+export declare const KOREA_LAT_RANGE: readonly [33, 43];
+/**
+ * Zod schema for validating [longitude, latitude] coordinates in Korea.
+ * This is intentionally a broad web-map guard, not a cadastral/CRS validator.
+ */
+export declare const KoreaLngLatSchema: z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>;
+export type KoreaLngLat = z.infer<typeof KoreaLngLatSchema>;
+/**
+ * Zod schema for Map Bounds [WestLng, SouthLat, EastLng, NorthLat] in Korea.
+ */
+export declare const KoreaBoundsSchema: z.ZodTuple<[z.ZodNumber, z.ZodNumber, z.ZodNumber, z.ZodNumber], null>;
+export type KoreaBounds = z.infer<typeof KoreaBoundsSchema>;
+export declare function formatLngLat(lngLat: LngLat, precision?: number): LngLat;
+export declare function serializeBounds(bounds: Bounds, precision?: number): string;
+export declare function parseBoundsParam(value: string): Bounds;
 /**
  * Basic Point Data schema for clustering and markers.
  */
