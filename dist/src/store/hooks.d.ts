@@ -28,12 +28,15 @@ export declare function useMapLoaded(): boolean;
  * Subscribe to a derived slice of map state with referential-equality
  * caching. The consumer re-renders only when the selected value changes.
  *
- * The selector must be referentially stable (wrap with `useCallback` if it
- * closes over props).
+ * The selector is wrapped through a ref so identity changes do not force
+ * `useSyncExternalStore` to re-subscribe — passing a fresh arrow function
+ * on every render is safe. Returned values are stabilized with `Object.is`
+ * so unchanged primitives / referentially-stable objects do not cascade
+ * re-renders.
  *
  * @example
  * const isSimplified = useMapSelector(
- *   useCallback((s) => s.zoom < (threshold ?? s.semanticZoomThreshold ?? 0), [threshold])
+ *   (s) => s.zoom < (threshold ?? s.semanticZoomThreshold ?? 0)
  * );
  */
 export declare function useMapSelector<T>(selector: (snapshot: MapStoreSnapshot) => T): T;

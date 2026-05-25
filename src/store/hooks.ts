@@ -78,35 +78,39 @@ export function useMapLoaded(): boolean {
  * Subscribe to a derived slice of map state with referential-equality
  * caching. The consumer re-renders only when the selected value changes.
  *
- * The selector must be referentially stable (wrap with `useCallback` if it
- * closes over props).
+ * The selector is wrapped through a ref so identity changes do not force
+ * `useSyncExternalStore` to re-subscribe — passing a fresh arrow function
+ * on every render is safe. Returned values are stabilized with `Object.is`
+ * so unchanged primitives / referentially-stable objects do not cascade
+ * re-renders.
  *
  * @example
  * const isSimplified = useMapSelector(
- *   useCallback((s) => s.zoom < (threshold ?? s.semanticZoomThreshold ?? 0), [threshold])
+ *   (s) => s.zoom < (threshold ?? s.semanticZoomThreshold ?? 0)
  * );
  */
 export function useMapSelector<T>(selector: (snapshot: MapStoreSnapshot) => T): T {
   const store = useStore();
-  const cacheRef = useRef<{
-    selector: (snapshot: MapStoreSnapshot) => T;
-    snapshot: MapStoreSnapshot;
-    value: T;
-  } | undefined>(undefined);
+  const selectorRef = useRef(selector);
+  useLayoutEffect(() => {
+    selectorRef.current = selector;
+  });
+
+  const cacheRef = useRef<{ snapshot: MapStoreSnapshot; value: T } | undefined>(undefined);
   const get = useCallback(() => {
     const snapshot = store.getSnapshot();
     const cached = cacheRef.current;
-    if (cached && cached.selector === selector && cached.snapshot === snapshot) {
+    if (cached && cached.snapshot === snapshot) {
       return cached.value;
     }
-    const nextValue = selector(snapshot);
-    if (cached && cached.selector === selector && Object.is(cached.value, nextValue)) {
-      cacheRef.current = { selector, snapshot, value: cached.value };
+    const nextValue = selectorRef.current(snapshot);
+    if (cached && Object.is(cached.value, nextValue)) {
+      cacheRef.current = { snapshot, value: cached.value };
       return cached.value;
     }
-    cacheRef.current = { selector, snapshot, value: nextValue };
+    cacheRef.current = { snapshot, value: nextValue };
     return nextValue;
-  }, [selector, store]);
+  }, [store]);
   return useSyncExternalStore(store.subscribe, get, get);
 }
 

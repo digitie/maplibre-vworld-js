@@ -96,11 +96,13 @@ export const PolygonArea: React.FC<PolygonAreaProps> = ({
     };
 
     addOrUpdate();
-    // Re-add layers after a setStyle() so child layers survive style swaps.
-    map.on('styledata', addOrUpdate);
+    // `style.load` fires once per full style swap (e.g. after `setStyle()`)
+    // instead of every intermediate style mutation, so our paint updates
+    // do not cause re-entrancy.
+    map.on('style.load', addOrUpdate);
 
     return () => {
-      map.off('styledata', addOrUpdate);
+      map.off('style.load', addOrUpdate);
       if (!map.getStyle()) return;
       if (map.getLayer(fillLayerId)) map.removeLayer(fillLayerId);
       if (map.getLayer(lineLayerId)) map.removeLayer(lineLayerId);

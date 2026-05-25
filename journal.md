@@ -4,6 +4,58 @@
 
 ---
 
+## 2026-05-26: PR #13 후속 코드 리뷰 — 정합성/edge case 보강
+
+### 1. 핸들러 관리 정리
+- **이슈**: PR #13에서 `<VWorldMap>` onError에 `hasOnErrorRef` + `stableOnError` 2개 ref가 동시에 동기화됐는데 둘이 같은 사실(`onError !== undefined`)을 추적. race + 중복.
+- **조치**: `onErrorRef` 하나로 통합. `useLayoutEffect`로 최신 핸들러를 가리키게 하고, 디스패치 시점에 `ref.current ? handler : console.warn` 분기.
+- **결과**: ref가 하나로 줄고 race 가능성 제거. dispatch 의도가 명확.
+
+### 2. 카메라 prop drop 문제 해결
+- **이슈**: 사용자가 패닝 중일 때 부모가 `center`/`zoom`을 바꾸면 `map.isMoving()` 가드 때문에 update가 사일런트 drop. lastCameraRef도 갱신 안 되어 다음 prop 변경까지 영구 무시.
+- **조치**: `pendingCameraRef`를 도입해 가용한 가장 최신 카메라를 큐잉. 즉시 적용이 불가하면 `moveend` 핸들러가 idle 상태에서 재시도.
+- **결과**: 어떤 prop 변경도 사일런트로 사라지지 않음. 사용자 제스처 우선권은 유지.
+
+### 3. styledata 재진입 → style.load
+- **이슈**: `<RouteLine>`/`<PolygonArea>`가 `styledata` 리스너를 등록했는데, 이 이벤트는 `setPaintProperty`마다 발화 → 우리 자신의 paint update가 `addOrUpdate`를 재호출 → O(N²) 가능성.
+- **조치**: 두 컴포넌트 모두 `style.load`로 교체. 이 이벤트는 `setStyle()` 완료 시 한 번만 발화 → 우리 layer 보존 의도와 정확히 일치.
+
+### 4. Marker className diff 알고리즘 개선
+- **이슈**: `applyMarkerState`가 prev 토큰을 모두 remove 후 next 토큰을 모두 add. 공통 토큰이 잠시 사라졌다 다시 추가되어 CSS transition 한 프레임 깜빡임.
+- **조치**: 토큰 셋 diff로 변경 (`prev - next` remove, `next - prev` add). 공통 토큰은 건드리지 않음.
+
+### 5. Marker anchor / offset prop 추가
+- **이슈**: `<PinMarker>`와 `<PlaceMarker>`가 `transform: translate(-50%, -100%)` + `marginTop`으로 수동 anchor 처리. MapLibre의 anchor와 이중 변환으로 좌표 오프셋이 어긋남.
+- **조치**: `<Marker>`에 `anchor` (construction-time) 와 `offset` (setter 지원) prop 추가. `<PinMarker>`는 `anchor="bottom"`으로, `<PlaceMarker>`는 `anchor="bottom" offset={[0,-8]}`로 단순화.
+
+### 6. Popup 옵션 분류 정리
+- **이슈**: `<Popup>`의 effect deps에 `offset` 같은 객체가 있어서 consumer가 인라인 객체로 전달하면 매 render마다 popup이 remount → unmount 시 onClose가 발화하는 무한 루프 가능.
+- **조치**: construction-only 옵션(closeButton, closeOnClick, className)은 첫 render에 ref로 스냅샷. mutable 옵션(`offset`, `maxWidth`, `lngLat`)은 dedicated setter effect로 적용.
+
+### 7. ClusterMarker 클로저 안정화
+- **이슈**: `<ClusterMarker>`가 `onClick ? () => onClick() : undefined`로 매 render마다 새 함수 → 자식 `<Marker>`가 보는 onClick identity 매번 변경.
+- **조치**: `useEvent`로 onClick 디스패치 안정화 + `useMemo`로 wrapper도 stable identity. onMouseEnter/Leave도 `useCallback`.
+
+### 8. ClusterLayer 초기 viewport 가드
+- **이슈**: `<ClusterLayer>`의 mount effect가 `map.getBounds()`를 즉시 호출하는데, `load` 이전엔 degenerate bounds(0/0/0/0). 첫 클러스터 계산이 빈 결과로 종료.
+- **조치**: `map.loaded()` 체크 후 `update()` 즉시 호출 vs `map.once('load', update)`로 가드.
+
+### 9. useMapSelector 안정성 개선
+- **이슈**: cache key가 selector identity까지 포함해서, consumer가 useCallback을 잊으면 매 render마다 cache miss → 값이 같아도 새 reference 반환 가능 → 무한 render.
+- **조치**: selector는 ref로 wrap. cache key는 snapshot identity만 사용. `Object.is`로 값 동등성 비교 → unstable selector도 안전하게 동작.
+
+### 10. 기타 정리
+- `<PriceMarker>`의 `'₩'` currency 기본값 제거 → 빈 문자열. 라이브러리는 통화 단위를 가정하지 않음.
+- `<PinMarker>`, `<PriceMarker>`, `<RoutePointMarker>`에 `'use client'` 누락 → 추가. AI_AGENT_GUIDE의 "every DOM-touching module" 약속과 일치.
+- 디버그 잔재 파일 제거: `analyze_tiles.js`, `generate_html.js`, `test_tiles.js`, `tiles.html`, `screenshot_before_fly.png`, `z17.png`, `z18.png`, `z19.png`.
+
+### 11. 검증
+- type-check: 통과.
+- test: 7 files / 48 tests 통과.
+- 회귀 테스트 추가: camera pending re-apply (moveend 시), Popup offset/maxWidth setter (no remount), Marker anchor 전달, Marker className 토큰셋 diff, useMapSelector unstable selector tolerance, hooks outside provider throw.
+
+---
+
 ## 2026-05-25: main 브랜치 코드 리뷰 후 런타임 결함 수정
 
 ### 1. stale event handler와 camera 동기화 문제 해결

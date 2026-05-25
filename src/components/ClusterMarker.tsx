@@ -1,15 +1,21 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Marker, type MarkerProps } from './Marker';
+import { useEvent } from '../store/hooks';
 
 export interface ClusterMarkerProps extends Omit<MarkerProps, 'children' | 'onClick'> {
   count: number;
   color?: string;
   size?: number;
+  /** Click handler for the cluster bubble. */
   onClick?: () => void;
 }
 
+/**
+ * Default cluster bubble — color and size scale with `count`. Used by
+ * {@link ClusterLayer} when no `renderCluster` is provided.
+ */
 export const ClusterMarker: React.FC<ClusterMarkerProps> = ({
   count,
   color,
@@ -17,25 +23,32 @@ export const ClusterMarker: React.FC<ClusterMarkerProps> = ({
   onClick,
   ...props
 }) => {
-  // Dynamic sizing and color based on count if not provided
-  let clusterSize = size || 30;
-  let clusterColor = color || '#51bbd6';
-  
-  if (count > 100) {
-    clusterSize = size || 40;
-    clusterColor = color || '#f1f075';
-  }
-  if (count > 500) {
-    clusterSize = size || 50;
-    clusterColor = color || '#f28cb1';
-  }
+  const clusterSize = size ?? (count > 500 ? 50 : count > 100 ? 40 : 30);
+  const clusterColor =
+    color ?? (count > 500 ? '#f28cb1' : count > 100 ? '#f1f075' : '#51bbd6');
+
+  // Wrap onClick so the inner `<Marker>` always sees a stable identity, but
+  // the latest user callback is invoked. Without this, every render of the
+  // parent allocates a fresh wrapper which Marker would see as a new
+  // listener identity.
+  const stableOnClick = useEvent(onClick);
+  const markerOnClick = useMemo<MarkerProps['onClick'] | undefined>(
+    () => (onClick ? () => stableOnClick() : undefined),
+    // The wrapper only needs to be regenerated when the consumer toggles
+    // onClick on/off — its body always dispatches through `stableOnClick`.
+    [onClick === undefined, stableOnClick],
+  );
+
+  const handleEnter = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    event.currentTarget.style.transform = 'scale(1.1)';
+  }, []);
+  const handleLeave = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    event.currentTarget.style.transform = 'scale(1)';
+  }, []);
 
   return (
-    <Marker
-      {...props}
-      onClick={onClick ? () => onClick() : undefined}
-    >
-      <div 
+    <Marker {...props} onClick={markerOnClick}>
+      <div
         style={{
           width: clusterSize,
           height: clusterSize,
@@ -50,9 +63,9 @@ export const ClusterMarker: React.FC<ClusterMarkerProps> = ({
           boxShadow: '0 0 0 4px rgba(255,255,255,0.5), 0 2px 4px rgba(0,0,0,0.3)',
           cursor: onClick ? 'pointer' : 'default',
           transition: 'transform 0.2s ease',
-      }}
-      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+        }}
+        onMouseEnter={handleEnter}
+        onMouseLeave={handleLeave}
       >
         {count > 999 ? '999+' : count}
       </div>

@@ -78,6 +78,53 @@ describe('Marker', () => {
     expect(element).toHaveClass('custom-class');
   });
 
+  it('passes anchor and offset through to the MapLibre Marker constructor', async () => {
+    vi.clearAllMocks();
+    render(
+      <VWorldMap apiKey="test-key" center={[127, 37]}>
+        <Marker lngLat={[127, 37]} anchor="bottom" offset={[0, -8]}>
+          <div>pin</div>
+        </Marker>
+      </VWorldMap>,
+    );
+
+    await waitFor(() => {
+      expect(maplibregl.Marker).toHaveBeenCalledWith(
+        expect.objectContaining({ anchor: 'bottom', offset: [0, -8] }),
+      );
+    });
+  });
+
+  it('updates className with a token-set diff (no flicker on shared tokens)', async () => {
+    vi.clearAllMocks();
+    const { rerender } = render(
+      <VWorldMap apiKey="test-key" center={[127, 37]}>
+        <Marker lngLat={[127, 37]} className="alpha shared">
+          <div>x</div>
+        </Marker>
+      </VWorldMap>,
+    );
+
+    await waitFor(() => expect(maplibregl.Marker).toHaveBeenCalled());
+    const marker = latestMarkerMock();
+    const element = marker.getElement() as HTMLElement;
+    const removeSpy = vi.spyOn(element.classList, 'remove');
+
+    rerender(
+      <VWorldMap apiKey="test-key" center={[127, 37]}>
+        <Marker lngLat={[127, 37]} className="beta shared">
+          <div>x</div>
+        </Marker>
+      </VWorldMap>,
+    );
+
+    // `shared` should NOT be removed — only `alpha` should.
+    expect(removeSpy).toHaveBeenCalledWith('alpha');
+    expect(removeSpy).not.toHaveBeenCalledWith('shared');
+    expect(element).toHaveClass('beta');
+    expect(element).toHaveClass('shared');
+  });
+
   it('uses event handlers added after the marker instance was created', async () => {
     vi.clearAllMocks();
     const onClick = vi.fn();

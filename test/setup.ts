@@ -10,7 +10,13 @@ vi.mock('maplibre-gl', () => {
           setTimeout(callback, 0); // simulate async load
         }
       }),
+      once: vi.fn((event, callback) => {
+        if (event === 'load') {
+          setTimeout(callback, 0);
+        }
+      }),
       off: vi.fn(),
+      loaded: vi.fn(() => false),
       remove: vi.fn(),
       setStyle: vi.fn(),
       addControl: vi.fn(),
@@ -68,9 +74,11 @@ vi.mock('maplibre-gl', () => {
     const element = options?.element ?? document.createElement('div');
     return {
       setLngLat: vi.fn().mockReturnThis(),
+      setOffset: vi.fn().mockReturnThis(),
       addTo: vi.fn().mockReturnThis(),
       remove: vi.fn(),
       on: vi.fn(),
+      off: vi.fn(),
       getLngLat: vi.fn().mockReturnValue({ lng: 0, lat: 0 }),
       getElement: vi.fn().mockReturnValue(element),
     };
@@ -80,6 +88,8 @@ vi.mock('maplibre-gl', () => {
     return {
       setLngLat: vi.fn().mockReturnThis(),
       setDOMContent: vi.fn().mockReturnThis(),
+      setOffset: vi.fn().mockReturnThis(),
+      setMaxWidth: vi.fn().mockReturnThis(),
       addTo: vi.fn().mockReturnThis(),
       on: vi.fn(),
       off: vi.fn(),

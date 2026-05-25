@@ -95,10 +95,15 @@ export const RouteLine: React.FC<RouteLineProps> = ({
     };
 
     addOrUpdate();
-    map.on('styledata', addOrUpdate);
+    // `style.load` fires once when a new style is fully ready (typically
+    // after `setStyle()`), unlike `styledata` which fires for *every*
+    // intermediate style mutation — including the paint-property updates
+    // we make ourselves. Re-attaching only on full style swaps avoids the
+    // pointless O(N²) work pattern.
+    map.on('style.load', addOrUpdate);
 
     return () => {
-      map.off('styledata', addOrUpdate);
+      map.off('style.load', addOrUpdate);
       if (!map.getStyle()) return;
       if (map.getLayer(layerId)) map.removeLayer(layerId);
       if (map.getSource(sourceId)) map.removeSource(sourceId);

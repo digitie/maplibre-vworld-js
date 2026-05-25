@@ -97,10 +97,18 @@ export const ClusterLayer: React.FC<ClusterLayerProps> = ({
       });
     };
 
-    update();
+    // `getBounds()` returns a degenerate box before the map's first
+    // `idle`; wait for that to fire (or `load` if it has not yet) so the
+    // first cluster pass uses real viewport bounds.
+    if (map.loaded()) {
+      update();
+    } else {
+      map.once('load', update);
+    }
     map.on('moveend', update);
     map.on('zoomend', update);
     return () => {
+      map.off('load', update);
       map.off('moveend', update);
       map.off('zoomend', update);
     };
