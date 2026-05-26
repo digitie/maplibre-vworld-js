@@ -4,17 +4,14 @@
 
 ## 현재 진척도 (2026-05-26 갱신)
 
-- ✅ T-001~T-014: 코어 라이브러리 + 보안 패치 + GitHub dependency 패키징 + zod v4 + 디버그 hook + TripMate primitive + 범용 라이브러리 정리 + 런타임 결함 수정 + post-PR13 review fixes
-- 🟡 T-015: python-kraddr-geo 문서 구조 채택 (브랜치 `chore/adopt-kraddr-doc-structure`, PR 진행 중)
+- ✅ T-001~T-015: 코어 라이브러리 + 보안 패치 + GitHub dependency 패키징 + zod v4 + 디버그 hook + TripMate primitive + 범용 라이브러리 정리 + 런타임 결함 수정 + post-PR13 review fixes + python-kraddr-geo 문서 구조 채택
 - ⬜ T-016: supercluster `generateId` 옵션 노출
 - ⬜ T-017: VWorld `getCapabilities` 응답 기반 layer/tile matrix 자동 검증
 - ⬜ T-018: marker portal teardown 재현 테스트
 
 ## 다음 한 작업 (1시간 이내 분량)
 
-T-015 PR을 머지 → 새 에이전트가 `CLAUDE.md`를 진입점으로 정상 동작하는지 1~2 세션 동안 관찰. 진입 흐름에 마찰이 보이면 `CLAUDE.md`/`SKILL.md`에서 보강한다.
-
-그 다음 후보:
+후보:
 - T-016이 가장 작다 (supercluster 옵션 한 줄 + 회귀 테스트).
 - T-018은 fiber leak 시나리오 reproduction이 까다로워 약간 더 큼.
 - T-017은 WMTS Capabilities XML 파싱 + cache 정책 결정이 필요해 ADR이 먼저 나와야 할 수 있다.
