@@ -2,6 +2,8 @@
 
 Context for AI coding assistants generating code that consumes this library.
 
+> **Internal contributors**: if you are working on this repository itself (not just consuming it), start with [`CLAUDE.md`](./CLAUDE.md) instead. This file is the consumer-facing English entry point; the Korean agent manual is [`SKILL.md`](./SKILL.md), and architecture/decisions/journal/tasks live in [`docs/`](./docs/).
+
 ## What this library is
 
 - React (18+) bindings for MapLibre GL JS v5, configured for Korea's VWorld basemap tiles.
@@ -50,7 +52,7 @@ interface VWorldMapProps {
 Rules for AI:
 - **No implicit center.** `center` is required. Pick a sensible value for the app.
 - Event callbacks receive **raw** MapLibre events. No `VWorldMap*Info` envelope.
-- Camera prop changes (`center`, `zoom`, `pitch`, `bearing`) are applied with `flyTo` (animated) or `jumpTo` (instant) and skip when the user is mid-gesture (`map.isMoving()`).
+- Camera prop changes (`center`, `zoom`, `pitch`, `bearing`) are applied with `flyTo` (animated) or `jumpTo` (instant) and skip when the user is mid-gesture (`map.isMoving()`). Drops are queued and re-applied on `moveend`.
 - `Satellite`/`Hybrid` cap at z18; `Base`/`gray`/`midnight` cap at z19. The component clamps automatically — don't pass `maxZoom` higher than `getVWorldMaxZoom(layerType)`.
 - For CORS / proxy needs, use `transformRequest`. Don't fork the library to add headers.
 
@@ -126,3 +128,15 @@ isVWorldTileError(errorEvent)         // tile-vs-style classifier
 ## Push policy
 
 Branch + PR only. `main` is protected — never direct-push, never `--no-verify`.
+
+## Further reading
+
+- [`README.md`](./README.md) — user-facing intro and API reference
+- [`CLAUDE.md`](./CLAUDE.md) — current state (read by Claude Code on session start)
+- [`AGENTS.md`](./AGENTS.md) — language policy, identifier matrix, DO NOT rules
+- [`SKILL.md`](./SKILL.md) — Korean agent manual (DO NOT, frequent tasks, domain vocab)
+- [`docs/architecture.md`](./docs/architecture.md) — `MapStore` + `useSyncExternalStore` deep-dive
+- [`docs/decisions.md`](./docs/decisions.md) — ADR-1 through ADR-9
+- [`docs/journal.md`](./docs/journal.md) — work log (reverse-chronological)
+- [`docs/tasks.md`](./docs/tasks.md) — T-NNN backlog
+- [`docs/dev-environment.md`](./docs/dev-environment.md) — local setup

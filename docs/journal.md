@@ -1,10 +1,36 @@
-# 개발 작업 일지 (Journal)
+# JOURNAL — 작업 일지
 
-이 문서는 프로젝트의 진행 과정, 문제 해결 내역, 그리고 각 단계별 핵심 인사이트를 상세하게 기록하는 작업 일지입니다.
+새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
+
+## 2026-05-26 (T-015 — python-kraddr-geo 문서 구조 채택)
+
+**작업**: 기존 `AGENTS.md` + `ADR.md` + `AI_AGENT_GUIDE.md` + `journal.md` + `README.md` 5개 루트 파일 구조를 python-kraddr-geo 식으로 재배치. `CLAUDE.md` 신설, `AGENTS.md` 재작성(언어 정책/식별자 매트릭스/DO NOT 포맷), `SKILL.md` 신설(한글 에이전트 매뉴얼), `docs/` 디렉토리에 architecture/decisions/journal/tasks/resume/dev-environment 분리. `CHANGELOG.md` 신설.
+
+**구현 상세**:
+- 신규: `CLAUDE.md` — 현재 작업(T-015), 잔존 부채(D1~D3), 브랜치 정리, 후속 백로그, 로컬 개발 환경, 빠른 검증 명령, 주요 결정 사항.
+- 재작성: `AGENTS.md` — 문서 언어 정책, 식별자 매트릭스, 개발 환경 정책, 지시 우선순위, DO NOT 14항목, 외부 의존성 사용 원칙, 작업 후 체크리스트.
+- 신규: `SKILL.md` — 정체성, 빠른 시작, 디렉토리 지도, DO NOT 14항목, 자주 묻는 작업, 도메인 어휘, 작업 후 체크리스트.
+- 신규: `docs/architecture.md` — 한 패키지 두 표면(컴포넌트 + hook), 계층 의존, MapStore + useSyncExternalStore, useEvent, VWorldMap 라이프사이클, Marker/Popup 라이프사이클, semantic zoom 흐름, RouteLine/PolygonArea style.load 재등록, 에러 분류, 빌드/배포, 테스트, 호환성.
+- 재작성: `docs/decisions.md` — 기존 `ADR.md`의 8개 결정을 표준 포맷(컨텍스트/결정/근거/결과+/결과-/후속)으로 다시 정리하고 ADR-9(본 문서 구조 채택)를 추가.
+- 이전: `journal.md` → `docs/journal.md` (역시간순 유지, 본 항목 추가).
+- 신규: `docs/tasks.md` — T-001~T-014를 historical PR에서 retroactive 매핑, T-015~T-018을 후속 백로그로 등록.
+- 신규: `docs/resume.md` — 현재 진척도, 다음 한 작업, 작업 시작 전 확인할 것, 알려진 함정.
+- 신규: `docs/dev-environment.md` — Node 버전, Puppeteer 환경변수, dist 커밋 정책, .env.local 권한, dev 서버 사용법.
+- 신규: `CHANGELOG.md` — Keep-a-Changelog 포맷. 1.0.0 (PR #14 기준)으로 backfill.
+- 보존: `AI_AGENT_GUIDE.md` — 영문 사용자 대상 진입점으로 유지(소비자 앱 개발자가 영어로 검색해 들어오는 경로). `SKILL.md`는 한글 에이전트 매뉴얼로 별도.
+- 보존: `README.md` — 영문 사용자 대상 표지. 마이그레이션과 무관.
+
+**검증**:
+- `npm run type-check` → 통과.
+- `npm test` → 통과 (8 files / 50 tests).
+- `npm run build` → 통과. `dist/` 변경 없음(코드 변경 없으므로).
+- `git diff --exit-code -- dist/` → 깨끗.
+
+**다음 작업**: PR 올리고 머지. 새 에이전트가 `CLAUDE.md` 한 곳을 진입점으로 사용하는지 1~2 세션 동안 관찰.
 
 ---
 
-## 2026-05-26: PR #13 후속 코드 리뷰 — 정합성/edge case 보강
+## 2026-05-26: PR #13 후속 코드 리뷰 — 정합성/edge case 보강 (PR #14)
 
 ### 1. 핸들러 관리 정리
 - **이슈**: PR #13에서 `<VWorldMap>` onError에 `hasOnErrorRef` + `stableOnError` 2개 ref가 동시에 동기화됐는데 둘이 같은 사실(`onError !== undefined`)을 추적. race + 중복.
@@ -56,7 +82,7 @@
 
 ---
 
-## 2026-05-25: main 브랜치 코드 리뷰 후 런타임 결함 수정
+## 2026-05-25: main 브랜치 코드 리뷰 후 런타임 결함 수정 (PR #13)
 
 ### 1. stale event handler와 camera 동기화 문제 해결
 - **이슈**: `useEvent`로 최신 callback을 보장하도록 리팩토링했지만, 일부 이벤트는 mount 시점의 prop 존재 여부를 closure로 잡고 있었다. 그 결과 `<VWorldMap onError>`나 `<Marker onClick>`을 렌더 후 추가하면 MapLibre/DOM listener가 최신 handler를 호출하지 못했다.
@@ -79,7 +105,7 @@
 
 ---
 
-## 2026-05-25: 범용 라이브러리로 정리 + API/성능 리팩토링
+## 2026-05-25: 범용 라이브러리로 정리 + API/성능 리팩토링 (PR #12)
 
 ### 1. 도메인-특화 코드 제거 (TripMate)
 - **이슈**: PR #10/#11에서 `src/tripmate.ts`, `src/components/TripmateFeatureLayer.tsx`, `docs/tripmate-implementation-roadmap.md`가 추가되며 라이브러리에 TripMate 도메인 지식(`TRIPMATE_MARKER_PALETTE` P-01~P-16, 한국어 관광 카테고리 enum, 7종 feature kind enum, `₩` currency hardcode)이 박혔다. 범용 지도 라이브러리의 책임 경계를 벗어남.
@@ -131,7 +157,7 @@
 
 ## (이전 기록은 history로 보존)
 
-## 2026-05-25: TripMate 지도 primitive P0/P1 구현
+## 2026-05-25: TripMate 지도 primitive P0/P1 구현 (PR #11)
 
 ### 1. PR #10 백로그 기반 public API 추가
 - **이슈**: 문서화된 TripMate Sprint 4 요구사항 중 viewport 변화, 우클릭 메뉴, marker palette, Maki vendor path, 서버 클러스터, feature kind 렌더링, popup은 소비자 앱마다 직접 MapLibre listener와 DOM portal을 붙이면 중복과 성능 저하 위험이 크다.
@@ -149,7 +175,7 @@
 - `PATH=/tmp/node-v20.19.5-linux-x64/bin:$PATH npm run type-check` → 통과.
 - `PATH=/tmp/node-v20.19.5-linux-x64/bin:$PATH npm test` → 7 files / 44 tests 통과.
 
-## 2026-05-25: TripMate 연동 추가 구현 백로그 문서화
+## 2026-05-25: TripMate 연동 추가 구현 백로그 문서화 (PR #10)
 
 ### 1. TripMate 최신 main 문서 기준의 지도 요구사항 정리
 - **이슈**: `tripmate`는 사용자 대면 UI를 `maplibre-vworld` 기반 지도로 가져가는 방향을 명시하지만, 세부 Sprint 문서에는 과거 Kakao SDK 기준 문구와 지도 UI 요구사항이 섞여 있다. 이 상태에서 바로 구현에 들어가면 앱 책임(TanStack Query, Zustand, 위치 동의/감사 로그)과 라이브러리 책임(MapLibre 이벤트, marker primitive, VWorld 오류 처리)이 뒤섞일 위험이 있었다.
@@ -162,7 +188,7 @@
 ### 2. 검증
 - `git diff --check` → 통과.
 
-## 2026-05-25: 디버그 UI 동작 정합화를 위한 Map event hook 보강
+## 2026-05-25: 디버그 UI 동작 정합화를 위한 Map event hook 보강 (PR #9)
 
 ### 1. `python-kraddr-geo` 디버그 지도와 공통화할 이벤트 표면 추가
 - **이슈**: `kraddr-geo-ui`는 지도 click 좌표를 `(lon, lat)` 입력값으로 반영하고, VWorld tile 오류를 API key redaction 후 transient warning/overlay로 처리한다. 기존 `<VWorldMap>`은 지도 표시와 marker/cluster 중심이라 이 디버그 UI 동작을 공통 package API로 옮기기 어려웠다.
@@ -180,7 +206,7 @@
 - `PATH=/tmp/node-v20.19.5-linux-x64/bin:$PATH npm run pack:check` → 통과. tarball에 `dist/`와 declaration files 포함 확인.
 - `git diff --check` → 통과.
 
-## 2026-05-25: GitHub dependency 소비 가능 패키징 보강
+## 2026-05-25: GitHub dependency 소비 가능 패키징 보강 (PR #8)
 
 ### 1. `dist/` 산출물 누락 문제 해결
 - **이슈**: `package.json`의 `main`/`module`/`types`/`exports`가 모두 `dist/`를 가리키지만, 저장소에는 `dist/`가 커밋되어 있지 않아 GitHub dependency로 설치한 소비자 프로젝트에서 package root import가 실패할 수 있었다.

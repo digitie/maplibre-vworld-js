@@ -1,0 +1,107 @@
+# CLAUDE.md — 프로젝트 컨텍스트
+
+이 파일은 Claude Code가 매 세션 시작 시 자동으로 읽는다.
+프로젝트 규칙은 `AGENTS.md`에, 아키텍처는 `docs/architecture.md`에 있다.
+이 파일은 **현재 상태**와 **세션 간 연속성**에 집중한다.
+
+## 프로젝트 현황 (2026-05-26)
+
+React + MapLibre GL JS 기반 VWorld(한국 공간정보 오픈플랫폼) 지도 라이브러리. npm 패키지 이름은 `maplibre-vworld`, GitHub 저장소는 `maplibre-vworld-js`. T-001 ~ T-014 완료 (PR #1 ~ #14 머지). 현재 main은 외부 store + `useSyncExternalStore` 아키텍처와 `useEvent` 패턴이 정착된 상태.
+
+### 현재 작업
+
+- **T-015** (브랜치 `chore/adopt-kraddr-doc-structure`):
+  python-kraddr-geo의 문서 구조(`CLAUDE.md`/`docs/` 분리, T-NNN task 시스템, ADR 표준 포맷, journal 역시간순)를 채택해 본 저장소에 이식. 코드 변경은 없고 `docs/` 디렉토리를 신설하고 기존 `ADR.md`/`journal.md`/`AI_AGENT_GUIDE.md`를 통합·재배치한다.
+  - 상태: 문서 작업 진행 중.
+  - 다음 단계: 신규 구조로 PR 올리고 머지.
+
+### 잔존 기술 부채
+
+PR #14에서 PR #13 follow-up이 정리되어 코드 레벨 부채는 낮다. 문서 레벨 부채만 남아 있다:
+
+- D1: `AI_AGENT_GUIDE.md`, `ADR.md`, `journal.md`가 루트에 흩어져 있어 새 에이전트 진입점이 불명확. 본 작업(T-015)으로 해소 예정.
+- D2: T-NNN으로 거슬러 매핑한 작업 번호와 실제 PR 번호 매핑이 `docs/tasks.md`에서 1차 정리됨. 누락된 historical PR이 발견되면 추가한다.
+- D3: `CHANGELOG.md`가 없어 사용자 가시 변경 이력을 PR 머지 메시지로만 확인 가능. T-015에서 신설.
+
+### 브랜치 정리
+
+머지 완료된 리모트 브랜치 (삭제 가능):
+- `codex/tripmate-implementation-docs` — PR #10 merged.
+- `codex/tripmate-map-primitives` — PR #11 merged.
+- `refactor/generalize-and-cleanup` — PR #12 merged.
+- `codex/main-review-fixes` — PR #13 merged.
+- `fix/post-pr13-review-fixes` — PR #14 merged.
+- `codex/debug-map-contract-hooks` — PR #9 merged.
+
+### 후속 백로그
+
+- T-016: 새 supercluster 옵션(`generateId`) 노출로 cluster id 안정화
+- T-017: VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증
+- T-018: marker portal teardown 재현 테스트(stale React fiber 시나리오)
+
+## 로컬 개발 환경
+
+```
+F:\dev\maplibre-vworld-js\
+├── src/              # 소스 — declaration 생성 대상
+│   ├── components/   # React 컴포넌트 (모두 'use client')
+│   ├── store/        # MapStore + useSyncExternalStore hooks
+│   ├── schemas.ts    # zod 스키마 (region-bounded factory 포함)
+│   ├── vworld.ts     # VWorld URL/style/redact helper
+│   └── index.ts      # public 진입점
+├── test/             # vitest + Testing Library
+├── dist/             # 빌드 산출물 (git 커밋 대상 — ADR-5)
+├── dev/              # 로컬 dev 서버용 (배포 산출물에서 제외)
+└── docs/             # 아키텍처, ADR, journal, tasks
+```
+
+Node 20 LTS. `npm ci` → `npm test` / `npm run build`.
+
+## VWorld 계약
+
+| 항목 | 값 |
+|------|----|
+| 타일 URL | `https://api.vworld.kr/req/wmts/1.0.0/{key}/{layer}/{z}/{y}/{x}.{ext}` |
+| Satellite / Hybrid max zoom | 18 |
+| Base / gray / midnight max zoom | 19 |
+| Attribution | `공간정보 오픈플랫폼 브이월드` |
+
+`apiKey`는 양 끝 whitespace를 trim하고 URL-encode한 뒤 사용한다. 빈 키 / 공백뿐인 키는 `fallback` 렌더로 빠지고 MapLibre 인스턴스를 만들지 않는다.
+
+## 빠른 검증 명령
+
+```bash
+# 의존성
+PUPPETEER_SKIP_DOWNLOAD=1 npm ci
+
+# 품질 게이트 (CI와 동일)
+npm run type-check
+npm test
+npm run build
+git diff --exit-code -- dist/        # dist/ drift 검사 (CI에서 자동)
+npm run pack:check                    # tarball 산출물 확인
+
+# dev 서버
+npm run dev
+```
+
+## 주요 결정 사항
+
+- ADR-1: 렌더링 엔진 MapLibre GL JS (Canvas 2D 대비 60fps)
+- ADR-2: React.createPortal로 마커 주입 — React 라이프사이클과 동기화
+- ADR-3: supercluster + viewport culling — 10만 마커 메모리 안전
+- ADR-4: `transformRequest` — CORS/프록시 우회 hook
+- ADR-5: `dist/` 커밋 — GitHub dependency 소비자 보호
+- ADR-6: zod v4 강제 (v3 미지원, externalize)
+- ADR-7: 범용 라이브러리 경계 — 도메인 특화 코드 비포함
+- ADR-8: 외부 store + `useSyncExternalStore` + `useEvent` 패턴
+
+상세는 `docs/decisions.md`.
+
+## 작업 후 의무사항
+
+1. `docs/journal.md`에 항목 추가 (날짜·요약·결정·다음 작업, 역시간순)
+2. `docs/tasks.md`의 현재 작업 상태 업데이트
+3. 결정이 있었다면 `docs/decisions.md`에 ADR 추가
+4. 사용자 가시 변경이면 `CHANGELOG.md` 갱신
+5. `npm run build` 후 `dist/` 커밋 — CI의 drift 검사를 통과해야 머지 가능
