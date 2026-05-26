@@ -133,12 +133,13 @@ const simplified = useMapSelector(
 ## 레이어
 
 ```tsx
-<RouteLine id="route" coordinates={[[127, 37], [127.1, 37.1]]} color="#2196F3" width={4} />
+<RouteLine id="route" data={geojsonFeature} color="#2196F3" width={4} />
 
 <PolygonArea id="park" data={geojsonFeature} fillColor="..." outlineColor="..." />
 ```
 
 `RouteLine`과 `PolygonArea`는 `setStyle()` (layer swap) 이후에도 자동 재등록된다 — `style.load` 이벤트 hook 사용.
+개발 환경(`NODE_ENV !== 'production'`)에서는 입력된 GeoJSON의 유효성을 얕게 검사하는 런타임 Zod 검증이 활성화되어 콘솔에 경고를 출력한다.
 
 ## 팝업
 
@@ -159,6 +160,7 @@ import { Popup } from 'maplibre-vworld';
   points={points}
   radius={50}
   maxZoom={16}
+  generateId={true} // React Key Churn을 방지하는 클러스터 고유 ID 자동 생성 (기본값 true)
   renderMarker={(p) => <Marker key={p.id} lngLat={p.lngLat} />}
 />
 ```

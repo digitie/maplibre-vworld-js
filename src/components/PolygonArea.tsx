@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import type maplibregl from 'maplibre-gl';
 import { useMap, useEvent } from '../store/hooks';
+import { PolygonAreaInputSchema } from '../schemas';
 
 type PolygonGeoJSON =
   | GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>
@@ -57,6 +58,15 @@ export const PolygonArea: React.FC<PolygonAreaProps> = ({
   const stableOnClick = useEvent(onClick);
   const stableOnMouseEnter = useEvent(onMouseEnter);
   const stableOnMouseLeave = useEvent(onMouseLeave);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') {
+      const result = PolygonAreaInputSchema.safeParse(data);
+      if (!result.success) {
+        console.warn(`[PolygonArea] Invalid data prop:`, result.error.errors);
+      }
+    }
+  }, [data]);
 
   useEffect(() => {
     if (!map) return;

@@ -53,6 +53,12 @@ export interface ClusterLayerProps {
   radius?: number;
   /** Maximum zoom at which clustering still applies. @default 16 */
   maxZoom?: number;
+  /**
+   * If true, supercluster will generate stable IDs for clusters. 
+   * This is recommended to prevent React key churn on re-renders.
+   * @default true
+   */
+  generateId?: boolean;
 }
 
 type Bounds = [number, number, number, number];
@@ -71,6 +77,7 @@ export const ClusterLayer: React.FC<ClusterLayerProps> = ({
   renderCluster,
   radius = 50,
   maxZoom = 16,
+  generateId = true,
 }) => {
   const map = useMap();
   const [bounds, setBounds] = useState<Bounds | null>(null);
@@ -123,7 +130,7 @@ export const ClusterLayer: React.FC<ClusterLayerProps> = ({
       })),
     [points],
   );
-  const options = useMemo(() => ({ radius, maxZoom }), [radius, maxZoom]);
+  const options = useMemo(() => ({ radius, maxZoom, generateId }), [radius, maxZoom, generateId]);
 
   const { clusters, supercluster } = useSupercluster({
     points: features,

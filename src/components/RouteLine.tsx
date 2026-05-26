@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo } from 'react';
 import type maplibregl from 'maplibre-gl';
 import { useMap, useEvent } from '../store/hooks';
+import { RouteCoordinatesSchema, RouteLineGeoJSONSchema } from '../schemas';
 
 type FeatureMouseEvent = maplibregl.MapMouseEvent & {
   features?: maplibregl.MapGeoJSONFeature[];
@@ -15,7 +16,12 @@ export interface RouteLineProps {
    * Polyline coordinates as `[longitude, latitude]` tuples. Must be
    * referentially stable: reference changes trigger a `setData` call.
    */
-  coordinates: [number, number][];
+  coordinates?: [number, number][];
+  /**
+   * GeoJSON LineString / MultiLineString Feature, FeatureCollection, or URL.
+   * If provided, overrides `coordinates`. Must be referentially stable.
+   */
+  data?: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString> | GeoJSON.FeatureCollection | string;
   /** @default '#2196F3' */
   color?: string;
   /** Width in pixels. @default 4 */
@@ -35,6 +41,7 @@ export interface RouteLineProps {
 export const RouteLine: React.FC<RouteLineProps> = ({
   id = 'route-line',
   coordinates,
+  data,
   color = '#2196F3',
   width = 4,
   dashArray,
@@ -50,15 +57,34 @@ export const RouteLine: React.FC<RouteLineProps> = ({
   const stableOnMouseEnter = useEvent(onMouseEnter);
   const stableOnMouseLeave = useEvent(onMouseLeave);
 
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') {
+      if (data) {
+        const result = RouteLineGeoJSONSchema.safeParse(data);
+        if (!result.success) {
+          console.warn(`[RouteLine] Invalid data prop:`, result.error.errors);
+        }
+      } else if (coordinates) {
+        const result = RouteCoordinatesSchema.safeParse(coordinates);
+        if (!result.success) {
+          console.warn(`[RouteLine] Invalid coordinates prop:`, result.error.errors);
+        }
+      }
+    }
+  }, [coordinates, data]);
+
   // Build the Feature once per coordinates reference. Consumers that mutate
   // an array in place will not see updates — this is intentional, matching
   // how React props work everywhere else.
-  const feature = useMemo<GeoJSON.Feature<GeoJSON.LineString>>(
-    () => ({
-      type: 'Feature',
-      properties: {},
-      geometry: { type: 'LineString', coordinates },
-    }),
+  const feature = useMemo<GeoJSON.Feature<GeoJSON.LineString> | null>(
+    () => {
+      if (!coordinates) return null;
+      return {
+        type: 'Feature',
+        properties: {},
+        geometry: { type: 'LineString', coordinates },
+      };
+    },
     [coordinates],
   );
 
@@ -68,11 +94,14 @@ export const RouteLine: React.FC<RouteLineProps> = ({
     const addOrUpdate = () => {
       if (!map.getStyle()) return;
 
+      const sourceData = data || feature;
+      if (!sourceData) return;
+
       const source = map.getSource(sourceId) as maplibregl.GeoJSONSource | undefined;
       if (source) {
-        source.setData(feature);
+        if (typeof sourceData !== 'string') source.setData(sourceData as any);
       } else {
-        map.addSource(sourceId, { type: 'geojson', data: feature });
+        map.addSource(sourceId, { type: 'geojson', data: sourceData });
       }
 
       if (!map.getLayer(layerId)) {
@@ -108,7 +137,7 @@ export const RouteLine: React.FC<RouteLineProps> = ({
       if (map.getLayer(layerId)) map.removeLayer(layerId);
       if (map.getSource(sourceId)) map.removeSource(sourceId);
     };
-  }, [map, feature, color, width, dashArray, sourceId, layerId]);
+  }, [map, data, feature, color, width, dashArray, sourceId, layerId]);
 
   useEffect(() => {
     if (!map) return;
