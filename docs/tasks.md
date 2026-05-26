@@ -3,12 +3,12 @@
 작업 항목은 `T-NNN` 형식의 ID로 관리한다. 새 작업은 "대기"의 우선순위 순서대로 들어가고, 진행 중이 되면 담당자를 표시한다. 완료된 작업은 "완료" 섹션 상단에 누적한다. T-001부터 T-014까지는 PR #1 ~ #14의 historical 매핑이다.
 
 ## 진행 중
-- (없음)
+- T-017 모든 문서 한글화 — AGENTS.md 언어 정책 강화(예외 조항 제거), README.md / AI_AGENT_GUIDE.md / CHANGELOG.md 한글로 재작성. 브랜치 `chore/all-docs-in-korean`.
 
 ## 대기 (우선순위 순)
-- T-017 supercluster `generateId` 옵션 노출 — cluster id가 매 build마다 재할당되어 React key churn을 만드는 회귀가 있다. `generateId` 또는 `getId` 콜백으로 안정화 옵션 제공.
-- T-018 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 현재 `getVWorldMaxZoom`은 하드코딩된 표. WMTS Capabilities XML을 fetch해서 layer-별 zoom 범위를 동적으로 검증할 수 있는지 검토.
-- T-019 marker portal teardown 재현 테스트 — `<Marker>` unmount 시 React fiber가 정리되지 않으면 stale handler가 남는 회귀가 있었다. 명시적인 leak 검증 테스트 추가.
+- T-018 supercluster `generateId` 옵션 노출 — cluster id가 매 build마다 재할당되어 React key churn을 만드는 회귀가 있다. `generateId` 또는 `getId` 콜백으로 안정화 옵션 제공.
+- T-019 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 현재 `getVWorldMaxZoom`은 하드코딩된 표. WMTS Capabilities XML을 fetch해서 layer-별 zoom 범위를 동적으로 검증할 수 있는지 검토.
+- T-020 marker portal teardown 재현 테스트 — `<Marker>` unmount 시 React fiber가 정리되지 않으면 stale handler가 남는 회귀가 있었다. 명시적인 leak 검증 테스트 추가.
 
 ## 완료
 - [x] T-016 PR #17 — GitHub Actions / CI 제거. .github/workflows/ci.yml 삭제, ADR-10 추가, 모든 문서에서 CI 언급을 로컬 게이트 표현으로 정정. 백로그 번호 시프트(T-016/17/18 → T-017/18/19) (2026-05-26)

@@ -2,6 +2,27 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-05-26 (T-017 — 모든 문서 한글화)
+
+**작업**: 사용자 지시 "모든 문서는 한글로 작성할 것을 문서화하고, 현재 영어로 작성된 문서도 한글화 할 것"에 따라 `AGENTS.md` 언어 정책에서 영문 예외 조항을 제거하고 `README.md`, `AI_AGENT_GUIDE.md`, `CHANGELOG.md`를 한글로 재작성.
+
+**구현 상세**:
+- `AGENTS.md` 문서 언어 정책 재작성. 기존: "README와 AI_AGENT_GUIDE는 예외". 신규: "모든 Markdown 문서는 한글로 작성한다. 예외 없음." 보존 대상은 6개 카테고리로 명시 — 코드 식별자, 명령어/경로, 외부 공식 용어, 벤더/제품명, 표준 keyword, shell 출력.
+- `README.md` 한글화. 뱃지/Quick start 코드/API table 헤더는 그대로 두되 설명 문장과 trouble-shooting 섹션을 한글로. "More reading" → "참고 문서" 섹션 추가.
+- `AI_AGENT_GUIDE.md` 한글화. 진입점 표기: 본 문서 = 소비자 앱을 짜는 AI/개발자용, SKILL.md = 본 저장소 컨트리뷰터용. 역할 분리를 첫 단락에서 명시.
+- `CHANGELOG.md` 한글화. Keep-a-Changelog 표준 헤더(`### Added`/`Changed`/`Removed`/`Fixed`/`Security`)는 영문 보존, 본문 항목은 한글. T-017 Unreleased 항목 추가.
+- 한글화 정책에 따라 보존 대상은 의도적으로 영문: `useMapSelector`, `'use client'`, `npm run build`, `https://api.vworld.kr/...`, MapLibre, VWorld, zod, Keep-a-Changelog.
+
+**검증** (로컬 게이트, ADR-10):
+- `npm run type-check` → 통과.
+- `npm test` → 통과 (7 files / 48 tests).
+- `npm run build` → 통과.
+- `git diff --exit-code -- dist/` → 깨끗 (코드 변경 없음, 문서 전용).
+
+**다음 작업**: 후속 백로그 T-018(supercluster generateId)/T-019(VWorld getCapabilities)/T-020(marker portal teardown 테스트). 영문 README/AI_AGENT_GUIDE를 찾는 영어권 사용자가 다시 등장하면 별도 `*.en.md` 변형을 만드는 옵션 검토.
+
+---
+
 ## 2026-05-26 (T-016 — GitHub Actions / CI 제거)
 
 **작업**: 사용자 지시 "깃헙 ci/cd 쓰지마"에 따라 `.github/workflows/ci.yml`을 제거하고 모든 문서에서 CI 언급을 로컬 게이트 표현으로 정리. ADR-10(GitHub Actions 비사용)을 추가.
