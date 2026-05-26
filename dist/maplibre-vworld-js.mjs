@@ -798,18 +798,18 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 		]
 	})
 }), fe = ({ price: e, currency: t = "", isHoverable: n = !0, ...r }) => {
-	let [i, a] = l(!1), o = (e) => typeof e == "number" ? e.toLocaleString() : e;
+	let [i, a] = l(!1), o = (e) => typeof e == "number" ? e.toLocaleString() : e, s = Array.isArray(e);
 	return /* @__PURE__ */ (0, L.jsx)(B, {
 		...r,
-		children: /* @__PURE__ */ (0, L.jsxs)("div", {
+		children: /* @__PURE__ */ (0, L.jsx)("div", {
 			onMouseEnter: () => a(!0),
 			onMouseLeave: () => a(!1),
 			style: {
 				background: i && n ? "#222" : "white",
 				color: i && n ? "white" : "#222",
 				border: "1px solid #ddd",
-				borderRadius: "24px",
-				padding: "6px 12px",
+				borderRadius: s ? "12px" : "24px",
+				padding: s ? "8px 12px" : "6px 12px",
 				fontSize: "14px",
 				fontWeight: "bold",
 				boxShadow: i && n ? "0 4px 12px rgba(0,0,0,0.3)" : "0 2px 6px rgba(0,0,0,0.15)",
@@ -817,10 +817,27 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 				transition: "all 0.2s ease-in-out",
 				transform: i && n ? "scale(1.05)" : "scale(1)",
 				display: "flex",
-				alignItems: "center",
-				gap: "2px"
+				flexDirection: s ? "column" : "row",
+				alignItems: s ? "stretch" : "center",
+				gap: s ? "4px" : "2px",
+				minWidth: s ? "120px" : "auto"
 			},
-			children: [/* @__PURE__ */ (0, L.jsx)("span", { children: t }), /* @__PURE__ */ (0, L.jsx)("span", { children: o(e) })]
+			children: s ? e.map((e, r) => /* @__PURE__ */ (0, L.jsxs)("div", {
+				style: {
+					display: "flex",
+					justifyContent: "space-between",
+					alignItems: "center",
+					gap: "12px"
+				},
+				children: [e.label && /* @__PURE__ */ (0, L.jsx)("span", {
+					style: {
+						color: i && n ? "#aaa" : "#666",
+						fontSize: "12px",
+						fontWeight: "normal"
+					},
+					children: e.label
+				}), /* @__PURE__ */ (0, L.jsxs)("span", { children: [e.currency === void 0 ? t : e.currency, o(e.price)] })]
+			}, r)) : /* @__PURE__ */ (0, L.jsxs)(L.Fragment, { children: [/* @__PURE__ */ (0, L.jsx)("span", { children: t }), /* @__PURE__ */ (0, L.jsx)("span", { children: o(e) })] })
 		})
 	});
 }, pe = {

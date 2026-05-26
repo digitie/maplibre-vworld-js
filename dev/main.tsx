@@ -159,8 +159,21 @@ const App = () => {
         />
 
         {/* Price Markers (Airbnb style) */}
-        <PriceMarker lngLat={[127.03, 37.52]} price={150000} />
+        <PriceMarker lngLat={[127.03, 37.52]} price={150000} currency="₩" />
         <PriceMarker lngLat={[127.04, 37.53]} price="Sold Out" currency="" color="#888" />
+
+        {/* Multi-Price Marker (e.g., Gas Station) */}
+        <PriceMarker 
+          lngLat={[127.02, 37.51]} 
+          currency="₩"
+          price={[
+            { label: '휘발유', price: 1299 },
+            { label: '고급유', price: 1920 },
+            { label: '경유', price: 1900 },
+            { label: '등유', price: 1290 },
+            { label: 'LPG', price: 129 },
+          ]}
+        />
 
         {/* Pulsing Marker */}
         <PulsingMarker lngLat={[126.99, 37.54]} color="#E91E63" />

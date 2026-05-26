@@ -3,8 +3,16 @@
 import React, { useState } from 'react';
 import { Marker, type MarkerProps } from './Marker';
 
-export interface PriceMarkerProps extends Omit<MarkerProps, 'children'> {
+export interface PriceItem {
+  label?: string;
   price: string | number;
+  /** Currency / unit symbol shown before the price. Falls back to the root `currency` prop. */
+  currency?: string;
+}
+
+export interface PriceMarkerProps extends Omit<MarkerProps, 'children'> {
+  /** Single price or an array of price items (e.g., for gas stations with multiple fuels). */
+  price: string | number | PriceItem[];
   /** Currency / unit symbol shown before the price. @default '' */
   currency?: string;
   /** Apply hover styling. @default true */
@@ -27,6 +35,8 @@ export const PriceMarker: React.FC<PriceMarkerProps> = ({
     return p;
   };
 
+  const isArray = Array.isArray(price);
+
   return (
     <Marker {...props}>
       <div 
@@ -36,8 +46,8 @@ export const PriceMarker: React.FC<PriceMarkerProps> = ({
           background: isHovered && isHoverable ? '#222' : 'white',
           color: isHovered && isHoverable ? 'white' : '#222',
           border: '1px solid #ddd',
-          borderRadius: '24px',
-          padding: '6px 12px',
+          borderRadius: isArray ? '12px' : '24px',
+          padding: isArray ? '8px 12px' : '6px 12px',
           fontSize: '14px',
           fontWeight: 'bold',
           boxShadow: isHovered && isHoverable 
@@ -47,12 +57,36 @@ export const PriceMarker: React.FC<PriceMarkerProps> = ({
           transition: 'all 0.2s ease-in-out',
           transform: (isHovered && isHoverable) ? 'scale(1.05)' : 'scale(1)',
           display: 'flex',
-          alignItems: 'center',
-          gap: '2px'
+          flexDirection: isArray ? 'column' : 'row',
+          alignItems: isArray ? 'stretch' : 'center',
+          gap: isArray ? '4px' : '2px',
+          minWidth: isArray ? '120px' : 'auto',
         }}
       >
-        <span>{currency}</span>
-        <span>{formatPrice(price)}</span>
+        {isArray ? (
+          (price as PriceItem[]).map((p, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+              {p.label && (
+                <span style={{ 
+                  color: isHovered && isHoverable ? '#aaa' : '#666', 
+                  fontSize: '12px', 
+                  fontWeight: 'normal' 
+                }}>
+                  {p.label}
+                </span>
+              )}
+              <span>
+                {p.currency !== undefined ? p.currency : currency}
+                {formatPrice(p.price)}
+              </span>
+            </div>
+          ))
+        ) : (
+          <>
+            <span>{currency}</span>
+            <span>{formatPrice(price as string | number)}</span>
+          </>
+        )}
       </div>
     </Marker>
   );
