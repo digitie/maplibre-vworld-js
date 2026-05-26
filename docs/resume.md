@@ -4,18 +4,14 @@
 
 ## 현재 진척도 (2026-05-26 갱신)
 
-- ✅ T-001~T-016: 코어 라이브러리 + 보안 패치 + GitHub dependency 패키징 + zod v4 + 디버그 hook + TripMate primitive + 범용 라이브러리 정리 + 런타임 결함 수정 + post-PR13 review fixes + python-kraddr-geo 문서 구조 채택 + GitHub Actions 제거(ADR-10)
-- 🟡 T-017: 모든 문서 한글화 + 언어 정책 강화 (브랜치 `chore/all-docs-in-korean`, PR 진행 중)
-- ⬜ T-018: supercluster `generateId` 옵션 노출
+- ✅ T-001~T-018, T-020~T-023: 코어 라이브러리 + 보안 패치 + GitHub dependency 패키징 + zod v4 + 디버그 hook + TripMate primitive + 범용 라이브러리 정리 + 런타임 결함 수정 + post-PR13 review fixes + python-kraddr-geo 문서 구조 채택 + GitHub Actions 제거(ADR-10) + 모든 문서 한글화 + RouteLine GeoJSON 복구 + supercluster generateId + Marker portal leak 테스트 + 동적 z-index + PriceMarker 다중 가격/LOD/Manual Expand + ADR-11
 - ⬜ T-019: VWorld `getCapabilities` 응답 기반 layer/tile matrix 자동 검증
-- ⬜ T-020: marker portal teardown 재현 테스트
 
 ## 다음 한 작업 (1시간 이내 분량)
 
-T-017 PR 머지 후:
-- T-018이 가장 작다 (supercluster 옵션 한 줄 + 회귀 테스트).
-- T-020은 fiber leak 시나리오 reproduction이 까다로워 약간 더 큼.
-- T-019는 WMTS Capabilities XML 파싱 + cache 정책 결정이 필요해 ADR이 먼저 나와야 할 수 있다.
+후보:
+- T-019(VWorld getCapabilities)는 WMTS Capabilities XML 파싱 + cache 정책 결정이 필요해 ADR이 먼저 나와야 할 수 있다.
+- 새 백로그가 떠오르면 `docs/tasks.md`에 T-024 이후로 등록한다.
 
 ## 작업 시작 전 확인할 것
 
