@@ -3,7 +3,7 @@
 작업 항목은 `T-NNN` 형식의 ID로 관리한다. 새 작업은 "대기"의 우선순위 순서대로 들어가고, 진행 중이 되면 담당자를 표시한다. 완료된 작업은 "완료" 섹션 상단에 누적한다. T-001부터 T-014까지는 PR #1 ~ #14의 historical 매핑이다.
 
 ## 진행 중
-- T-016 GitHub Actions 제거 — `.github/workflows/ci.yml` 삭제, 모든 문서에서 CI 언급을 로컬 게이트 표현으로 정리, ADR-10 추가. 브랜치 `chore/remove-github-actions`.
+- (없음)
 
 ## 대기 (우선순위 순)
 - T-017 supercluster `generateId` 옵션 노출 — cluster id가 매 build마다 재할당되어 React key churn을 만드는 회귀가 있다. `generateId` 또는 `getId` 콜백으로 안정화 옵션 제공.
@@ -11,6 +11,7 @@
 - T-019 marker portal teardown 재현 테스트 — `<Marker>` unmount 시 React fiber가 정리되지 않으면 stale handler가 남는 회귀가 있었다. 명시적인 leak 검증 테스트 추가.
 
 ## 완료
+- [x] T-016 PR #17 — GitHub Actions / CI 제거. .github/workflows/ci.yml 삭제, ADR-10 추가, 모든 문서에서 CI 언급을 로컬 게이트 표현으로 정정. 백로그 번호 시프트(T-016/17/18 → T-017/18/19) (2026-05-26)
 - [x] T-015 PR #15 — python-kraddr-geo 문서 구조 채택. CLAUDE.md/AGENTS.md(재작성)/SKILL.md 루트, docs/{architecture,decisions,journal,tasks,resume,dev-environment}.md, CHANGELOG.md 신설. ADR.md→docs/decisions.md, journal.md→docs/journal.md 이전. 코드 변경 없음 (2026-05-26)
 - [x] T-014 PR #14 — PR #13 follow-up review fixes. onError ref 통합, pendingCameraRef로 camera prop drop 방지, styledata→style.load, Marker className token diff, anchor/offset prop, Popup construction-only opts snapshot, ClusterMarker useEvent, ClusterLayer loaded gate, useMapSelector ref-based selector, 디버그 잔재 제거 (2026-05-26)
 - [x] T-013 PR #13 — main 코드 리뷰 후 런타임 결함 수정. stale handler ref 패턴, initial camera replay 방지, pitch/bearing prop, maxBounds undefined 해제, useMapSelector cache, marker scale style, ClusterMarker onClick path, RouteLine dashArray reset (2026-05-25)

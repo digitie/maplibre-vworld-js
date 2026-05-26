@@ -4,15 +4,14 @@
 
 ## 현재 진척도 (2026-05-26 갱신)
 
-- ✅ T-001~T-015: 코어 라이브러리 + 보안 패치 + GitHub dependency 패키징 + zod v4 + 디버그 hook + TripMate primitive + 범용 라이브러리 정리 + 런타임 결함 수정 + post-PR13 review fixes + python-kraddr-geo 문서 구조 채택
-- 🟡 T-016: GitHub Actions 제거 + ADR-10 추가 (브랜치 `chore/remove-github-actions`, PR 진행 중)
+- ✅ T-001~T-016: 코어 라이브러리 + 보안 패치 + GitHub dependency 패키징 + zod v4 + 디버그 hook + TripMate primitive + 범용 라이브러리 정리 + 런타임 결함 수정 + post-PR13 review fixes + python-kraddr-geo 문서 구조 채택 + GitHub Actions 제거(ADR-10)
 - ⬜ T-017: supercluster `generateId` 옵션 노출
 - ⬜ T-018: VWorld `getCapabilities` 응답 기반 layer/tile matrix 자동 검증
 - ⬜ T-019: marker portal teardown 재현 테스트
 
 ## 다음 한 작업 (1시간 이내 분량)
 
-T-016 PR을 머지 후:
+후보:
 - T-017이 가장 작다 (supercluster 옵션 한 줄 + 회귀 테스트).
 - T-019는 fiber leak 시나리오 reproduction이 까다로워 약간 더 큼.
 - T-018은 WMTS Capabilities XML 파싱 + cache 정책 결정이 필요해 ADR이 먼저 나와야 할 수 있다.
