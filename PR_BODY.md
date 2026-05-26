@@ -1,20 +1,9 @@
 ## 배경 및 목적
 
-지도 상에 밀집된 다수의 마커(Marker)나 팝업(Popup)이 렌더링될 때, 요소들이 서로 겹쳐서 사용자가 특정 요소를 클릭해도 가려져서 보이지 않는 사용성 문제가 있었습니다. 본 PR은 사용자가 특정 팝업이나 마커를 클릭했을 때 해당 요소의 DOM `z-index`를 동적으로 증가시켜 항상 최상단에 노출되도록 개선합니다.
+기존의 `PriceMarker`는 단일 가격만 표시할 수 있어서 주유소(휘발유, 경유, 고급유 등)와 같이 하나의 마커에서 여러 개의 가격 항목을 나열해야 하는 유스케이스에 대응하기 어려웠습니다. 본 PR은 `PriceMarker` 컴포넌트가 배열 형태의 가격 정보(Label + Price)를 지원하도록 개선합니다. 
 
-## 기술적 변경 사항 및 구현 상세
-
-### 1. `Popup` 컴포넌트 개선 (`Popup.tsx`)
-- **전역 카운터 도입**: 모듈 레벨 변수 `let globalPopupZIndex = 1;`을 선언하여 모든 팝업 인스턴스가 공유하는 z-index 상태를 관리합니다.
-- **클릭 이벤트 바인딩**: MapLibre 팝업 인스턴스 생성 시 `popup.getElement()`를 통해 루트 DOM 엘리먼트에 직접 `click` 이벤트 리스너를 추가했습니다.
-- **동적 z-index 할당**: 사용자가 팝업을 클릭할 때마다 전역 카운터가 1씩 단조 증가(Monotonically Increasing)하며, 이를 해당 팝업 엘리먼트의 `style.zIndex`에 즉시 적용하여 가장 높은 스택 컨텍스트를 점유하도록 했습니다.
-
-### 2. `Marker` 컴포넌트 개선 (`Marker.tsx`)
-- **전역 카운터 및 레퍼런스 분리**: `let globalMarkerZIndex = 1000;` (일반적인 정적 z-index prop과의 충돌 방지를 위해 높은 값에서 시작) 및 각 마커별 `dynamicZIndexRef`를 선언했습니다.
-- **상태 동기화 문제 해결**: 마커 클릭 시 부모 컴포넌트에서 `selected` prop을 변경하여 React 리렌더링이 발생하면, 기존 로직의 `applyMarkerState`가 동적으로 주입된 z-index를 초기화해버리는 문제가 발생할 수 있었습니다.
-- **우선순위 재조정 (Effective z-index)**: `effectiveZIndex = dynamicZIndexRef.current ?? zIndex` 로직을 구성하여, 한 번이라도 클릭을 통해 부여받은 동적 z-index가 있다면 React 렌더 사이클(`selected`, `highlighted` 등 변경)에서도 사용자 정의 `zIndex` prop보다 우선하여 유지되도록 설계했습니다.
-
-### 3. 테스트 및 빌드 무결성 확보
-- **테스트 환경 동기화**: Vitest 환경의 `test/setup.ts` 내 MapLibre `Popup` Mock 객체가 실제 DOM 요소 참조를 반환하도록 `getElement()` 구현을 추가했습니다.
-- **Unit Test 반영**: 마커 클릭 이벤트를 시뮬레이션하는 `Marker.test.tsx`의 검증부에서 동적 z-index(`1001`)를 정상적으로 참조하는지 Assert 로직을 수정했습니다.
-- 빌드 산출물(`dist/`) 동기화 및 런타임 타입 체크 정상 통과 완료.
+## 구현 상세
+- **타입 호환성**: 기존처럼 단순 `number` 또는 `string` 하나만 전달하는 방식도 그대로 지원하여 하위 호환성(Backward Compatibility)을 보장합니다.
+- **다중 가격 지원**: `price` prop에 배열을 전달하면 세로 목록(Flex Column) 형태로 가격들을 렌더링하며, 각 항목별 레이블(`label`)과 통화 단위(`currency`)를 지정할 수 있도록 인터페이스(`PriceItem`)를 신설하고 `export` 했습니다.
+- **스타일링**: 단일 가격일 경우 기존 Airbnb 스타일의 동그란 알약 형태를 유지하고, 다중 가격 배열이 들어오면 목록 형태에 어울리는 직사각형 모서리(Border-radius) 및 최소 너비를 자동으로 적용합니다.
+- **Debug UI 적용**: `dev/main.tsx`에 주유소 다중 가격 표시 예제를 추가하여 데브 서버에서 테스트해볼 수 있도록 연동했습니다.

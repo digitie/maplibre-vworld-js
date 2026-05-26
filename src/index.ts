@@ -36,7 +36,7 @@ export { MakiMarker, type MakiMarkerProps } from './components/MakiMarker';
 export { PulsingMarker, type PulsingMarkerProps } from './components/PulsingMarker';
 export { SimpleMarker, type SimpleMarkerProps } from './components/SimpleMarker';
 export { PlaceMarker, type PlaceMarkerProps } from './components/PlaceMarker';
-export { PriceMarker, type PriceMarkerProps } from './components/PriceMarker';
+export { PriceMarker, type PriceMarkerProps, type PriceItem } from './components/PriceMarker';
 export {
   WeatherMarker,
   type WeatherMarkerProps,

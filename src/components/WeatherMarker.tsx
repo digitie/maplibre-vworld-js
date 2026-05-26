@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { Marker, type MarkerProps } from './Marker';
 import { PinMarker } from './PinMarker';
 import { useMapSelector } from '../store/hooks';
@@ -68,13 +68,25 @@ export const WeatherMarker: React.FC<WeatherMarkerProps> = ({
     ),
   );
 
-  if (shouldSimplify) {
+  const [isManuallyExpanded, setIsManuallyExpanded] = useState(false);
+  const prevShouldSimplifyRef = useRef(shouldSimplify);
+
+  if (prevShouldSimplifyRef.current !== shouldSimplify) {
+    if (shouldSimplify === false) setIsManuallyExpanded(false);
+    prevShouldSimplifyRef.current = shouldSimplify;
+  }
+
+  if (shouldSimplify && !isManuallyExpanded) {
     return (
       <PinMarker
         lngLat={props.lngLat}
         color={conditionColors[condition]}
         size={24}
         showInnerCircle
+        onClick={(e, marker) => {
+          if (props.onClick) props.onClick(e, marker);
+          setIsManuallyExpanded(true);
+        }}
       />
     );
   }
@@ -110,6 +122,35 @@ export const WeatherMarker: React.FC<WeatherMarkerProps> = ({
         >
           <span style={{ fontSize: '16px' }}>{conditionIcons[condition]}</span>
           <span>{temperature}°C</span>
+          
+          {shouldSimplify && isManuallyExpanded && (
+            <button
+              aria-label="Close"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsManuallyExpanded(false);
+                setIsExpanded(false); // Also close forecast if open
+              }}
+              style={{
+                background: 'rgba(0,0,0,0.1)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '16px',
+                height: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                marginLeft: '4px',
+                fontSize: '10px',
+                padding: 0,
+                color: '#333'
+              }}
+            >
+              ✕
+            </button>
+          )}
+
           {hasForecast && (
             <span style={{ fontSize: '10px', color: '#999', marginLeft: '2px' }}>
               {isExpanded ? '▲' : '▼'}

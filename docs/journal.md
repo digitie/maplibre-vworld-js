@@ -2,6 +2,27 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-05-26 (UX/UI 디테일 보강 및 다중 가격 지원 — PR #21, #22)
+
+**작업**: 겹치는 마커/팝업의 클릭 UX 개선, 주유소 등 다중 가격을 표시하기 위한 `PriceMarker` 배열 지원, 그리고 시멘틱 줌으로 인해 축소된 마커를 수동으로 확장할 수 있는 강제 확장(Manual Expand) 기능 추가. 더불어 개발용 앱(`dev/main.tsx`)에 컨텍스트 메뉴(우클릭) 커스텀 예제 추가.
+
+**구현 상세**:
+- **T-021 (PR #21)**: `<Popup>`과 `<Marker>`에 전역 카운터를 사용하는 자동 `z-index` 증가 로직(`onClick` 인터셉트)을 추가해 클릭한 요소가 무조건 최상단에 올라오도록 개선.
+- **T-022 (PR #22)**: 
+  - `PriceMarker`가 `price` prop으로 `PriceItem[]` 배열을 받아 여러 개의 가격을 수직 레이아웃으로 표시할 수 있도록 지원.
+  - `PriceMarker`에 3단계 Semantic Zoom (Stage 1: 전체, Stage 2: 2개 제한, Stage 3: 단순 점 마커) LOD 적용 및 `lodThresholds` prop 노출.
+  - 시멘틱 줌 대상 마커(`PlaceMarker`, `WeatherMarker`, `PriceMarker`)들에 `isManuallyExpanded` 상태를 도입하여, 간소화된 핀을 1번 클릭 시 즉시 원래 뷰가 확장 표시되도록 적용. 닫기(`✕`) 버튼 또는 토글 기능 제공.
+  - 사용자가 지도를 확대하여 줌 임계치를 넘어가면 자연스럽게 강제 확장 상태를 초기화하는 UX 디테일 추가.
+- `dev/main.tsx`에 `<VWorldMap>` 및 `<Marker>`의 `onContextMenu`를 활용한 커스텀 우클릭 메뉴 UI 예제 추가.
+
+**검증**:
+- `npm run type-check` 및 `npm test` 모두 통과 (53 Tests Passed).
+- `npm run build` 산출물(`dist/`) 커밋 및 푸시 완료.
+
+**다음 작업**: 해당 변경 사항을 메인 브랜치로 머지.
+
+---
+
 ## 2026-05-26 (RouteLine GeoJSON 복구 및 라이브러리 고도화)
 
 **작업**: 사용자 요청에 따라 라이브러리의 4가지 핵심 개선점(T-019 제외)을 반영하여 확장성과 안정성을 보강.

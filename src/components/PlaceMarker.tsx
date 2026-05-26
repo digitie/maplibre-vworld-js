@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { Marker, type MarkerProps } from './Marker';
 import { PinMarker } from './PinMarker';
 import { useMapSelector } from '../store/hooks';
@@ -37,8 +37,30 @@ export const PlaceMarker: React.FC<PlaceMarkerProps> = ({
     ),
   );
 
-  if (shouldSimplify) {
-    return <PinMarker lngLat={props.lngLat} color="#333" size={24} showInnerCircle={false} />;
+  const [isManuallyExpanded, setIsManuallyExpanded] = useState(false);
+  const prevShouldSimplifyRef = useRef(shouldSimplify);
+
+  if (prevShouldSimplifyRef.current !== shouldSimplify) {
+    if (shouldSimplify === false) {
+      // Natural zoom-in occurred, reset manual override
+      setIsManuallyExpanded(false);
+    }
+    prevShouldSimplifyRef.current = shouldSimplify;
+  }
+
+  if (shouldSimplify && !isManuallyExpanded) {
+    return (
+      <PinMarker 
+        lngLat={props.lngLat} 
+        color="#333" 
+        size={24} 
+        showInnerCircle={false} 
+        onClick={(e, marker) => {
+          if (props.onClick) props.onClick(e, marker);
+          setIsManuallyExpanded(true);
+        }}
+      />
+    );
   }
 
   return (
@@ -58,6 +80,36 @@ export const PlaceMarker: React.FC<PlaceMarkerProps> = ({
           cursor: 'default',
         }}
       >
+        {isManuallyExpanded && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsManuallyExpanded(false);
+            }}
+            style={{
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              background: 'rgba(0,0,0,0.5)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '50%',
+              width: '20px',
+              height: '20px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              zIndex: 10,
+              padding: 0,
+              lineHeight: 1,
+            }}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        )}
         <div
           style={{
             position: 'absolute',
