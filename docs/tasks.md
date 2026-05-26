@@ -3,16 +3,18 @@
 작업 항목은 `T-NNN` 형식의 ID로 관리한다. 새 작업은 "대기"의 우선순위 순서대로 들어가고, 진행 중이 되면 담당자를 표시한다. 완료된 작업은 "완료" 섹션 상단에 누적한다. T-001부터 T-014까지는 PR #1 ~ #14의 historical 매핑이다.
 
 ## 진행 중
-- T-017 모든 문서 한글화 — AGENTS.md 언어 정책 강화(예외 조항 제거), README.md / AI_AGENT_GUIDE.md / CHANGELOG.md 한글로 재작성. 브랜치 `chore/all-docs-in-korean`.
+- (없음)
 
 ## 대기 (우선순위 순)
 - T-019 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 현재 `getVWorldMaxZoom`은 하드코딩된 표. WMTS Capabilities XML을 fetch해서 layer-별 zoom 범위를 동적으로 검증할 수 있는지 검토.
 
 ## 완료
+- [x] T-023 PR #23 — ADR-11 추가. 동적 z-index와 시멘틱 줌 manual expand에 대한 결정 기록. (2026-05-26)
 - [x] T-022 PR #22 — PriceMarker 다중 가격 배열 지원, 3단계 LOD 적용, 시멘틱 줌 마커 강제 확장(Manual Expand) 기능 추가, 우클릭(onContextMenu) 예제 추가. (2026-05-26)
 - [x] T-021 PR #21 — 겹치는 마커/팝업 클릭 시 전역 카운터 기반 동적 `z-index` 증가 로직 도입으로 클릭 요소 최상단 노출. (2026-05-26)
 - [x] T-020 RouteLine GeoJSON 복구 및 Marker Portal 메모리 누수 방지 테스트 — GeoJSON `data` Prop 복구 및 Zod 유효성 검사 추가. `<Marker>` 언마운트 누수 검증. (2026-05-26)
 - [x] T-018 supercluster `generateId` 옵션 노출 — 클러스터 마커의 React Key Churn 방지. (2026-05-26)
+- [x] T-017 PR #19 — 모든 Markdown 문서를 한글로 작성하도록 정책 강화. AGENTS.md 언어 정책에서 예외 조항 제거, README.md / AI_AGENT_GUIDE.md / CHANGELOG.md 한글로 재작성. 보존 대상은 6개 카테고리(코드 식별자/명령어/외부 공식 용어/벤더/표준 keyword/shell 출력)로 명시. (2026-05-26)
 - [x] T-016 PR #17 — GitHub Actions / CI 제거. .github/workflows/ci.yml 삭제, ADR-10 추가, 모든 문서에서 CI 언급을 로컬 게이트 표현으로 정정. 백로그 번호 시프트(T-016/17/18 → T-017/18/19) (2026-05-26)
 - [x] T-015 PR #15 — python-kraddr-geo 문서 구조 채택. CLAUDE.md/AGENTS.md(재작성)/SKILL.md 루트, docs/{architecture,decisions,journal,tasks,resume,dev-environment}.md, CHANGELOG.md 신설. ADR.md→docs/decisions.md, journal.md→docs/journal.md 이전. 코드 변경 없음 (2026-05-26)
 - [x] T-014 PR #14 — PR #13 follow-up review fixes. onError ref 통합, pendingCameraRef로 camera prop drop 방지, styledata→style.load, Marker className token diff, anchor/offset prop, Popup construction-only opts snapshot, ClusterMarker useEvent, ClusterLayer loaded gate, useMapSelector ref-based selector, 디버그 잔재 제거 (2026-05-26)
