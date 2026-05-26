@@ -6,11 +6,11 @@
 - T-017 모든 문서 한글화 — AGENTS.md 언어 정책 강화(예외 조항 제거), README.md / AI_AGENT_GUIDE.md / CHANGELOG.md 한글로 재작성. 브랜치 `chore/all-docs-in-korean`.
 
 ## 대기 (우선순위 순)
-- T-018 supercluster `generateId` 옵션 노출 — cluster id가 매 build마다 재할당되어 React key churn을 만드는 회귀가 있다. `generateId` 또는 `getId` 콜백으로 안정화 옵션 제공.
 - T-019 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 현재 `getVWorldMaxZoom`은 하드코딩된 표. WMTS Capabilities XML을 fetch해서 layer-별 zoom 범위를 동적으로 검증할 수 있는지 검토.
-- T-020 marker portal teardown 재현 테스트 — `<Marker>` unmount 시 React fiber가 정리되지 않으면 stale handler가 남는 회귀가 있었다. 명시적인 leak 검증 테스트 추가.
 
 ## 완료
+- [x] T-020 RouteLine GeoJSON 복구 및 Marker Portal 메모리 누수 방지 테스트 — GeoJSON `data` Prop 복구 및 Zod 유효성 검사 추가. `<Marker>` 언마운트 누수 검증. (2026-05-26)
+- [x] T-018 supercluster `generateId` 옵션 노출 — 클러스터 마커의 React Key Churn 방지. (2026-05-26)
 - [x] T-016 PR #17 — GitHub Actions / CI 제거. .github/workflows/ci.yml 삭제, ADR-10 추가, 모든 문서에서 CI 언급을 로컬 게이트 표현으로 정정. 백로그 번호 시프트(T-016/17/18 → T-017/18/19) (2026-05-26)
 - [x] T-015 PR #15 — python-kraddr-geo 문서 구조 채택. CLAUDE.md/AGENTS.md(재작성)/SKILL.md 루트, docs/{architecture,decisions,journal,tasks,resume,dev-environment}.md, CHANGELOG.md 신설. ADR.md→docs/decisions.md, journal.md→docs/journal.md 이전. 코드 변경 없음 (2026-05-26)
 - [x] T-014 PR #14 — PR #13 follow-up review fixes. onError ref 통합, pendingCameraRef로 camera prop drop 방지, styledata→style.load, Marker className token diff, anchor/offset prop, Popup construction-only opts snapshot, ClusterMarker useEvent, ClusterLayer loaded gate, useMapSelector ref-based selector, 디버그 잔재 제거 (2026-05-26)

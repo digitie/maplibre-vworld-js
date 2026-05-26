@@ -2,6 +2,26 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-05-26 (RouteLine GeoJSON 복구 및 라이브러리 고도화)
+
+**작업**: 사용자 요청에 따라 라이브러리의 4가지 핵심 개선점(T-019 제외)을 반영하여 확장성과 안정성을 보강.
+
+**구현 상세**:
+- `RouteLine`의 GeoJSON 지원(`data` Prop)이 이전 리팩토링 중 유실된 것을 파악하고 다시 복구. 이제 단일 `LineString`뿐만 아니라 `MultiLineString`도 주입 가능.
+- `src/schemas.ts`에 `PolygonAreaInputSchema` 및 `RouteLineGeoJSONSchema` 추가.
+- `RouteLine`, `PolygonArea` 내부에서 개발 환경(`NODE_ENV !== 'production'`)인 경우 입력된 데이터를 Zod로 얕게 검사하여 잘못된 구조일 때 `console.warn`을 띄우도록 개선.
+- T-018: React Key Churn을 방지하기 위해 `ClusterLayer`에 `generateId` 속성을 추가하고 `useSupercluster`에 연동.
+- T-020: `test/MarkerTeardown.test.tsx` 신설. `<Marker>` 컴포넌트가 언마운트될 때 React Portal과 MapLibre DOM 찌꺼기가 남지 않고 정상 제거(remove)되는지 검증.
+- `test/RouteLine.test.tsx`, `test/PolygonArea.test.tsx` 단위 테스트 작성. (이 과정에서 기존 `MapContext.Provider` 모의 렌더링이 더 이상 유효하지 않음을 발견하고 `<VWorldMap>`을 감싸는 형태로 모든 테스트를 수정).
+
+**검증**:
+- `npm run test` → 통과 (9 files / 52 tests).
+- 수동 로컬 데브 서버 기동 및 렌더링 이상 없음 확인.
+
+**다음 작업**: 해당 브랜치(`feat/enhance-routes-and-stability`) PR 생성 및 사용자 머지 대기.
+
+---
+
 ## 2026-05-26 (T-017 — 모든 문서 한글화)
 
 **작업**: 사용자 지시 "모든 문서는 한글로 작성할 것을 문서화하고, 현재 영어로 작성된 문서도 한글화 할 것"에 따라 `AGENTS.md` 언어 정책에서 영문 예외 조항을 제거하고 `README.md`, `AI_AGENT_GUIDE.md`, `CHANGELOG.md`를 한글로 재작성.

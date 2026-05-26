@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- `RouteLine`에 GeoJSON 포맷을 직접 주입할 수 있는 `data` Prop 복구. (단일 `LineString` 외에 `MultiLineString` 지원)
+- 개발 환경(`NODE_ENV !== 'production'`) 한정으로 `PolygonArea`와 `RouteLine`의 입력 데이터(GeoJSON 등) 구조를 검증하여 경고를 띄우는 Zod 런타임 유효성 검사 추가. (`PolygonAreaInputSchema`, `RouteLineGeoJSONSchema`)
+- `ClusterLayer`에 React Key Churn을 방지하는 클러스터 고유 ID 자동 생성 옵션 `generateId` 노출 (T-018).
+- `Marker` 포털 메모리 누수를 검증하는 자동화 단위 테스트 추가 (T-020).
+- `PolygonArea`, `RouteLine`의 라이프사이클 및 이벤트 바인딩 검증을 위한 단위 테스트 추가.
+
 ### Changed
 
 - 모든 Markdown 문서를 한글로 작성하도록 정책을 강화하고 영문으로 남아 있던 `README.md`, `AI_AGENT_GUIDE.md`, `CHANGELOG.md`를 한글화 (T-017). 코드 식별자, 명령어, URL, 외부 공식 용어, 벤더/제품명, Keep-a-Changelog 표준 keyword는 영문을 유지.

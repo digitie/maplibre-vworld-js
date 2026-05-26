@@ -41,6 +41,12 @@ export interface ClusterLayerProps {
     radius?: number;
     /** Maximum zoom at which clustering still applies. @default 16 */
     maxZoom?: number;
+    /**
+     * If true, supercluster will generate stable IDs for clusters.
+     * This is recommended to prevent React key churn on re-renders.
+     * @default true
+     */
+    generateId?: boolean;
 }
 /**
  * Clusters dense marker collections via `supercluster`. Off-screen points

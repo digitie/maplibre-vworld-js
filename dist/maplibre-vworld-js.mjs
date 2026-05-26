@@ -1383,27 +1383,27 @@ var Re = function(e) {
 		clusters: d,
 		supercluster: o.current
 	};
-}, ze = ({ points: e, renderMarker: n, renderCluster: r, radius: i = 50, maxZoom: o = 16 }) => {
-	let c = j(), [u, d] = l(null), [f, p] = l(() => 0);
+}, ze = ({ points: e, renderMarker: n, renderCluster: r, radius: i = 50, maxZoom: o = 16, generateId: c = !0 }) => {
+	let u = j(), [d, f] = l(null), [p, m] = l(() => 0);
 	a(() => {
-		if (!c) return;
+		if (!u) return;
 		let e = () => {
-			let e = c.getBounds(), t = [
+			let e = u.getBounds(), t = [
 				e.getWest(),
 				e.getSouth(),
 				e.getEast(),
 				e.getNorth()
 			];
-			d((e) => e && e[0] === t[0] && e[1] === t[1] && e[2] === t[2] && e[3] === t[3] ? e : t), p((e) => {
-				let t = c.getZoom();
+			f((e) => e && e[0] === t[0] && e[1] === t[1] && e[2] === t[2] && e[3] === t[3] ? e : t), m((e) => {
+				let t = u.getZoom();
 				return e === t ? e : t;
 			});
 		};
-		return c.loaded() ? e() : c.once("load", e), c.on("moveend", e), c.on("zoomend", e), () => {
-			c.off("load", e), c.off("moveend", e), c.off("zoomend", e);
+		return u.loaded() ? e() : u.once("load", e), u.on("moveend", e), u.on("zoomend", e), () => {
+			u.off("load", e), u.off("moveend", e), u.off("zoomend", e);
 		};
-	}, [c]);
-	let m = s(() => e.map((e) => ({
+	}, [u]);
+	let h = s(() => e.map((e) => ({
 		type: "Feature",
 		properties: {
 			cluster: !1,
@@ -1413,33 +1413,38 @@ var Re = function(e) {
 			type: "Point",
 			coordinates: e.lngLat
 		}
-	})), [e]), h = s(() => ({
+	})), [e]), g = s(() => ({
 		radius: i,
-		maxZoom: o
-	}), [i, o]), { clusters: g, supercluster: _ } = Re({
-		points: m,
-		bounds: u ?? void 0,
-		zoom: f,
-		options: h
+		maxZoom: o,
+		generateId: c
+	}), [
+		i,
+		o,
+		c
+	]), { clusters: _, supercluster: v } = Re({
+		points: h,
+		bounds: d ?? void 0,
+		zoom: p,
+		options: g
 	});
-	return c ? /* @__PURE__ */ (0, R.jsx)(R.Fragment, { children: g.map((e) => {
-		let [i, a] = e.geometry.coordinates, { cluster: o, point_count: s, cluster_id: l } = e.properties;
+	return u ? /* @__PURE__ */ (0, R.jsx)(R.Fragment, { children: _.map((e) => {
+		let [i, a] = e.geometry.coordinates, { cluster: o, point_count: s, cluster_id: c } = e.properties;
 		if (o) {
-			let n = _, o = s ?? 0;
-			return r && n ? /* @__PURE__ */ (0, R.jsx)(t.Fragment, { children: r(e, o, n) }, `cluster-${l ?? `${i},${a}`}`) : l === void 0 || !n ? null : /* @__PURE__ */ (0, R.jsx)(G, {
+			let n = v, o = s ?? 0;
+			return r && n ? /* @__PURE__ */ (0, R.jsx)(t.Fragment, { children: r(e, o, n) }, `cluster-${c ?? `${i},${a}`}`) : c === void 0 || !n ? null : /* @__PURE__ */ (0, R.jsx)(G, {
 				lngLat: [i, a],
 				count: o,
 				onClick: () => {
-					c.flyTo({
+					u.flyTo({
 						center: [i, a],
-						zoom: n.getClusterExpansionZoom(l),
+						zoom: n.getClusterExpansionZoom(c),
 						speed: 1.5
 					});
 				}
-			}, `cluster-${l}`);
+			}, `cluster-${c}`);
 		}
-		let u = e.properties;
-		return /* @__PURE__ */ (0, R.jsx)(t.Fragment, { children: n(u) }, u.id);
+		let l = e.properties;
+		return /* @__PURE__ */ (0, R.jsx)(t.Fragment, { children: n(l) }, l.id);
 	}) }) : null;
 };
 //#endregion
@@ -1481,76 +1486,148 @@ var Ve = ({ clusters: e, renderCluster: n, onClusterClick: i, fitBoundsOptions: 
 			onClick: r
 		}, e.id);
 	}) }) : null;
-}, He = ({ id: e = "route-line", coordinates: t, color: n = "#2196F3", width: r = 4, dashArray: i, onClick: o, onMouseEnter: c, onMouseLeave: l }) => {
-	let u = j(), d = `${e}-source`, f = `${e}-layer`, p = F(o), m = F(c), h = F(l), g = s(() => ({
+}, He = p.tuple([p.number().min(-180).max(180), p.number().min(-90).max(90)]), Ue = p.tuple([
+	p.number().min(-180).max(180),
+	p.number().min(-90).max(90),
+	p.number().min(-180).max(180),
+	p.number().min(-90).max(90)
+]);
+function We(e, t) {
+	return p.tuple([p.number().min(e[0]).max(e[1]), p.number().min(t[0]).max(t[1])]);
+}
+function Ge(e, t) {
+	return p.tuple([
+		p.number().min(e[0]).max(e[1]),
+		p.number().min(t[0]).max(t[1]),
+		p.number().min(e[0]).max(e[1]),
+		p.number().min(t[0]).max(t[1])
+	]);
+}
+function Ke(e, t) {
+	let n = 10 ** t;
+	return Math.round(e * n) / n;
+}
+function qe(e, t = 4) {
+	return [Ke(e[0], t), Ke(e[1], t)];
+}
+function Je(e, t = 6) {
+	return e.map((e) => Ke(e, t)).join(",");
+}
+function Ye(e) {
+	let t = e.split(",").map((e) => Number(e.trim()));
+	return Ue.parse(t);
+}
+var Xe = p.object({
+	id: p.union([p.string(), p.number()]),
+	lngLat: He
+});
+function Ze(e) {
+	return Xe.extend(e);
+}
+var Qe = p.array(He).min(2, "Route must have at least 2 points"), $e = p.object({ type: p.string() }).passthrough(), et = p.union([p.string().url("data must be a valid URL if passed as string"), $e.refine((e) => {
+	if (e.type === "FeatureCollection") return !0;
+	if (e.type === "Feature") {
+		let t = e.geometry?.type;
+		return t === "Polygon" || t === "MultiPolygon";
+	}
+	return !1;
+}, "data must be a GeoJSON Feature(Polygon/MultiPolygon), FeatureCollection, or a valid URL string")]), tt = p.union([p.string().url("data must be a valid URL if passed as string"), $e.refine((e) => {
+	if (e.type === "FeatureCollection") return !0;
+	if (e.type === "Feature") {
+		let t = e.geometry?.type;
+		return t === "LineString" || t === "MultiLineString";
+	}
+	return !1;
+}, "data must be a GeoJSON Feature(LineString/MultiLineString), FeatureCollection, or a valid URL string")]), nt = ({ id: e = "route-line", coordinates: t, data: n, color: r = "#2196F3", width: i = 4, dashArray: o, onClick: c, onMouseEnter: l, onMouseLeave: u }) => {
+	let d = j(), f = `${e}-source`, p = `${e}-layer`, m = F(c), h = F(l), g = F(u);
+	a(() => {
+		if (typeof process < "u" && process.env.NODE_ENV !== "production") {
+			if (n) {
+				let e = tt.safeParse(n);
+				e.success || console.warn("[RouteLine] Invalid data prop:", e.error.issues);
+			} else if (t) {
+				let e = Qe.safeParse(t);
+				e.success || console.warn("[RouteLine] Invalid coordinates prop:", e.error.issues);
+			}
+		}
+	}, [t, n]);
+	let _ = s(() => t ? {
 		type: "Feature",
 		properties: {},
 		geometry: {
 			type: "LineString",
 			coordinates: t
 		}
-	}), [t]);
+	} : null, [t]);
 	return a(() => {
-		if (!u) return;
+		if (!d) return;
 		let e = () => {
-			if (!u.getStyle()) return;
-			let e = u.getSource(d);
-			e ? e.setData(g) : u.addSource(d, {
+			if (!d.getStyle()) return;
+			let e = n || _;
+			if (!e) return;
+			let t = d.getSource(f);
+			t ? t.setData(e) : d.addSource(f, {
 				type: "geojson",
-				data: g
-			}), u.getLayer(f) ? (u.setPaintProperty(f, "line-color", n), u.setPaintProperty(f, "line-width", r), u.setPaintProperty(f, "line-dasharray", i)) : u.addLayer({
-				id: f,
+				data: e
+			}), d.getLayer(p) ? (d.setPaintProperty(p, "line-color", r), d.setPaintProperty(p, "line-width", i), d.setPaintProperty(p, "line-dasharray", o)) : d.addLayer({
+				id: p,
 				type: "line",
-				source: d,
+				source: f,
 				layout: {
 					"line-join": "round",
 					"line-cap": "round"
 				},
 				paint: {
-					"line-color": n,
-					"line-width": r,
-					...i ? { "line-dasharray": i } : {}
+					"line-color": r,
+					"line-width": i,
+					...o ? { "line-dasharray": o } : {}
 				}
 			});
 		};
-		return e(), u.on("style.load", e), () => {
-			u.off("style.load", e), u.getStyle() && (u.getLayer(f) && u.removeLayer(f), u.getSource(d) && u.removeSource(d));
+		return e(), d.on("style.load", e), () => {
+			d.off("style.load", e), d.getStyle() && (d.getLayer(p) && d.removeLayer(p), d.getSource(f) && d.removeSource(f));
 		};
 	}, [
-		u,
-		g,
+		d,
 		n,
+		_,
 		r,
 		i,
-		d,
-		f
+		o,
+		f,
+		p
 	]), a(() => {
-		if (!u) return;
-		let e = (e) => p(e), t = (e) => {
-			(c || o) && (u.getCanvas().style.cursor = "pointer"), m(e);
+		if (!d) return;
+		let e = (e) => m(e), t = (e) => {
+			(l || c) && (d.getCanvas().style.cursor = "pointer"), h(e);
 		}, n = (e) => {
-			u.getCanvas().style.cursor = "", h(e);
+			d.getCanvas().style.cursor = "", g(e);
 		};
-		return u.on("click", f, e), u.on("mouseenter", f, t), u.on("mouseleave", f, n), () => {
-			u.off("click", f, e), u.off("mouseenter", f, t), u.off("mouseleave", f, n);
+		return d.on("click", p, e), d.on("mouseenter", p, t), d.on("mouseleave", p, n), () => {
+			d.off("click", p, e), d.off("mouseenter", p, t), d.off("mouseleave", p, n);
 		};
 	}, [
-		u,
-		f,
-		o,
-		c,
+		d,
 		p,
+		c,
+		l,
 		m,
-		h
+		h,
+		g
 	]), null;
-}, Ue = ({ id: e, data: t, fillColor: n = "rgba(33, 150, 243, 0.4)", outlineColor: r = "#2196F3", outlineWidth: i = 2, onClick: o, onMouseEnter: s, onMouseLeave: c }) => {
+}, rt = ({ id: e, data: t, fillColor: n = "rgba(33, 150, 243, 0.4)", outlineColor: r = "#2196F3", outlineWidth: i = 2, onClick: o, onMouseEnter: s, onMouseLeave: c }) => {
 	let l = j(), u = `${e}-source`, d = `${e}-fill-layer`, f = `${e}-line-layer`, p = F(o), m = F(s), h = F(c);
 	return a(() => {
+		if (typeof process < "u" && process.env.NODE_ENV !== "production") {
+			let e = et.safeParse(t);
+			e.success || console.warn("[PolygonArea] Invalid data prop:", e.error.issues);
+		}
+	}, [t]), a(() => {
 		if (!l) return;
 		let e = () => {
 			if (!l.getStyle()) return;
 			let e = l.getSource(u);
-			e ? typeof t != "string" && e.setData(t) : l.addSource(u, {
+			e ? e.setData(t) : l.addSource(u, {
 				type: "geojson",
 				data: t
 			}), l.getLayer(d) ? l.setPaintProperty(d, "fill-color", n) : l.addLayer({
@@ -1599,7 +1676,7 @@ var Ve = ({ clusters: e, renderCluster: n, onClusterClick: i, fitBoundsOptions: 
 		m,
 		h
 	]), null;
-}, We = ({ lngLat: e, children: t, offset: n, closeButton: r = !0, closeOnClick: i = !0, maxWidth: o, className: l, onClose: u }) => {
+}, it = ({ lngLat: e, children: t, offset: n, closeButton: r = !0, closeOnClick: i = !0, maxWidth: o, className: l, onClose: u }) => {
 	let p = j(), m = c(null), h = F(u), g = c({
 		closeButton: r,
 		closeOnClick: i,
@@ -1622,44 +1699,6 @@ var Ve = ({ clusters: e, renderCluster: n, onClusterClick: i, fitBoundsOptions: 
 	}, [n]), a(() => {
 		o !== void 0 && m.current?.setMaxWidth(o);
 	}, [o]), _ ? f(t, _) : null;
-}, Ge = p.tuple([p.number().min(-180).max(180), p.number().min(-90).max(90)]), Ke = p.tuple([
-	p.number().min(-180).max(180),
-	p.number().min(-90).max(90),
-	p.number().min(-180).max(180),
-	p.number().min(-90).max(90)
-]);
-function qe(e, t) {
-	return p.tuple([p.number().min(e[0]).max(e[1]), p.number().min(t[0]).max(t[1])]);
-}
-function Je(e, t) {
-	return p.tuple([
-		p.number().min(e[0]).max(e[1]),
-		p.number().min(t[0]).max(t[1]),
-		p.number().min(e[0]).max(e[1]),
-		p.number().min(t[0]).max(t[1])
-	]);
-}
-function Ye(e, t) {
-	let n = 10 ** t;
-	return Math.round(e * n) / n;
-}
-function Xe(e, t = 4) {
-	return [Ye(e[0], t), Ye(e[1], t)];
-}
-function Ze(e, t = 6) {
-	return e.map((e) => Ye(e, t)).join(",");
-}
-function Qe(e) {
-	let t = e.split(",").map((e) => Number(e.trim()));
-	return Ke.parse(t);
-}
-var $e = p.object({
-	id: p.union([p.string(), p.number()]),
-	lngLat: Ge
-});
-function et(e) {
-	return $e.extend(e);
-}
-var tt = p.array(Ge).min(2, "Route must have at least 2 points");
+};
 //#endregion
-export { Ke as BoundsSchema, ze as ClusterLayer, G as ClusterMarker, Ge as LngLatSchema, H as MakiMarker, ee as MapStore, E as MapStoreContext, B as Marker, V as PinMarker, le as PlaceMarker, $e as PointSchema, Ue as PolygonArea, We as Popup, ue as PriceMarker, ce as PulsingMarker, tt as RouteCoordinatesSchema, He as RouteLine, ge as RoutePointMarker, Ve as ServerClusterLayer, W as SimpleMarker, ie as VWorldMap, he as WeatherMarker, et as extendPointSchema, Xe as formatLngLat, x as getVWorldMaxZoom, w as getVWorldStyle, b as getVWorldTileUrl, C as isVWorldTileError, Je as makeBoundedBoundsSchema, qe as makeBoundedLngLatSchema, Qe as parseBoundsParam, S as redactVWorldUrl, Ze as serializeBounds, F as useEvent, j as useMap, N as useMapLoaded, P as useMapSelector, M as useMapZoom };
+export { Ue as BoundsSchema, ze as ClusterLayer, G as ClusterMarker, He as LngLatSchema, H as MakiMarker, ee as MapStore, E as MapStoreContext, B as Marker, V as PinMarker, le as PlaceMarker, Xe as PointSchema, rt as PolygonArea, it as Popup, ue as PriceMarker, ce as PulsingMarker, Qe as RouteCoordinatesSchema, nt as RouteLine, ge as RoutePointMarker, Ve as ServerClusterLayer, W as SimpleMarker, ie as VWorldMap, he as WeatherMarker, Ze as extendPointSchema, qe as formatLngLat, x as getVWorldMaxZoom, w as getVWorldStyle, b as getVWorldTileUrl, C as isVWorldTileError, Ge as makeBoundedBoundsSchema, We as makeBoundedLngLatSchema, Ye as parseBoundsParam, S as redactVWorldUrl, Je as serializeBounds, F as useEvent, j as useMap, N as useMapLoaded, P as useMapSelector, M as useMapZoom };

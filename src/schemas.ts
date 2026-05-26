@@ -122,3 +122,35 @@ export const RouteCoordinatesSchema = z
   .min(2, 'Route must have at least 2 points');
 
 export type RouteCoordinates = z.infer<typeof RouteCoordinatesSchema>;
+
+/**
+ * Shallow Zod validation for GeoJSON objects to catch obvious structure errors
+ * early in development without full coordinate traversal.
+ */
+const BaseGeoJSONSchema = z.object({
+  type: z.string(),
+}).passthrough();
+
+export const PolygonAreaInputSchema = z.union([
+  z.string().url('data must be a valid URL if passed as string'),
+  BaseGeoJSONSchema.refine((val) => {
+    if (val.type === 'FeatureCollection') return true;
+    if (val.type === 'Feature') {
+      const geomType = (val as any).geometry?.type;
+      return geomType === 'Polygon' || geomType === 'MultiPolygon';
+    }
+    return false;
+  }, 'data must be a GeoJSON Feature(Polygon/MultiPolygon), FeatureCollection, or a valid URL string'),
+]);
+
+export const RouteLineGeoJSONSchema = z.union([
+  z.string().url('data must be a valid URL if passed as string'),
+  BaseGeoJSONSchema.refine((val) => {
+    if (val.type === 'FeatureCollection') return true;
+    if (val.type === 'Feature') {
+      const geomType = (val as any).geometry?.type;
+      return geomType === 'LineString' || geomType === 'MultiLineString';
+    }
+    return false;
+  }, 'data must be a GeoJSON Feature(LineString/MultiLineString), FeatureCollection, or a valid URL string'),
+]);
