@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom';
 import maplibregl from 'maplibre-gl';
 import { useMap, useEvent } from '../store/hooks';
 
+let globalPopupZIndex = 1;
+
 export interface PopupProps {
   /** Anchor position as `[longitude, latitude]`. */
   lngLat: [number, number];
@@ -82,11 +84,22 @@ export const Popup: React.FC<PopupProps> = ({
       .setLngLat(lngLat)
       .setDOMContent(container)
       .addTo(map);
+
+    const popupElement = popup.getElement();
+    const handleBringToFront = () => {
+      popupElement.style.zIndex = String(++globalPopupZIndex);
+    };
+
+    // Initialize with a high z-index and bring to front on click
+    handleBringToFront();
+    popupElement.addEventListener('click', handleBringToFront);
+
     const handleClose = () => stableOnClose();
     popup.on('close', handleClose);
     popupRef.current = popup;
 
     return () => {
+      popupElement.removeEventListener('click', handleBringToFront);
       popup.off('close', handleClose);
       popup.remove();
       popupRef.current = null;

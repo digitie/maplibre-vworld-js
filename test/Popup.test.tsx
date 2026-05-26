@@ -70,4 +70,37 @@ describe('Popup', () => {
     // recreating the popup.
     expect(maplibregl.Popup).toHaveBeenCalledTimes(1);
   });
+
+  it('increments z-index and brings to front on click, and cleans up on unmount', async () => {
+    vi.clearAllMocks();
+    const { unmount } = render(
+      <VWorldMap apiKey="test-key" center={[127, 37]}>
+        <Popup lngLat={[127, 37]}>hello</Popup>
+        <Popup lngLat={[128, 38]}>world</Popup>
+      </VWorldMap>,
+    );
+
+    await waitFor(() => expect(maplibregl.Popup).toHaveBeenCalledTimes(2));
+
+    const results = vi.mocked(maplibregl.Popup).mock.results;
+    const popup1 = results[0]?.value as any;
+    const popup2 = results[1]?.value as any;
+
+    const el1 = popup1.getElement();
+    const el2 = popup2.getElement();
+
+    const initialZ1 = parseInt(el1.style.zIndex || '0', 10);
+    const initialZ2 = parseInt(el2.style.zIndex || '0', 10);
+    expect(initialZ2).toBeGreaterThan(initialZ1);
+
+    // Click on the first popup
+    el1.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    const newZ1 = parseInt(el1.style.zIndex || '0', 10);
+    expect(newZ1).toBeGreaterThan(initialZ2);
+
+    // Unmount and verify cleanup
+    const removeSpy = vi.spyOn(el1, 'removeEventListener');
+    unmount();
+    expect(removeSpy).toHaveBeenCalledWith('click', expect.any(Function));
+  });
 });

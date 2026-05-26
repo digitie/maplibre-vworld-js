@@ -5,6 +5,8 @@ import { createPortal } from 'react-dom';
 import maplibregl from 'maplibre-gl';
 import { useMap, useEvent } from '../store/hooks';
 
+let globalMarkerZIndex = 1000;
+
 export interface MarkerProps {
   /** Marker position as `[longitude, latitude]`. */
   lngLat: [number, number];
@@ -129,7 +131,14 @@ export const Marker: React.FC<MarkerProps> = ({
   const map = useMap();
   const markerRef = useRef<maplibregl.Marker | null>(null);
   const prevClassNameRef = useRef<string | undefined>(undefined);
+  const dynamicZIndexRef = useRef<number | undefined>(undefined);
+  const prevZIndexPropRef = useRef(zIndex);
   const hasOnClickRef = useRef(onClick !== undefined);
+
+  if (prevZIndexPropRef.current !== zIndex) {
+    dynamicZIndexRef.current = undefined;
+    prevZIndexPropRef.current = zIndex;
+  }
   const hasOnContextMenuRef = useRef(onContextMenu !== undefined);
   const hasChildren = children !== undefined && children !== null && children !== false;
 
@@ -160,6 +169,11 @@ export const Marker: React.FC<MarkerProps> = ({
     const element = marker.getElement();
 
     const handleClick = (event: MouseEvent) => {
+      const baseZIndex = prevZIndexPropRef.current ?? 0;
+      globalMarkerZIndex = Math.max(globalMarkerZIndex, baseZIndex) + 1;
+      dynamicZIndexRef.current = globalMarkerZIndex;
+      element.style.zIndex = String(dynamicZIndexRef.current);
+
       if (!hasOnClickRef.current) return;
       event.stopPropagation();
       stableOnClick(event, marker);
@@ -210,10 +224,15 @@ export const Marker: React.FC<MarkerProps> = ({
   useEffect(() => {
     const marker = markerRef.current;
     if (!marker) return;
+
+    const effectiveZIndex = dynamicZIndexRef.current !== undefined
+      ? dynamicZIndexRef.current
+      : zIndex;
+
     applyMarkerState(marker.getElement(), prevClassNameRef.current, {
       selected,
       highlighted,
-      zIndex,
+      zIndex: effectiveZIndex,
       ariaLabel,
       className,
     });
