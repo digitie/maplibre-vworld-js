@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import {
   VWorldMap, Marker, WeatherMarker, PlaceMarker, SimpleMarker,
@@ -16,6 +16,21 @@ const App = () => {
   // States for Area and Route hover
   const [hoveredArea, setHoveredArea] = useState<string | null>(null);
   const [hoveredRoute, setHoveredRoute] = useState<string | null>(null);
+
+  // Context Menu State
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    type: 'map' | 'marker';
+    data?: any;
+  } | null>(null);
+
+  // Close context menu on external click
+  useEffect(() => {
+    const handleWindowClick = () => setContextMenu(null);
+    window.addEventListener('click', handleWindowClick);
+    return () => window.removeEventListener('click', handleWindowClick);
+  }, []);
 
   // Dummy GeoJSON for Namsan Park Area (Polygon)
   const namsanAreaGeoJSON = useMemo<GeoJSON.Feature<GeoJSON.Polygon>>(() => ({
@@ -72,6 +87,15 @@ const App = () => {
           [132.0, 38.9]  // Northeast coordinates of Korea
         ]}
         semanticZoomThreshold={semanticThreshold}
+        onContextMenu={(e) => {
+          e.originalEvent.preventDefault();
+          setContextMenu({
+            x: e.originalEvent.clientX,
+            y: e.originalEvent.clientY,
+            type: 'map',
+            data: e.lngLat,
+          });
+        }}
       >
         <Marker
           lngLat={markerPos}
@@ -81,7 +105,21 @@ const App = () => {
         />
         
         {/* Simple Markers */}
-        <SimpleMarker lngLat={[127.02, 37.53]} label="강남역 주변" bgColor="#ff5500" />
+        <SimpleMarker 
+          lngLat={[127.02, 37.53]} 
+          label="강남역 주변 (우클릭 해보세요)" 
+          bgColor="#ff5500" 
+          onContextMenu={(e, marker) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setContextMenu({
+              x: e.clientX,
+              y: e.clientY,
+              type: 'marker',
+              data: { label: '강남역 주변', lngLat: marker.getLngLat() }
+            });
+          }}
+        />
         <SimpleMarker lngLat={[126.97, 37.55]} label="서울역" bgColor="#0055ff" />
 
         {/* Weather Markers */}
@@ -279,9 +317,72 @@ const App = () => {
           Marker Pos: {markerPos[0].toFixed(4)}, {markerPos[1].toFixed(4)}
         </div>
         <div style={{ marginTop: '12px', fontSize: '12px', color: '#666' }}>
+          * 지도 빈 곳이나 '강남역 주변' 마커를 <b>우클릭</b>해 보세요.
+          <br/>
           * 남산 영역(Polygon)과 둘레길(Line)에 마우스를 올리거나 클릭해보세요.
         </div>
       </div>
+
+      {/* Context Menu UI */}
+      {contextMenu && (
+        <div
+          style={{
+            position: 'fixed',
+            top: contextMenu.y,
+            left: contextMenu.x,
+            background: 'white',
+            border: '1px solid #ccc',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            padding: '8px 0',
+            borderRadius: '4px',
+            zIndex: 9999,
+            minWidth: '160px',
+            fontFamily: 'sans-serif'
+          }}
+        >
+          {contextMenu.type === 'map' ? (
+            <>
+              <div style={{ padding: '4px 16px', fontSize: '12px', fontWeight: 'bold', color: '#888', borderBottom: '1px solid #eee', marginBottom: '4px' }}>지도 옵션</div>
+              <div 
+                style={{ padding: '8px 16px', cursor: 'pointer', fontSize: '14px' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                onClick={() => alert(`여기에 마커 추가: ${contextMenu.data.lng.toFixed(4)}, ${contextMenu.data.lat.toFixed(4)}`)}
+              >
+                📍 여기에 마커 추가하기
+              </div>
+              <div 
+                style={{ padding: '8px 16px', cursor: 'pointer', fontSize: '14px' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                onClick={() => alert('위치 공유하기')}
+              >
+                🔗 위치 공유하기
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ padding: '4px 16px', fontSize: '12px', fontWeight: 'bold', color: '#888', borderBottom: '1px solid #eee', marginBottom: '4px' }}>마커 옵션</div>
+              <div 
+                style={{ padding: '8px 16px', cursor: 'pointer', fontSize: '14px' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f5f5f5'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                onClick={() => alert(`'${contextMenu.data.label}' 정보 보기`)}
+              >
+                ℹ️ 상세 정보 보기
+              </div>
+              <div 
+                style={{ padding: '8px 16px', cursor: 'pointer', fontSize: '14px', color: '#e74c3c' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#ffe5e5'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                onClick={() => alert('마커 삭제하기')}
+              >
+                🗑️ 마커 삭제
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
