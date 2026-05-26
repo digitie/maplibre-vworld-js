@@ -132,7 +132,13 @@ export const Marker: React.FC<MarkerProps> = ({
   const markerRef = useRef<maplibregl.Marker | null>(null);
   const prevClassNameRef = useRef<string | undefined>(undefined);
   const dynamicZIndexRef = useRef<number | undefined>(undefined);
+  const prevZIndexPropRef = useRef(zIndex);
   const hasOnClickRef = useRef(onClick !== undefined);
+
+  if (prevZIndexPropRef.current !== zIndex) {
+    dynamicZIndexRef.current = undefined;
+    prevZIndexPropRef.current = zIndex;
+  }
   const hasOnContextMenuRef = useRef(onContextMenu !== undefined);
   const hasChildren = children !== undefined && children !== null && children !== false;
 
@@ -163,7 +169,9 @@ export const Marker: React.FC<MarkerProps> = ({
     const element = marker.getElement();
 
     const handleClick = (event: MouseEvent) => {
-      dynamicZIndexRef.current = ++globalMarkerZIndex;
+      const baseZIndex = prevZIndexPropRef.current ?? 0;
+      globalMarkerZIndex = Math.max(globalMarkerZIndex, baseZIndex) + 1;
+      dynamicZIndexRef.current = globalMarkerZIndex;
       element.style.zIndex = String(dynamicZIndexRef.current);
 
       if (!hasOnClickRef.current) return;
@@ -217,8 +225,8 @@ export const Marker: React.FC<MarkerProps> = ({
     const marker = markerRef.current;
     if (!marker) return;
 
-    const effectiveZIndex = dynamicZIndexRef.current !== undefined 
-      ? dynamicZIndexRef.current 
+    const effectiveZIndex = dynamicZIndexRef.current !== undefined
+      ? dynamicZIndexRef.current
       : zIndex;
 
     applyMarkerState(marker.getElement(), prevClassNameRef.current, {
