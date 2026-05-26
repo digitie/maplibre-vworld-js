@@ -2,7 +2,18 @@
 
 ## 문서 언어 정책
 
-이 저장소의 모든 Markdown 문서는 한글로 작성한다. 공식 API 필드명, 코드 식별자, 명령어, URL, MapLibre/React 공식 용어, 라이브러리 prop 이름처럼 그대로 보존해야 하는 값만 영어를 유지한다. `README.md`와 `AI_AGENT_GUIDE.md`(영문 사용자 대상)는 예외다.
+이 저장소의 **모든 Markdown 문서는 한글로 작성한다**. 예외 없음. `README.md`, `AI_AGENT_GUIDE.md`, `CHANGELOG.md`도 본문은 한글이다.
+
+다음 항목만 영어를 유지한다 — 한글로 옮기면 의미가 변하거나 정확성이 깨지기 때문:
+
+- **코드 식별자**: 함수/타입/prop/이벤트/모듈 이름 (`useMapSelector`, `VWorldMapProps`, `onMoveEnd`, `'use client'`).
+- **명령어와 경로**: `npm run build`, `git diff --exit-code -- dist/`, `F:\dev\maplibre-vworld-js\src\components`.
+- **외부 공식 용어**: MapLibre/React 공식 명칭(`useSyncExternalStore`, `React.createPortal`, WMTS, MVT), API 응답 필드(`error.message`, `lngLat.lng`), URL(`https://api.vworld.kr/...`).
+- **벤더/제품명**: VWorld, MapLibre GL JS, Mapbox, supercluster, Next.js, Vite, zod.
+- **표준 keyword**: ADR, CHANGELOG, ISO 8601 날짜, semver 라벨(`Added`/`Changed`/`Removed`/`Fixed`/`Security`).
+- **shell 출력 / 로그 예시**: 그대로 캡처한 문자열은 보존.
+
+설명 문장, 절제목, 표 column 헤더, ADR 본문, 빠른 시작 가이드, 일지 항목은 한글로 적는다. 새 문서를 만들 때 영문 초안을 두지 않는다 — 처음부터 한글로 쓴다.
 
 ## 역할
 

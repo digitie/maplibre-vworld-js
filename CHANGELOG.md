@@ -1,80 +1,81 @@
 # CHANGELOG
 
-All notable changes to `maplibre-vworld` are documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project loosely adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The 1.0.0 line is the stable baseline shipped after PR #14.
+`maplibre-vworld`의 주목할 만한 변경 사항을 기록한다. 포맷은 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)를 따르고 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)을 느슨하게 준수한다. 1.0.0은 PR #14 머지 후 안정 baseline이다. 표준 헤더(`### Added`/`Changed`/`Removed`/`Fixed`/`Security`)는 Keep-a-Changelog 표준에 따라 영문을 유지하고, 본문 항목은 한글로 적는다.
 
 ## [Unreleased]
 
 ### Changed
 
-- Repository documentation restructured to match `python-kraddr-geo` (T-015): `CLAUDE.md`/`AGENTS.md`/`SKILL.md` at root, `docs/{architecture,decisions,journal,tasks,resume,dev-environment}.md` for the rest. Public API is unchanged.
+- 모든 Markdown 문서를 한글로 작성하도록 정책을 강화하고 영문으로 남아 있던 `README.md`, `AI_AGENT_GUIDE.md`, `CHANGELOG.md`를 한글화 (T-017). 코드 식별자, 명령어, URL, 외부 공식 용어, 벤더/제품명, Keep-a-Changelog 표준 keyword는 영문을 유지.
+- `python-kraddr-geo` 식 문서 구조 채택 (T-015): 루트에 `CLAUDE.md`/`AGENTS.md`/`SKILL.md`, 나머지는 `docs/{architecture,decisions,journal,tasks,resume,dev-environment}.md`. public API는 변경 없음.
 
 ### Removed
 
-- GitHub Actions / CI workflow (T-016, ADR-10). `.github/workflows/ci.yml` deleted. Quality gates (`npm run type-check && npm test && npm run build && git diff --exit-code -- dist/`) are now run locally by the maintainer before merging.
+- GitHub Actions / CI 워크플로 (T-016, ADR-10). `.github/workflows/ci.yml` 삭제. 품질 게이트(`npm run type-check && npm test && npm run build && git diff --exit-code -- dist/`)는 유지보수자가 머지 전 로컬에서 직접 실행.
 
 ## [1.0.0] — 2026-05-26
 
-This release consolidates PR #1 through #14 into the stable baseline. From this point on, breaking changes follow semver.
+이번 릴리스는 PR #1 ~ #14를 안정 baseline으로 통합한다. 이 시점 이후의 breaking change는 semver를 따른다.
 
 ### Added
 
-- External store architecture: `MapStore` + `useSyncExternalStore` (ADR-8). `useMap`, `useMapZoom`, `useMapLoaded`, `useMapSelector`, `useEvent` exposed from the package root.
-- `<VWorldMap>` props: `fallback`, `loadingSkeleton`, `animateCameraChanges`, `flyToOptions`, `onClick`, `onContextMenu`, `onMoveEnd`, `onZoomEnd`, `onIdle`, `onError`, `transformRequest`, `semanticZoomThreshold`.
-- `<Marker>` state props: `selected`, `highlighted`, `zIndex`, `ariaLabel`, `className`. Anchor/offset construction-time prop on `<Marker>`.
-- `<Popup>` with construction-only options snapshot and dedicated setter effects (no remount on inline `offset` change).
-- `<ClusterLayer>` (client-side via supercluster) and `<ServerClusterLayer>` (server-grouped clusters).
-- Marker variants: `PinMarker`, `MakiMarker`, `PulsingMarker`, `SimpleMarker`, `PlaceMarker`, `PriceMarker`, `WeatherMarker`, `RoutePointMarker`, `ClusterMarker`.
-- Layer components: `RouteLine`, `PolygonArea`.
-- Schemas: `LngLatSchema`, `BoundsSchema`, `PointSchema`, `RouteCoordinatesSchema`, `makeBoundedLngLatSchema`, `makeBoundedBoundsSchema`, `extendPointSchema`, `formatLngLat`, `serializeBounds`, `parseBoundsParam`.
-- VWorld helpers: `getVWorldTileUrl`, `getVWorldStyle`, `getVWorldMaxZoom`, `redactVWorldUrl`, `isVWorldTileError`.
-- `'use client'` directive on every DOM-touching module (Next.js App Router safe).
-- `dist/` committed for GitHub-URL consumers (ADR-5).
-- (historical) GitHub Actions CI workflow with `git diff --exit-code -- dist/` drift check. Removed in 2026-05-26 per ADR-10 — quality gates are now run locally.
+- 외부 store 아키텍처: `MapStore` + `useSyncExternalStore` (ADR-8). 패키지 root에서 `useMap`, `useMapZoom`, `useMapLoaded`, `useMapSelector`, `useEvent` 노출.
+- `<VWorldMap>` prop: `fallback`, `loadingSkeleton`, `animateCameraChanges`, `flyToOptions`, `onClick`, `onContextMenu`, `onMoveEnd`, `onZoomEnd`, `onIdle`, `onError`, `transformRequest`, `semanticZoomThreshold`.
+- `<Marker>` 상태 prop: `selected`, `highlighted`, `zIndex`, `ariaLabel`, `className`. `<Marker>`에 construction-time anchor/offset prop 추가.
+- `<Popup>`: construction-only 옵션 ref snapshot + 전용 setter effect (인라인 `offset` 객체 변경 시 remount되지 않음).
+- `<ClusterLayer>` (supercluster 기반 클라이언트 사이드)와 `<ServerClusterLayer>` (서버에서 그룹화된 클러스터).
+- 마커 variant: `PinMarker`, `MakiMarker`, `PulsingMarker`, `SimpleMarker`, `PlaceMarker`, `PriceMarker`, `WeatherMarker`, `RoutePointMarker`, `ClusterMarker`.
+- 레이어 컴포넌트: `RouteLine`, `PolygonArea`.
+- 스키마: `LngLatSchema`, `BoundsSchema`, `PointSchema`, `RouteCoordinatesSchema`, `makeBoundedLngLatSchema`, `makeBoundedBoundsSchema`, `extendPointSchema`, `formatLngLat`, `serializeBounds`, `parseBoundsParam`.
+- VWorld 헬퍼: `getVWorldTileUrl`, `getVWorldStyle`, `getVWorldMaxZoom`, `redactVWorldUrl`, `isVWorldTileError`.
+- 모든 DOM 모듈에 `'use client'` directive (Next.js App Router 안전).
+- GitHub URL 소비자를 위한 `dist/` 커밋 (ADR-5).
+- (historical) GitHub Actions CI 워크플로의 `git diff --exit-code -- dist/` drift 검사. 2026-05-26 ADR-10에 따라 제거 — 품질 게이트는 이제 로컬에서 실행.
 
 ### Changed
 
-- API naming aligned with React ecosystem (PR #12):
+- API naming을 React 생태계 컨벤션에 맞춤 (PR #12):
   - `onMapClick` → `onClick`, `onMapLoad` → `onLoad`, `onMapError` → `onError`, `onMapContextMenu` → `onContextMenu`
   - `showNavigationControl`/`showGeolocateControl`/`showScaleControl` → `navigation`/`geolocate`/`scale`
   - `MarkerClusterer` → `ClusterLayer`, `MapPopup` → `Popup`
-  - `lineWidth`/`lineDasharray` → `width`/`dashArray` on `<RouteLine>`
+  - `<RouteLine>`의 `lineWidth`/`lineDasharray` → `width`/`dashArray`
   - `BasePointDataSchema` → `PointSchema`, `createPointDataSchema` → `extendPointSchema`
-- `<VWorldMap center>` is now required — no implicit Seoul default (PR #12).
-- Camera prop changes (`center`, `zoom`, `pitch`, `bearing`) now queue with `pendingCameraRef` when the user is mid-gesture and re-apply on `moveend` (PR #14).
-- `<RouteLine>` and `<PolygonArea>` listen on `style.load` instead of `styledata` to avoid re-entrancy from our own `setPaintProperty` calls (PR #14).
-- `useMapSelector` keeps the selector in a ref so unstable selector identity does not invalidate the cache (PR #14).
-- `<Marker>` `className` diffing uses a token-set (`prev - next` remove, `next - prev` add) to avoid CSS-transition flicker on shared tokens (PR #14).
-- `<PinMarker>` and `<PlaceMarker>` use `<Marker anchor="bottom" offset={...}>` instead of manual `transform: translate(...)` — eliminates double-transform with MapLibre's anchor (PR #14).
-- zod pinned to `^4.4.3` (peer + dev). zod v3 is no longer supported (ADR-6, PR #8). Build artifacts shrunk by ~67% via externalization.
+- `<VWorldMap center>`를 필수 prop으로 변경 — 서울 기본값 제거 (PR #12).
+- 카메라 prop 변경(`center`, `zoom`, `pitch`, `bearing`)이 사용자 제스처 중에는 `pendingCameraRef`로 큐잉되고 `moveend` 시 재시도된다 (PR #14).
+- `<RouteLine>`/`<PolygonArea>`가 `styledata` 대신 `style.load`를 리스닝하도록 변경 — 우리 자신의 `setPaintProperty` 호출이 재진입을 일으키지 않도록 (PR #14).
+- `useMapSelector`가 selector를 ref에 보관 — 불안정한 selector identity도 cache를 invalidate하지 않음 (PR #14).
+- `<Marker>` `className` diff를 토큰 집합(`prev - next` 제거, `next - prev` 추가) 방식으로 변경 — 공통 토큰의 CSS transition 깜빡임 방지 (PR #14).
+- `<PinMarker>`와 `<PlaceMarker>`가 `<Marker anchor="bottom" offset={...}>`을 사용하도록 변경 — 수동 `transform: translate(...)`을 제거해 MapLibre anchor와 이중 변환되지 않게 함 (PR #14).
+- zod를 `^4.4.3`로 고정 (peer + dev). zod v3는 더 이상 지원하지 않음 (ADR-6, PR #8). externalize로 빌드 산출물 약 67% 축소.
 
 ### Removed
 
-- Domain-specific TripMate code (`src/tripmate.ts`, `<TripmateFeatureLayer>`, `TRIPMATE_MARKER_PALETTE`, Korean tourism category enums, `₩` currency hardcode) — ADR-7 (PR #12).
-- `KoreaLngLatSchema`, `KoreaBoundsSchema`, `KOREA_LNG_RANGE` constants — replaced by `makeBoundedLngLatSchema` factory (PR #12).
-- `VWorldMapErrorInfo`/`VWorldMapContextMenuInfo`/`VWorldViewportInfo` envelopes — raw MapLibre events are exposed directly (PR #12).
-- `MakiMarker` aliases `iconName`/`fallbackIcon` — single `icon` prop (PR #12).
-- `redactVWorldTileUrl` — subsumed into `redactVWorldUrl` (overload accepts `undefined`) (PR #12).
-- Debug artifacts: `analyze_tiles.js`, `generate_html.js`, `test_tiles.js`, `tiles.html`, several PNG screenshots (PR #14).
+- 도메인 특화 TripMate 코드 (`src/tripmate.ts`, `<TripmateFeatureLayer>`, `TRIPMATE_MARKER_PALETTE`, 한국 관광 카테고리 enum, `₩` 통화 하드코드) — ADR-7 (PR #12).
+- `KoreaLngLatSchema`, `KoreaBoundsSchema`, `KOREA_LNG_RANGE` 상수 — `makeBoundedLngLatSchema` factory로 대체 (PR #12).
+- `VWorldMapErrorInfo`/`VWorldMapContextMenuInfo`/`VWorldViewportInfo` envelope — raw MapLibre 이벤트를 직접 노출 (PR #12).
+- `MakiMarker` alias `iconName`/`fallbackIcon` — 단일 `icon` prop으로 통일 (PR #12).
+- `redactVWorldTileUrl` — `redactVWorldUrl`에 흡수 (overload로 `undefined` 통과 가능) (PR #12).
+- 디버그 잔재: `analyze_tiles.js`, `generate_html.js`, `test_tiles.js`, `tiles.html`, 여러 PNG 스크린샷 (PR #14).
 
 ### Fixed
 
-- `useEvent` pattern (`useLayoutEffect + useRef + useCallback`) prevents stale event handler closures from MapLibre's perspective — prop callbacks can change freely without re-binding listeners (PR #12, refined in PR #13/14).
-- `map.isMoving() || map.isEasing()` guard on camera prop application prevents jitter mid-gesture (PR #12, drop fix in PR #14).
-- `useMapSelector` referential caching: same snapshot → same selector result reference. `Object.is` value comparison avoids unnecessary re-renders even on new snapshots (PR #13/14).
-- `<Marker>` selected/highlighted scale applied to the actual `style.scale` property (Safari fallback via `--vworld-marker-scale` CSS var) (PR #13).
-- `<RouteLine>` clears `dashArray` paint property when the prop is removed (PR #13).
-- `<VWorldMap>` initial mount no longer replays `center`/`zoom` via redundant `flyTo` after `load` (PR #13).
-- `<VWorldMap maxBounds>` removal correctly clears the bound via `setMaxBounds(undefined)` (PR #13).
-- `<ClusterMarker>` `onClick` routed through `<Marker onClick>` (no longer bubbles to map click) and stabilized via `useEvent` + `useMemo` (PR #13/14).
-- `<Popup>` no longer remounts on inline-object `offset` prop changes — construction-only options snapshotted, mutable options handled via dedicated setter effects (PR #14).
-- `<ClusterLayer>` guards against the `load`-before-`map.getBounds()` race with `map.loaded()` check + `map.once('load', update)` fallback (PR #14).
-- `isVWorldTileError(event)` handles `error?.message` null-safely (PR #14).
-- Removed window global leak (`window.vworldMap`) and debug `console.log` statements (PR #6/7).
+- `useEvent` 패턴(`useLayoutEffect + useRef + useCallback`)이 MapLibre 관점에서 stale 이벤트 핸들러 closure를 방지 — prop callback은 자유롭게 변경 가능하며 listener를 재바인딩하지 않음 (PR #12, PR #13/14에서 정련).
+- 카메라 prop 적용 시 `map.isMoving() || map.isEasing()` 가드로 제스처 중 진동 방지 (PR #12, drop 수정은 PR #14).
+- `useMapSelector` referential caching: 같은 snapshot → 같은 selector 결과 reference. `Object.is` 값 비교로 새 snapshot에서도 불필요한 re-render 방지 (PR #13/14).
+- `<Marker>` selected/highlighted scale이 실제 `style.scale` 속성에 적용됨 (Safari fallback은 `--vworld-marker-scale` CSS 변수) (PR #13).
+- `<RouteLine>`이 `dashArray` prop이 제거되면 paint property도 초기화 (PR #13).
+- `<VWorldMap>` 초기 mount가 `load` 이후 `center`/`zoom`을 redundant `flyTo`로 replay하지 않음 (PR #13).
+- `<VWorldMap maxBounds>` 제거 시 `setMaxBounds(undefined)`로 bound가 정상 해제됨 (PR #13).
+- `<ClusterMarker>` `onClick`이 `<Marker onClick>` 경로로 라우팅되고(map click으로 bubble되지 않음) `useEvent` + `useMemo`로 안정화 (PR #13/14).
+- `<Popup>`이 인라인 객체 `offset` prop 변경 시 remount되지 않음 — construction-only 옵션은 snapshot, mutable 옵션은 dedicated setter effect로 처리 (PR #14).
+- `<ClusterLayer>`가 `load` 이전 `map.getBounds()` race를 방어 — `map.loaded()` 체크 + `map.once('load', update)` fallback (PR #14).
+- `isVWorldTileError(event)`가 `error?.message` null 안전 (PR #14).
+- window 글로벌 누수(`window.vworldMap`) 및 디버그 `console.log` 제거 (PR #6/7).
 
 ### Security
 
-- VWorld API key in `dev/main.tsx` purged from git history; future leaks prevented by `redactVWorldUrl()` and DO NOT rule on plaintext commit (2026-05-24).
+- `dev/main.tsx`의 VWorld API key를 git history에서 제거; 추후 누설은 `redactVWorldUrl()`과 평문 커밋 금지 DO NOT 규칙으로 방지 (2026-05-24).
 
-## Earlier history
+## 이전 이력
 
-PR #1 through #5 covered the initial library bootstrap (MapLibre integration, React portal markers, supercluster + viewport culling, zod schemas). Detailed entries live in `docs/journal.md`.
+PR #1 ~ #5는 초기 라이브러리 부트스트랩을 다룬다 (MapLibre 통합, React portal 마커, supercluster + viewport culling, zod 스키마). 상세 항목은 `docs/journal.md`에서 확인.
