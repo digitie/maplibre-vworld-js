@@ -11,7 +11,10 @@
 - `ClusterLayer`에 React Key Churn을 방지하는 클러스터 고유 ID 자동 생성 옵션 `generateId` 노출 (T-018).
 - `Marker` 포털 메모리 누수를 검증하는 자동화 단위 테스트 추가 (T-020).
 - `PolygonArea`, `RouteLine`의 라이프사이클 및 이벤트 바인딩 검증을 위한 단위 테스트 추가.
-- `Popup` 또는 `Marker`가 클릭될 경우 동적으로 `z-index`를 높여 다른 요소들 위로 최상단 렌더링되도록 개선.
+- `Popup` 또는 `Marker`가 클릭될 경우 동적으로 `z-index`를 높여 다른 요소들 위로 최상단 렌더링되도록 개선 (PR #21).
+- `PriceMarker`에 배열 데이터(`price: PriceItem[]`)를 전달하여 주유소처럼 여러 개의 가격(휘발유, 고급유 등)을 동시에 표시할 수 있는 기능 추가 (PR #22).
+- `PriceMarker`에 3단계 Semantic Zoom LOD 적용 및 `lodThresholds` prop 노출.
+- 시멘틱 줌에 의해 간소화된 마커(`PlaceMarker`, `WeatherMarker`, `PriceMarker`)를 사용자가 한 번 클릭하면 줌 레벨과 무관하게 전체 내용이 강제로 확장 표시(Manual Expand)되는 기능 추가.
 
 ### Changed
 

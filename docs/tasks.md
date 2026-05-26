@@ -9,6 +9,8 @@
 - T-019 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 현재 `getVWorldMaxZoom`은 하드코딩된 표. WMTS Capabilities XML을 fetch해서 layer-별 zoom 범위를 동적으로 검증할 수 있는지 검토.
 
 ## 완료
+- [x] T-022 PR #22 — PriceMarker 다중 가격 배열 지원, 3단계 LOD 적용, 시멘틱 줌 마커 강제 확장(Manual Expand) 기능 추가, 우클릭(onContextMenu) 예제 추가. (2026-05-26)
+- [x] T-021 PR #21 — 겹치는 마커/팝업 클릭 시 전역 카운터 기반 동적 `z-index` 증가 로직 도입으로 클릭 요소 최상단 노출. (2026-05-26)
 - [x] T-020 RouteLine GeoJSON 복구 및 Marker Portal 메모리 누수 방지 테스트 — GeoJSON `data` Prop 복구 및 Zod 유효성 검사 추가. `<Marker>` 언마운트 누수 검증. (2026-05-26)
 - [x] T-018 supercluster `generateId` 옵션 노출 — 클러스터 마커의 React Key Churn 방지. (2026-05-26)
 - [x] T-016 PR #17 — GitHub Actions / CI 제거. .github/workflows/ci.yml 삭제, ADR-10 추가, 모든 문서에서 CI 언급을 로컬 게이트 표현으로 정정. 백로그 번호 시프트(T-016/17/18 → T-017/18/19) (2026-05-26)
