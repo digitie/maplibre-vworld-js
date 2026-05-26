@@ -23,8 +23,9 @@
 
 PC 개발은 Windows 호스트에서 직접 진행한다. 본 저장소는 Node.js 패키지이므로 WSL 강제는 아니지만, `node_modules/`와 `dist/`는 NTFS에서 정상 동작한다. 단:
 
-- **Puppeteer postinstall 비용 회피**: `PUPPETEER_SKIP_DOWNLOAD=1`로 설치한다. 헤드리스 브라우저 검증은 CI에서만 수행.
+- **Puppeteer postinstall 비용 회피**: `PUPPETEER_SKIP_DOWNLOAD=1`로 설치한다. 헤드리스 브라우저 검증이 필요하면 작업자가 직접 로컬에서 수행.
 - **`dist/`는 커밋 대상**: `vite build` 산출물을 저장소에 포함한다(ADR-5). 빌드 후 `git diff --exit-code -- dist/`가 깨끗해야 한다.
+- **GitHub Actions 비사용**: 본 저장소는 GitHub CI/CD를 사용하지 않는다(ADR-10). 품질 게이트는 PR 머지 직전 작업자가 로컬에서 실행한다.
 - **`tsconfig.build.json`만 declaration emission**: `dev/`와 `test/` 타입 오류가 배포 산출물에 섞이지 않도록 `tsconfig.build.json`이 `src/`만 대상으로 한다.
 
 작업 전에 반드시 다음을 읽는다:
@@ -51,7 +52,7 @@ PC 개발은 Windows 호스트에서 직접 진행한다. 본 저장소는 Node.
 
 1. **`main` 직접 푸시 금지** — 반드시 feature 브랜치 + PR.
 2. **도메인 특화 코드 추가 금지** — TripMate, kraddr 같은 특정 소비자 도메인 지식(카테고리 enum, 통화 단위, 색상 팔레트)을 라이브러리에 넣지 않는다(ADR-7).
-3. **`dist/` 커밋 누락 금지** — `src/` 변경 후 `npm run build`를 하지 않으면 CI가 실패한다(ADR-5).
+3. **`dist/` 커밋 누락 금지** — `src/` 변경 후 `npm run build`를 하지 않으면 GitHub dependency 소비자가 stale 산출물을 가져간다(ADR-5). PR 머지 전 `git diff --exit-code -- dist/`가 깨끗한지 반드시 확인.
 4. **`'use client'` 누락 금지** — DOM-touching 모듈은 모두 첫 줄에 `'use client'`. Next.js App Router에서 RSC로부터 직접 import할 수 있어야 한다.
 5. **`useMemo` 미적용 prop 금지** — 배열/GeoJSON/`flyToOptions`처럼 deep-equal이 비싼 prop은 consumer가 memoize해야 한다는 가정을 깨지 않는다.
 6. **`map.setTerrain()` 호출 금지** — VWorld는 Terrain-RGB를 제공하지 않는다.
@@ -73,7 +74,7 @@ PC 개발은 Windows 호스트에서 직접 진행한다. 본 저장소는 Node.
 - [ ] `npm run type-check` 통과
 - [ ] `npm test` 통과
 - [ ] `npm run build` 통과 (`dist/` 갱신 후 커밋)
-- [ ] `git diff --exit-code -- dist/` 통과 (CI와 동일)
+- [ ] `git diff --exit-code -- dist/` 통과
 - [ ] `npm run pack:check` 통과
 - [ ] `docs/journal.md`에 작업 항목 추가 (역시간순)
 - [ ] `docs/tasks.md`의 T-NNN 상태 갱신

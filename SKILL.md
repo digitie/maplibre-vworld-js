@@ -21,10 +21,11 @@
 
 ### 개발 환경
 
-- Node.js 20 LTS. CI도 `actions/setup-node@v4`로 20을 사용한다.
-- `PUPPETEER_SKIP_DOWNLOAD=1`로 `npm ci` — Puppeteer 브라우저 다운로드는 CI에서만 필요.
+- Node.js 20 LTS. 다른 버전은 보장 범위 밖.
+- `PUPPETEER_SKIP_DOWNLOAD=1`로 `npm ci` — Puppeteer 브라우저 다운로드는 거의 쓰지 않으므로 회피.
 - `dist/`는 커밋 대상(ADR-5). `vite build` 산출물이 깨끗하게 들어 있어야 머지 가능.
 - `tsconfig.build.json`이 declaration emission을 `src/`로만 한정 — `dev/`, `test/` 타입 오류가 배포 산출물에 새지 않도록.
+- GitHub Actions/CI는 사용하지 않는다(ADR-10). 품질 게이트는 PR을 푸시하기 전 작업자가 직접 로컬에서 실행한다.
 
 ## 2. 빠른 시작
 
@@ -34,7 +35,7 @@ PUPPETEER_SKIP_DOWNLOAD=1 npm ci
 npm run type-check
 npm test
 npm run build
-git diff --exit-code -- dist/   # CI와 동일한 drift 검사
+git diff --exit-code -- dist/   # dist/ drift 검사
 npm run pack:check               # tarball 산출물 확인
 npm run dev                      # 로컬 dev 서버 (.env.local에 VITE_VWORLD_API_KEY)
 ```
@@ -62,7 +63,7 @@ src/
 test/
   setup.ts                — maplibre-gl mock (Map, Marker, Popup, controls)
   *.test.tsx              — Vitest + @testing-library/react
-dist/                     — 빌드 산출물 (CI drift 검사 대상)
+dist/                     — 빌드 산출물 (git 커밋 대상, drift 검사는 PR 전 로컬에서)
 docs/                     — architecture, decisions, journal, tasks, resume, dev-environment
 ```
 
@@ -72,7 +73,7 @@ docs/                     — architecture, decisions, journal, tasks, resume, d
 
 1. **`main` 직접 푸시 금지**: 반드시 feature 브랜치 + PR. `--no-verify`로 hook 우회 금지.
 2. **도메인 특화 코드 추가 금지**: 특정 소비자 앱(TripMate, kraddr 등)의 카테고리/통화/색상을 라이브러리에 넣지 않는다(ADR-7). 일반화가 필요하면 factory(`makeBoundedLngLatSchema` 같은)로 노출.
-3. **`dist/` 커밋 누락 금지**: `src/` 변경 후 `npm run build` 안 하면 CI `git diff --exit-code -- dist/` 실패.
+3. **`dist/` 커밋 누락 금지**: `src/` 변경 후 `npm run build` 안 하면 GitHub dependency 소비자가 stale 산출물을 가져간다. PR 전 `git diff --exit-code -- dist/`로 확인.
 4. **`'use client'` 누락 금지**: DOM-touching 모듈은 모두 첫 줄에 `'use client'`. Next.js App Router의 RSC에서 import할 수 있어야 한다.
 5. **`useMemo` 미적용 prop 가정 깨기 금지**: `RouteLine.coordinates`, `PolygonArea.data`, `flyToOptions` 같은 deep-equal 비싼 prop은 consumer가 memoize한다는 가정 위에 동작한다. 라이브러리 내부에서 `JSON.stringify(...)`로 deps를 만들면 큰 GeoJSON에서 main thread를 막는다.
 6. **`map.setTerrain()` 호출 금지**: VWorld는 Terrain-RGB를 제공하지 않는다.
