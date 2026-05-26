@@ -72,7 +72,7 @@ describe('Marker', () => {
     expect(onClick).toHaveBeenCalledWith(expect.any(MouseEvent), marker);
     expect(onContextMenu).toHaveBeenCalledWith(expect.any(MouseEvent), marker);
     expect(element.dataset.selected).toBe('true');
-    expect(element.style.zIndex).toBe('7');
+    expect(element.style.zIndex).toBe('1001'); // clicked -> dynamic zIndex
     expect(element.style.getPropertyValue('scale')).toBe('1.18');
     expect(element).toHaveAttribute('aria-label', 'Selected place');
     expect(element).toHaveClass('custom-class');
