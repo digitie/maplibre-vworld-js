@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Marker, type MarkerProps } from './Marker';
 import { useMapSelector } from '../store/hooks';
 
@@ -47,6 +47,16 @@ export const PriceMarker: React.FC<PriceMarkerProps> = ({
     return 3;
   });
 
+  const [isManuallyExpanded, setIsManuallyExpanded] = useState(false);
+  const prevStageRef = useRef(stage);
+
+  if (prevStageRef.current !== stage) {
+    if (stage === 1) setIsManuallyExpanded(false);
+    prevStageRef.current = stage;
+  }
+
+  const effectiveStage = isManuallyExpanded ? 1 : stage;
+
   const formatPrice = (p: string | number) => {
     if (typeof p === 'number') return p.toLocaleString();
     return p;
@@ -54,10 +64,13 @@ export const PriceMarker: React.FC<PriceMarkerProps> = ({
 
   const isArray = Array.isArray(price);
 
-  if (stage === 3) {
+  if (effectiveStage === 3) {
     return (
       <Marker {...props}>
         <div 
+          onClick={() => {
+            setIsManuallyExpanded(true);
+          }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           style={{
@@ -77,12 +90,18 @@ export const PriceMarker: React.FC<PriceMarkerProps> = ({
   }
 
   const displayPrice = isArray 
-    ? (stage === 2 ? (price as PriceItem[]).slice(0, 2) : (price as PriceItem[]))
+    ? (effectiveStage === 2 ? (price as PriceItem[]).slice(0, 2) : (price as PriceItem[]))
     : price;
 
   return (
     <Marker {...props}>
       <div 
+        onClick={() => {
+          if (isManuallyExpanded) {
+             // Clicking an expanded marker toggles it back to simplified (if currently simplified by zoom)
+             setIsManuallyExpanded(false);
+          }
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{

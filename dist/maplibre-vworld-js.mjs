@@ -705,103 +705,140 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 		},
 		children: e
 	})
-}), de = ({ title: e, description: t, category: n, photoUrl: i, link: a, linkLabel: o = "View more", simplifyAtZoom: s, ...c }) => P(r((e) => {
-	let t = s ?? e.semanticZoomThreshold;
-	return t !== void 0 && e.zoom < t;
-}, [s])) ? /* @__PURE__ */ (0, L.jsx)(V, {
-	lngLat: c.lngLat,
-	color: "#333",
-	size: 24,
-	showInnerCircle: !1
-}) : /* @__PURE__ */ (0, L.jsx)(B, {
-	...c,
-	anchor: "bottom",
-	offset: [0, -8],
-	children: /* @__PURE__ */ (0, L.jsxs)("div", {
-		style: {
-			position: "relative",
-			background: "white",
-			borderRadius: "8px",
-			overflow: "visible",
-			boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-			width: "200px",
-			fontFamily: "sans-serif",
-			cursor: "default"
-		},
-		children: [
-			/* @__PURE__ */ (0, L.jsx)("div", { style: {
-				position: "absolute",
-				bottom: "-8px",
-				left: "50%",
-				transform: "translateX(-50%)",
-				borderWidth: "8px 8px 0",
-				borderStyle: "solid",
-				borderColor: "white transparent transparent transparent",
-				display: "block",
-				width: 0
-			} }),
-			i && /* @__PURE__ */ (0, L.jsx)("img", {
-				src: i,
-				alt: e,
-				style: {
-					width: "100%",
-					height: "100px",
-					objectFit: "cover",
-					display: "block"
-				}
-			}),
-			/* @__PURE__ */ (0, L.jsxs)("div", {
-				style: { padding: "12px" },
-				children: [
-					/* @__PURE__ */ (0, L.jsx)("div", {
-						style: {
-							fontSize: "10px",
-							color: "#888",
-							textTransform: "uppercase",
-							letterSpacing: "0.5px",
-							marginBottom: "4px"
-						},
-						children: n
-					}),
-					/* @__PURE__ */ (0, L.jsx)("div", {
-						style: {
-							fontSize: "14px",
-							fontWeight: "bold",
-							marginBottom: "4px",
-							color: "#333"
-						},
-						children: e
-					}),
-					/* @__PURE__ */ (0, L.jsx)("div", {
-						style: {
-							fontSize: "12px",
-							color: "#666",
-							marginBottom: "8px",
-							lineHeight: "1.4"
-						},
-						children: t
-					}),
-					a && /* @__PURE__ */ (0, L.jsxs)("a", {
-						href: a,
-						target: "_blank",
-						rel: "noreferrer",
-						style: {
-							fontSize: "12px",
-							color: "#0066cc",
-							textDecoration: "none",
-							fontWeight: "bold"
-						},
-						children: [o, " →"]
-					})
-				]
-			})
-		]
-	})
-}), fe = ({ price: e, currency: t = "", isHoverable: n = !0, lodThresholds: r = [13, 11], ...i }) => {
-	let [a, o] = l(!1), s = P((e) => e.zoom >= r[0] ? 1 : e.zoom >= r[1] ? 2 : 3), c = (e) => typeof e == "number" ? e.toLocaleString() : e, u = Array.isArray(e);
-	if (s === 3) return /* @__PURE__ */ (0, L.jsx)(B, {
+}), de = ({ title: e, description: t, category: n, photoUrl: i, link: a, linkLabel: o = "View more", simplifyAtZoom: s, ...u }) => {
+	let d = P(r((e) => {
+		let t = s ?? e.semanticZoomThreshold;
+		return t !== void 0 && e.zoom < t;
+	}, [s])), [f, p] = l(!1), m = c(d);
+	return m.current !== d && (d === !1 && p(!1), m.current = d), d && !f ? /* @__PURE__ */ (0, L.jsx)(V, {
+		lngLat: u.lngLat,
+		color: "#333",
+		size: 24,
+		showInnerCircle: !1,
+		onClick: (e, t) => {
+			u.onClick && u.onClick(e, t), p(!0);
+		}
+	}) : /* @__PURE__ */ (0, L.jsx)(B, {
+		...u,
+		anchor: "bottom",
+		offset: [0, -8],
+		children: /* @__PURE__ */ (0, L.jsxs)("div", {
+			style: {
+				position: "relative",
+				background: "white",
+				borderRadius: "8px",
+				overflow: "visible",
+				boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+				width: "200px",
+				fontFamily: "sans-serif",
+				cursor: "default"
+			},
+			children: [
+				f && /* @__PURE__ */ (0, L.jsx)("button", {
+					onClick: (e) => {
+						e.stopPropagation(), p(!1);
+					},
+					style: {
+						position: "absolute",
+						top: "8px",
+						right: "8px",
+						background: "rgba(0,0,0,0.5)",
+						color: "white",
+						border: "none",
+						borderRadius: "50%",
+						width: "20px",
+						height: "20px",
+						cursor: "pointer",
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						fontSize: "12px",
+						zIndex: 10,
+						padding: 0,
+						lineHeight: 1
+					},
+					"aria-label": "Close",
+					children: "✕"
+				}),
+				/* @__PURE__ */ (0, L.jsx)("div", { style: {
+					position: "absolute",
+					bottom: "-8px",
+					left: "50%",
+					transform: "translateX(-50%)",
+					borderWidth: "8px 8px 0",
+					borderStyle: "solid",
+					borderColor: "white transparent transparent transparent",
+					display: "block",
+					width: 0
+				} }),
+				i && /* @__PURE__ */ (0, L.jsx)("img", {
+					src: i,
+					alt: e,
+					style: {
+						width: "100%",
+						height: "100px",
+						objectFit: "cover",
+						display: "block"
+					}
+				}),
+				/* @__PURE__ */ (0, L.jsxs)("div", {
+					style: { padding: "12px" },
+					children: [
+						/* @__PURE__ */ (0, L.jsx)("div", {
+							style: {
+								fontSize: "10px",
+								color: "#888",
+								textTransform: "uppercase",
+								letterSpacing: "0.5px",
+								marginBottom: "4px"
+							},
+							children: n
+						}),
+						/* @__PURE__ */ (0, L.jsx)("div", {
+							style: {
+								fontSize: "14px",
+								fontWeight: "bold",
+								marginBottom: "4px",
+								color: "#333"
+							},
+							children: e
+						}),
+						/* @__PURE__ */ (0, L.jsx)("div", {
+							style: {
+								fontSize: "12px",
+								color: "#666",
+								marginBottom: "8px",
+								lineHeight: "1.4"
+							},
+							children: t
+						}),
+						a && /* @__PURE__ */ (0, L.jsxs)("a", {
+							href: a,
+							target: "_blank",
+							rel: "noreferrer",
+							style: {
+								fontSize: "12px",
+								color: "#0066cc",
+								textDecoration: "none",
+								fontWeight: "bold"
+							},
+							children: [o, " →"]
+						})
+					]
+				})
+			]
+		})
+	});
+}, fe = ({ price: e, currency: t = "", isHoverable: n = !0, lodThresholds: r = [13, 11], ...i }) => {
+	let [a, o] = l(!1), s = P((e) => e.zoom >= r[0] ? 1 : e.zoom >= r[1] ? 2 : 3), [u, d] = l(!1), f = c(s);
+	f.current !== s && (s === 1 && d(!1), f.current = s);
+	let p = u ? 1 : s, m = (e) => typeof e == "number" ? e.toLocaleString() : e, h = Array.isArray(e);
+	if (p === 3) return /* @__PURE__ */ (0, L.jsx)(B, {
 		...i,
 		children: /* @__PURE__ */ (0, L.jsx)("div", {
+			onClick: () => {
+				d(!0);
+			},
 			onMouseEnter: () => o(!0),
 			onMouseLeave: () => o(!1),
 			style: {
@@ -817,18 +854,21 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 			}
 		})
 	});
-	let d = u && s === 2 ? e.slice(0, 2) : e;
+	let g = h && p === 2 ? e.slice(0, 2) : e;
 	return /* @__PURE__ */ (0, L.jsx)(B, {
 		...i,
 		children: /* @__PURE__ */ (0, L.jsx)("div", {
+			onClick: () => {
+				u && d(!1);
+			},
 			onMouseEnter: () => o(!0),
 			onMouseLeave: () => o(!1),
 			style: {
 				background: a && n ? "#222" : "white",
 				color: a && n ? "white" : "#222",
 				border: "1px solid #ddd",
-				borderRadius: u ? "12px" : "24px",
-				padding: u ? "8px 12px" : "6px 12px",
+				borderRadius: h ? "12px" : "24px",
+				padding: h ? "8px 12px" : "6px 12px",
 				fontSize: "14px",
 				fontWeight: "bold",
 				boxShadow: a && n ? "0 4px 12px rgba(0,0,0,0.3)" : "0 2px 6px rgba(0,0,0,0.15)",
@@ -836,12 +876,12 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 				transition: "all 0.2s ease-in-out",
 				transform: a && n ? "scale(1.05)" : "scale(1)",
 				display: "flex",
-				flexDirection: u ? "column" : "row",
-				alignItems: u ? "stretch" : "center",
-				gap: u ? "4px" : "2px",
-				minWidth: u ? "120px" : "auto"
+				flexDirection: h ? "column" : "row",
+				alignItems: h ? "stretch" : "center",
+				gap: h ? "4px" : "2px",
+				minWidth: h ? "120px" : "auto"
 			},
-			children: u ? d.map((e, r) => /* @__PURE__ */ (0, L.jsxs)("div", {
+			children: h ? g.map((e, r) => /* @__PURE__ */ (0, L.jsxs)("div", {
 				style: {
 					display: "flex",
 					justifyContent: "space-between",
@@ -855,8 +895,8 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 						fontWeight: "normal"
 					},
 					children: e.label
-				}), /* @__PURE__ */ (0, L.jsxs)("span", { children: [e.currency === void 0 ? t : e.currency, c(e.price)] })]
-			}, r)) : /* @__PURE__ */ (0, L.jsxs)(L.Fragment, { children: [/* @__PURE__ */ (0, L.jsx)("span", { children: t }), /* @__PURE__ */ (0, L.jsx)("span", { children: c(d) })] })
+				}), /* @__PURE__ */ (0, L.jsxs)("span", { children: [e.currency === void 0 ? t : e.currency, m(e.price)] })]
+			}, r)) : /* @__PURE__ */ (0, L.jsxs)(L.Fragment, { children: [/* @__PURE__ */ (0, L.jsx)("span", { children: t }), /* @__PURE__ */ (0, L.jsx)("span", { children: m(g) })] })
 		})
 	});
 }, pe = {
@@ -876,18 +916,21 @@ function ge() {
 	e.id = he, e.textContent = "\n    @keyframes vworld-weather-fadeIn {\n      from { opacity: 0; transform: translateY(-10px); }\n      to { opacity: 1; transform: translateY(0); }\n    }\n  ", document.head.appendChild(e);
 }
 var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, ...a }) => {
-	let [o, s] = l(!1);
-	if (P(r((e) => {
+	let [o, s] = l(!1), u = P(r((e) => {
 		let t = i ?? e.semanticZoomThreshold;
 		return t !== void 0 && e.zoom < t;
-	}, [i]))) return /* @__PURE__ */ (0, L.jsx)(V, {
+	}, [i])), [d, f] = l(!1), p = c(u);
+	if (p.current !== u && (u === !1 && f(!1), p.current = u), u && !d) return /* @__PURE__ */ (0, L.jsx)(V, {
 		lngLat: a.lngLat,
 		color: me[t],
 		size: 24,
-		showInnerCircle: !0
+		showInnerCircle: !0,
+		onClick: (e, t) => {
+			a.onClick && a.onClick(e, t), f(!0);
+		}
 	});
 	ge();
-	let c = !!n?.length;
+	let m = !!n?.length;
 	return /* @__PURE__ */ (0, L.jsx)(B, {
 		...a,
 		children: /* @__PURE__ */ (0, L.jsxs)("div", {
@@ -899,7 +942,7 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 			},
 			children: [/* @__PURE__ */ (0, L.jsxs)("div", {
 				onClick: (e) => {
-					e.stopPropagation(), c && s((e) => !e);
+					e.stopPropagation(), m && s((e) => !e);
 				},
 				style: {
 					background: "white",
@@ -913,7 +956,7 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 					fontWeight: "bold",
 					fontSize: "14px",
 					whiteSpace: "nowrap",
-					cursor: c ? "pointer" : "default",
+					cursor: m ? "pointer" : "default",
 					transition: "all 0.2s ease",
 					transform: o ? "scale(1.05)" : "scale(1)",
 					zIndex: o ? 10 : 1
@@ -924,7 +967,29 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 						children: pe[t]
 					}),
 					/* @__PURE__ */ (0, L.jsxs)("span", { children: [e, "°C"] }),
-					c && /* @__PURE__ */ (0, L.jsx)("span", {
+					u && d && /* @__PURE__ */ (0, L.jsx)("button", {
+						"aria-label": "Close",
+						onClick: (e) => {
+							e.stopPropagation(), f(!1), s(!1);
+						},
+						style: {
+							background: "rgba(0,0,0,0.1)",
+							border: "none",
+							borderRadius: "50%",
+							width: "16px",
+							height: "16px",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							cursor: "pointer",
+							marginLeft: "4px",
+							fontSize: "10px",
+							padding: 0,
+							color: "#333"
+						},
+						children: "✕"
+					}),
+					m && /* @__PURE__ */ (0, L.jsx)("span", {
 						style: {
 							fontSize: "10px",
 							color: "#999",
@@ -933,7 +998,7 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 						children: o ? "▲" : "▼"
 					})
 				]
-			}), o && c && /* @__PURE__ */ (0, L.jsx)("div", {
+			}), o && m && /* @__PURE__ */ (0, L.jsx)("div", {
 				style: {
 					position: "absolute",
 					top: "100%",
