@@ -1676,7 +1676,7 @@ var Qe = p.array(He).min(2, "Route must have at least 2 points"), $e = p.object(
 		m,
 		h
 	]), null;
-}, it = ({ lngLat: e, children: t, offset: n, closeButton: r = !0, closeOnClick: i = !0, maxWidth: o, className: l, onClose: u }) => {
+}, it = 1, at = ({ lngLat: e, children: t, offset: n, closeButton: r = !0, closeOnClick: i = !0, maxWidth: o, className: l, onClose: u }) => {
 	let p = j(), m = c(null), h = F(u), g = c({
 		closeButton: r,
 		closeOnClick: i,
@@ -1688,9 +1688,13 @@ var Qe = p.array(He).min(2, "Route must have at least 2 points"), $e = p.object(
 			...g.current,
 			offset: n,
 			maxWidth: o
-		}).setLngLat(e).setDOMContent(_).addTo(p), r = () => h();
-		return t.on("close", r), m.current = t, () => {
-			t.off("close", r), t.remove(), m.current = null;
+		}).setLngLat(e).setDOMContent(_).addTo(p), r = t.getElement(), i = () => {
+			r.style.zIndex = String(++it);
+		};
+		i(), r.addEventListener("click", i);
+		let a = () => h();
+		return t.on("close", a), m.current = t, () => {
+			r.removeEventListener("click", i), t.off("close", a), t.remove(), m.current = null;
 		};
 	}, [p, _]), a(() => {
 		m.current?.setLngLat(e);
@@ -1701,4 +1705,4 @@ var Qe = p.array(He).min(2, "Route must have at least 2 points"), $e = p.object(
 	}, [o]), _ ? f(t, _) : null;
 };
 //#endregion
-export { Ue as BoundsSchema, ze as ClusterLayer, G as ClusterMarker, He as LngLatSchema, H as MakiMarker, ee as MapStore, E as MapStoreContext, B as Marker, V as PinMarker, le as PlaceMarker, Xe as PointSchema, rt as PolygonArea, it as Popup, ue as PriceMarker, ce as PulsingMarker, Qe as RouteCoordinatesSchema, nt as RouteLine, ge as RoutePointMarker, Ve as ServerClusterLayer, W as SimpleMarker, ie as VWorldMap, he as WeatherMarker, Ze as extendPointSchema, qe as formatLngLat, x as getVWorldMaxZoom, w as getVWorldStyle, b as getVWorldTileUrl, C as isVWorldTileError, Ge as makeBoundedBoundsSchema, We as makeBoundedLngLatSchema, Ye as parseBoundsParam, S as redactVWorldUrl, Je as serializeBounds, F as useEvent, j as useMap, N as useMapLoaded, P as useMapSelector, M as useMapZoom };
+export { Ue as BoundsSchema, ze as ClusterLayer, G as ClusterMarker, He as LngLatSchema, H as MakiMarker, ee as MapStore, E as MapStoreContext, B as Marker, V as PinMarker, le as PlaceMarker, Xe as PointSchema, rt as PolygonArea, at as Popup, ue as PriceMarker, ce as PulsingMarker, Qe as RouteCoordinatesSchema, nt as RouteLine, ge as RoutePointMarker, Ve as ServerClusterLayer, W as SimpleMarker, ie as VWorldMap, he as WeatherMarker, Ze as extendPointSchema, qe as formatLngLat, x as getVWorldMaxZoom, w as getVWorldStyle, b as getVWorldTileUrl, C as isVWorldTileError, Ge as makeBoundedBoundsSchema, We as makeBoundedLngLatSchema, Ye as parseBoundsParam, S as redactVWorldUrl, Je as serializeBounds, F as useEvent, j as useMap, N as useMapLoaded, P as useMapSelector, M as useMapZoom };

@@ -11,6 +11,7 @@
 - `ClusterLayer`에 React Key Churn을 방지하는 클러스터 고유 ID 자동 생성 옵션 `generateId` 노출 (T-018).
 - `Marker` 포털 메모리 누수를 검증하는 자동화 단위 테스트 추가 (T-020).
 - `PolygonArea`, `RouteLine`의 라이프사이클 및 이벤트 바인딩 검증을 위한 단위 테스트 추가.
+- `Popup`이 클릭될 경우 동적으로 `z-index`를 높여 다른 팝업들 위로 최상단 렌더링되도록 개선.
 
 ### Changed
 
