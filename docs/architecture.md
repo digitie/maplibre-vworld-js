@@ -251,7 +251,7 @@ onError={(event) => {
 - `tsconfig.build.json`이 declaration emission을 `src/`로 한정.
 - `react`, `react-dom`, `maplibre-gl`, `zod`는 rollup external — 소비자 graph에서 단일 사본.
 - `dist/`는 커밋(ADR-5). GitHub dependency 소비자(`npm install digitie/maplibre-vworld-js`)가 별도 build 없이 import 가능.
-- CI의 `git diff --exit-code -- dist/` 검사가 drift를 막는다.
+- 작업자가 PR 머지 전 직접 `git diff --exit-code -- dist/`로 drift를 확인한다. GitHub Actions/CI는 사용하지 않는다(ADR-10).
 
 ## 테스트
 

@@ -5,16 +5,17 @@
 ## 현재 진척도 (2026-05-26 갱신)
 
 - ✅ T-001~T-015: 코어 라이브러리 + 보안 패치 + GitHub dependency 패키징 + zod v4 + 디버그 hook + TripMate primitive + 범용 라이브러리 정리 + 런타임 결함 수정 + post-PR13 review fixes + python-kraddr-geo 문서 구조 채택
-- ⬜ T-016: supercluster `generateId` 옵션 노출
-- ⬜ T-017: VWorld `getCapabilities` 응답 기반 layer/tile matrix 자동 검증
-- ⬜ T-018: marker portal teardown 재현 테스트
+- 🟡 T-016: GitHub Actions 제거 + ADR-10 추가 (브랜치 `chore/remove-github-actions`, PR 진행 중)
+- ⬜ T-017: supercluster `generateId` 옵션 노출
+- ⬜ T-018: VWorld `getCapabilities` 응답 기반 layer/tile matrix 자동 검증
+- ⬜ T-019: marker portal teardown 재현 테스트
 
 ## 다음 한 작업 (1시간 이내 분량)
 
-후보:
-- T-016이 가장 작다 (supercluster 옵션 한 줄 + 회귀 테스트).
-- T-018은 fiber leak 시나리오 reproduction이 까다로워 약간 더 큼.
-- T-017은 WMTS Capabilities XML 파싱 + cache 정책 결정이 필요해 ADR이 먼저 나와야 할 수 있다.
+T-016 PR을 머지 후:
+- T-017이 가장 작다 (supercluster 옵션 한 줄 + 회귀 테스트).
+- T-019는 fiber leak 시나리오 reproduction이 까다로워 약간 더 큼.
+- T-018은 WMTS Capabilities XML 파싱 + cache 정책 결정이 필요해 ADR이 먼저 나와야 할 수 있다.
 
 ## 작업 시작 전 확인할 것
 
@@ -29,7 +30,8 @@
 
 ## 알려진 함정
 
-- **`dist/` 커밋 누락**: `src/` 수정 후 `npm run build`를 안 하면 CI의 `git diff --exit-code -- dist/`가 실패. PR을 머지하기 전 반드시 빌드 산출물을 커밋.
+- **`dist/` 커밋 누락**: `src/` 수정 후 `npm run build`를 안 하면 GitHub dependency 소비자가 stale 산출물을 가져간다. PR 머지 전 작업자가 `git diff --exit-code -- dist/`로 확인.
+- **CI 자동 검증 없음**: 본 저장소는 GitHub Actions를 사용하지 않는다(ADR-10). 모든 품질 게이트는 PR 푸시 직전 작업자가 로컬에서 직접 실행.
 - **`'use client'` 누락**: 새 컴포넌트를 추가하면서 directive를 잊으면 Next.js App Router에서 RSC 경계 위반. DOM-touching 모듈은 모두 첫 줄에 명시.
 - **inline object prop**: consumer가 `<Popup offset={[0, -8]}>`처럼 인라인 객체를 넘기는 게 일반적. effect deps에 이 객체를 그대로 넣으면 매 render마다 popup이 remount되어 `onClose` 무한 루프. construction-only opts는 ref snapshot, mutable opts는 dedicated setter effect로 분리.
 - **camera prop drop**: 사용자 제스처 중 들어온 camera prop을 `isMoving()` 가드로 silent drop하면 안 됨. `pendingCameraRef` + `moveend` 핸들러로 재시도.

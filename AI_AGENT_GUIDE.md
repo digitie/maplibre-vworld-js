@@ -16,7 +16,7 @@ Context for AI coding assistants generating code that consumes this library.
 - The map exposes state via an external store (`MapStore` + `useSyncExternalStore`). Children subscribe only to the slice they need; camera changes do not force a global re-render.
 - Event handlers go through `useEvent` internally so prop callbacks can change freely without re-creating the MapLibre instance or re-binding listeners.
 - `dist/` is committed for GitHub-dep consumers. `tsconfig.build.json` restricts declaration emission to `src/` so `dev/` and `test/` type errors do not leak into the package.
-- Push to `main` only via PR. CI runs type-check + test + build + `git diff --exit-code dist/`.
+- Push to `main` only via PR. This repository does not use GitHub Actions or any external CI (ADR-10). The maintainer runs `npm run type-check && npm test && npm run build && git diff --exit-code -- dist/` locally before merging.
 
 ## Component surface
 
@@ -136,7 +136,7 @@ Branch + PR only. `main` is protected — never direct-push, never `--no-verify`
 - [`AGENTS.md`](./AGENTS.md) — language policy, identifier matrix, DO NOT rules
 - [`SKILL.md`](./SKILL.md) — Korean agent manual (DO NOT, frequent tasks, domain vocab)
 - [`docs/architecture.md`](./docs/architecture.md) — `MapStore` + `useSyncExternalStore` deep-dive
-- [`docs/decisions.md`](./docs/decisions.md) — ADR-1 through ADR-9
+- [`docs/decisions.md`](./docs/decisions.md) — ADR-1 through ADR-10
 - [`docs/journal.md`](./docs/journal.md) — work log (reverse-chronological)
 - [`docs/tasks.md`](./docs/tasks.md) — T-NNN backlog
 - [`docs/dev-environment.md`](./docs/dev-environment.md) — local setup

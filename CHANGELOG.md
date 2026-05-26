@@ -8,6 +8,10 @@ All notable changes to `maplibre-vworld` are documented in this file. The format
 
 - Repository documentation restructured to match `python-kraddr-geo` (T-015): `CLAUDE.md`/`AGENTS.md`/`SKILL.md` at root, `docs/{architecture,decisions,journal,tasks,resume,dev-environment}.md` for the rest. Public API is unchanged.
 
+### Removed
+
+- GitHub Actions / CI workflow (T-016, ADR-10). `.github/workflows/ci.yml` deleted. Quality gates (`npm run type-check && npm test && npm run build && git diff --exit-code -- dist/`) are now run locally by the maintainer before merging.
+
 ## [1.0.0] — 2026-05-26
 
 This release consolidates PR #1 through #14 into the stable baseline. From this point on, breaking changes follow semver.
@@ -25,7 +29,7 @@ This release consolidates PR #1 through #14 into the stable baseline. From this 
 - VWorld helpers: `getVWorldTileUrl`, `getVWorldStyle`, `getVWorldMaxZoom`, `redactVWorldUrl`, `isVWorldTileError`.
 - `'use client'` directive on every DOM-touching module (Next.js App Router safe).
 - `dist/` committed for GitHub-URL consumers (ADR-5).
-- CI workflow with `git diff --exit-code -- dist/` drift check.
+- (historical) GitHub Actions CI workflow with `git diff --exit-code -- dist/` drift check. Removed in 2026-05-26 per ADR-10 — quality gates are now run locally.
 
 ### Changed
 

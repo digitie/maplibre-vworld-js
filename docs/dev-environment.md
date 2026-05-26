@@ -11,7 +11,7 @@
 | OS | Windows / macOS / Linux 모두 동작. 본 저장소는 Windows 호스트 기준 경로 표기 |
 | 디스크 | `node_modules/` 약 800MB, `dist/` 약 200KB |
 
-CI는 `actions/setup-node@v4`로 Node 20을 사용한다. 로컬 개발도 Node 20을 권장한다. 다른 버전에서 동작은 하지만 보장 범위 밖이다.
+Node 20 사용을 권장한다. 다른 버전에서 동작은 하지만 보장 범위 밖이다. 본 저장소는 GitHub Actions/CI를 사용하지 않으므로(ADR-10) 모든 품질 게이트는 작업자가 PR 머지 전 로컬에서 직접 실행한다.
 
 ## 빠른 시작
 
@@ -47,7 +47,7 @@ PowerShell:
 $env:PUPPETEER_SKIP_DOWNLOAD = '1'; npm ci
 ```
 
-CI는 job-level `env`로 같은 변수를 set하므로 자동 적용된다.
+자주 쓴다면 사용자 환경변수로 등록해 두는 게 편하다.
 
 ### `NODE_ENV=production` (빌드)
 
@@ -65,7 +65,7 @@ git add dist/
 git commit -m "build: regenerate dist/"
 ```
 
-CI의 `git diff --exit-code -- dist/`가 drift를 막는다. PR을 푸시하기 전 반드시 `npm run build`를 실행하고 결과를 커밋한다.
+PR을 푸시하기 전 반드시 `npm run build`를 실행하고 결과를 커밋한다. 작업자가 직접 `git diff --exit-code -- dist/`로 drift가 없는지 확인.
 
 ### `tsconfig.build.json` declaration scope
 
@@ -131,5 +131,5 @@ const Map = vi.fn().mockImplementation(function() {
 - **`vite build`가 React 모듈을 못 찾는다**: `peerDependencies`에 React가 있는데 `node_modules/`에 없는 상태. `npm ci`를 다시 실행.
 - **타입 오류는 없는데 빌드만 실패**: `tsconfig.build.json`의 include/exclude를 확인. `dev/`나 `test/`가 declaration emission에 들어가 있을 수 있다.
 - **dist/에 매 빌드마다 source map diff**: vite의 source map은 결정적이어야 하는데 OS별로 path separator가 달라질 수 있다. `vite.config.ts`의 `build.sourcemap`을 확인.
-- **CI는 통과하는데 로컬은 실패**: Node 버전 mismatch가 가장 흔하다. `node --version`이 `v20.x.x`인지 확인.
+- **이전에는 깨끗했는데 갑자기 빌드/테스트 실패**: Node 버전 mismatch가 가장 흔하다. `node --version`이 `v20.x.x`인지 확인.
 - **`npm test`가 jsdom not found**: `npm ci`가 중간에 끊겼을 가능성. `rm -rf node_modules package-lock.json && npm install`로 재설치.

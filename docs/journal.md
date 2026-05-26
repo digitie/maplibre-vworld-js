@@ -2,6 +2,31 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-05-26 (T-016 — GitHub Actions / CI 제거)
+
+**작업**: 사용자 지시 "깃헙 ci/cd 쓰지마"에 따라 `.github/workflows/ci.yml`을 제거하고 모든 문서에서 CI 언급을 로컬 게이트 표현으로 정리. ADR-10(GitHub Actions 비사용)을 추가.
+
+**배경**: PR #15 머지 시점에 `digitie` 계정이 일시적/영구적 suspend 상태로 들어가 Actions checkout이 403으로 막혔다. 외부 인프라 의존을 끊고 작업자 로컬 게이트만으로 품질을 관리하는 운영 결정.
+
+**구현 상세**:
+- 삭제: `.github/workflows/ci.yml` (해당 디렉토리 전체가 비게 됨).
+- 추가: ADR-10 "GitHub Actions / CI/CD 비사용" — 컨텍스트(계정 suspend, 무료 한도, third-party action 검토 부담), 결정(외부 CI 미사용 + 로컬 게이트), 근거, 결과+/-, 후속(pre-commit/husky 검토).
+- 갱신: `CLAUDE.md`, `AGENTS.md`, `SKILL.md`, `docs/architecture.md`, `docs/decisions.md`, `docs/dev-environment.md`, `docs/resume.md`, `docs/tasks.md`, `AI_AGENT_GUIDE.md`, `CHANGELOG.md` — "CI runs ...", "CI에서 자동", "CI와 동일" 등의 표현을 "PR 머지 전 로컬에서 직접 실행" / "작업자가 직접 확인"으로 정정.
+- 갱신: AGENTS.md DO NOT §3 — "CI가 실패한다"를 "GitHub dependency 소비자가 stale 산출물을 가져간다"로 정정. 핵심 게이트(`git diff --exit-code -- dist/`)는 작업자가 직접 돌린다고 명시.
+- 갱신: tasks.md — 미래 백로그 T-016/17/18을 T-017/18/19로 시프트하여 본 작업이 T-016이 되도록 정리.
+- 보존: 본 journal 엔트리(T-015) — 기존 작업 기록은 수정하지 않는다.
+
+**검증**:
+- `npm run type-check` → 통과.
+- `npm test` → 통과 (7 files / 48 tests).
+- `npm run build` → 통과.
+- `git diff --exit-code -- dist/` → 깨끗 (코드 변경 없음).
+- `ls .github/` → "No such file or directory" (의도된 결과).
+
+**다음 작업**: 작업자가 PR을 push할 때마다 `npm run type-check && npm test && npm run build && git diff --exit-code -- dist/`를 직접 돌리는 규율을 유지. 누락 시 follow-up PR로 정정.
+
+---
+
 ## 2026-05-26 (T-015 — python-kraddr-geo 문서 구조 채택)
 
 **작업**: 기존 `AGENTS.md` + `ADR.md` + `AI_AGENT_GUIDE.md` + `journal.md` + `README.md` 5개 루트 파일 구조를 python-kraddr-geo 식으로 재배치. `CLAUDE.md` 신설, `AGENTS.md` 재작성(언어 정책/식별자 매트릭스/DO NOT 포맷), `SKILL.md` 신설(한글 에이전트 매뉴얼), `docs/` 디렉토리에 architecture/decisions/journal/tasks/resume/dev-environment 분리. `CHANGELOG.md` 신설.

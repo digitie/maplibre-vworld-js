@@ -70,11 +70,11 @@ Node 20 LTS. `npm ci` → `npm test` / `npm run build`.
 # 의존성
 PUPPETEER_SKIP_DOWNLOAD=1 npm ci
 
-# 품질 게이트 (CI와 동일)
+# 품질 게이트 (PR 전 로컬에서 직접 돌린다 — GitHub Actions는 사용하지 않는다)
 npm run type-check
 npm test
 npm run build
-git diff --exit-code -- dist/        # dist/ drift 검사 (CI에서 자동)
+git diff --exit-code -- dist/        # dist/ drift 검사
 npm run pack:check                    # tarball 산출물 확인
 
 # dev 서버
@@ -100,4 +100,4 @@ npm run dev
 2. `docs/tasks.md`의 현재 작업 상태 업데이트
 3. 결정이 있었다면 `docs/decisions.md`에 ADR 추가
 4. 사용자 가시 변경이면 `CHANGELOG.md` 갱신
-5. `npm run build` 후 `dist/` 커밋 — CI의 drift 검사를 통과해야 머지 가능
+5. `npm run build` 후 `dist/` 커밋 — `git diff --exit-code -- dist/`가 깨끗해야 PR 머지
