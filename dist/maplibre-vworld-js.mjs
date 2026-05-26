@@ -797,32 +797,51 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 			})
 		]
 	})
-}), fe = ({ price: e, currency: t = "", isHoverable: n = !0, ...r }) => {
-	let [i, a] = l(!1), o = (e) => typeof e == "number" ? e.toLocaleString() : e, s = Array.isArray(e);
-	return /* @__PURE__ */ (0, L.jsx)(B, {
-		...r,
+}), fe = ({ price: e, currency: t = "", isHoverable: n = !0, lodThresholds: r = [13, 11], ...i }) => {
+	let [a, o] = l(!1), s = P((e) => e.zoom >= r[0] ? 1 : e.zoom >= r[1] ? 2 : 3), c = (e) => typeof e == "number" ? e.toLocaleString() : e, u = Array.isArray(e);
+	if (s === 3) return /* @__PURE__ */ (0, L.jsx)(B, {
+		...i,
 		children: /* @__PURE__ */ (0, L.jsx)("div", {
-			onMouseEnter: () => a(!0),
-			onMouseLeave: () => a(!1),
+			onMouseEnter: () => o(!0),
+			onMouseLeave: () => o(!1),
 			style: {
-				background: i && n ? "#222" : "white",
-				color: i && n ? "white" : "#222",
+				width: "12px",
+				height: "12px",
+				background: a && n ? "#222" : "white",
+				border: "2px solid #222",
+				borderRadius: "50%",
+				boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+				cursor: n ? "pointer" : "default",
+				transition: "all 0.2s ease",
+				transform: a && n ? "scale(1.2)" : "scale(1)"
+			}
+		})
+	});
+	let d = u && s === 2 ? e.slice(0, 2) : e;
+	return /* @__PURE__ */ (0, L.jsx)(B, {
+		...i,
+		children: /* @__PURE__ */ (0, L.jsx)("div", {
+			onMouseEnter: () => o(!0),
+			onMouseLeave: () => o(!1),
+			style: {
+				background: a && n ? "#222" : "white",
+				color: a && n ? "white" : "#222",
 				border: "1px solid #ddd",
-				borderRadius: s ? "12px" : "24px",
-				padding: s ? "8px 12px" : "6px 12px",
+				borderRadius: u ? "12px" : "24px",
+				padding: u ? "8px 12px" : "6px 12px",
 				fontSize: "14px",
 				fontWeight: "bold",
-				boxShadow: i && n ? "0 4px 12px rgba(0,0,0,0.3)" : "0 2px 6px rgba(0,0,0,0.15)",
+				boxShadow: a && n ? "0 4px 12px rgba(0,0,0,0.3)" : "0 2px 6px rgba(0,0,0,0.15)",
 				cursor: n ? "pointer" : "default",
 				transition: "all 0.2s ease-in-out",
-				transform: i && n ? "scale(1.05)" : "scale(1)",
+				transform: a && n ? "scale(1.05)" : "scale(1)",
 				display: "flex",
-				flexDirection: s ? "column" : "row",
-				alignItems: s ? "stretch" : "center",
-				gap: s ? "4px" : "2px",
-				minWidth: s ? "120px" : "auto"
+				flexDirection: u ? "column" : "row",
+				alignItems: u ? "stretch" : "center",
+				gap: u ? "4px" : "2px",
+				minWidth: u ? "120px" : "auto"
 			},
-			children: s ? e.map((e, r) => /* @__PURE__ */ (0, L.jsxs)("div", {
+			children: u ? d.map((e, r) => /* @__PURE__ */ (0, L.jsxs)("div", {
 				style: {
 					display: "flex",
 					justifyContent: "space-between",
@@ -831,13 +850,13 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 				},
 				children: [e.label && /* @__PURE__ */ (0, L.jsx)("span", {
 					style: {
-						color: i && n ? "#aaa" : "#666",
+						color: a && n ? "#aaa" : "#666",
 						fontSize: "12px",
 						fontWeight: "normal"
 					},
 					children: e.label
-				}), /* @__PURE__ */ (0, L.jsxs)("span", { children: [e.currency === void 0 ? t : e.currency, o(e.price)] })]
-			}, r)) : /* @__PURE__ */ (0, L.jsxs)(L.Fragment, { children: [/* @__PURE__ */ (0, L.jsx)("span", { children: t }), /* @__PURE__ */ (0, L.jsx)("span", { children: o(e) })] })
+				}), /* @__PURE__ */ (0, L.jsxs)("span", { children: [e.currency === void 0 ? t : e.currency, c(e.price)] })]
+			}, r)) : /* @__PURE__ */ (0, L.jsxs)(L.Fragment, { children: [/* @__PURE__ */ (0, L.jsx)("span", { children: t }), /* @__PURE__ */ (0, L.jsx)("span", { children: c(d) })] })
 		})
 	});
 }, pe = {

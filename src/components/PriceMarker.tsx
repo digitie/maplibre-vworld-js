@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Marker, type MarkerProps } from './Marker';
+import { useMapSelector } from '../store/hooks';
 
 export interface PriceItem {
   label?: string;
@@ -17,6 +18,14 @@ export interface PriceMarkerProps extends Omit<MarkerProps, 'children'> {
   currency?: string;
   /** Apply hover styling. @default true */
   isHoverable?: boolean;
+  /** 
+   * Semantic zoom thresholds for Level of Detail (LOD): `[stage2Zoom, stage3Zoom]`.
+   * - Zoom >= stage2Zoom: Stage 1 (Full detail, all prices)
+   * - stage3Zoom <= Zoom < stage2Zoom: Stage 2 (Mid detail, up to 2 prices)
+   * - Zoom < stage3Zoom: Stage 3 (Low detail, small dot)
+   * @default [13, 11]
+   */
+  lodThresholds?: [number, number];
 }
 
 /**
@@ -26,9 +35,17 @@ export const PriceMarker: React.FC<PriceMarkerProps> = ({
   price,
   currency = '',
   isHoverable = true,
+  lodThresholds = [13, 11],
   ...props
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+
+  // useMapSelector only triggers re-render when the resulting stage changes
+  const stage = useMapSelector((s) => {
+    if (s.zoom >= lodThresholds[0]) return 1;
+    if (s.zoom >= lodThresholds[1]) return 2;
+    return 3;
+  });
 
   const formatPrice = (p: string | number) => {
     if (typeof p === 'number') return p.toLocaleString();
@@ -36,6 +53,32 @@ export const PriceMarker: React.FC<PriceMarkerProps> = ({
   };
 
   const isArray = Array.isArray(price);
+
+  if (stage === 3) {
+    return (
+      <Marker {...props}>
+        <div 
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          style={{
+            width: '12px',
+            height: '12px',
+            background: isHovered && isHoverable ? '#222' : 'white',
+            border: '2px solid #222',
+            borderRadius: '50%',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+            cursor: isHoverable ? 'pointer' : 'default',
+            transition: 'all 0.2s ease',
+            transform: (isHovered && isHoverable) ? 'scale(1.2)' : 'scale(1)',
+          }}
+        />
+      </Marker>
+    );
+  }
+
+  const displayPrice = isArray 
+    ? (stage === 2 ? (price as PriceItem[]).slice(0, 2) : (price as PriceItem[]))
+    : price;
 
   return (
     <Marker {...props}>
@@ -64,7 +107,7 @@ export const PriceMarker: React.FC<PriceMarkerProps> = ({
         }}
       >
         {isArray ? (
-          (price as PriceItem[]).map((p, i) => (
+          (displayPrice as PriceItem[]).map((p, i) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
               {p.label && (
                 <span style={{ 
@@ -84,7 +127,7 @@ export const PriceMarker: React.FC<PriceMarkerProps> = ({
         ) : (
           <>
             <span>{currency}</span>
-            <span>{formatPrice(price as string | number)}</span>
+            <span>{formatPrice(displayPrice as string | number)}</span>
           </>
         )}
       </div>
