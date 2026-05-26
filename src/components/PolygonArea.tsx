@@ -60,10 +60,11 @@ export const PolygonArea: React.FC<PolygonAreaProps> = ({
   const stableOnMouseLeave = useEvent(onMouseLeave);
 
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') {
+    // @ts-ignore
+    if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
       const result = PolygonAreaInputSchema.safeParse(data);
       if (!result.success) {
-        console.warn(`[PolygonArea] Invalid data prop:`, result.error.errors);
+        console.warn(`[PolygonArea] Invalid data prop:`, result.error.issues);
       }
     }
   }, [data]);
@@ -76,7 +77,7 @@ export const PolygonArea: React.FC<PolygonAreaProps> = ({
 
       const source = map.getSource(sourceId) as maplibregl.GeoJSONSource | undefined;
       if (source) {
-        if (typeof data !== 'string') source.setData(data);
+        source.setData(data);
       } else {
         map.addSource(sourceId, { type: 'geojson', data });
       }

@@ -9,7 +9,6 @@ describe('PolygonArea Component', () => {
 
   it('adds source and both fill/line layers on mount, cleans up on unmount', async () => {
     vi.clearAllMocks();
-    
     const { unmount } = render(
       <VWorldMap apiKey="test-key" center={[127, 37]}>
         <PolygonArea id="test-poly" data={dummyGeoJSON} />
@@ -17,7 +16,6 @@ describe('PolygonArea Component', () => {
     );
 
     await waitFor(() => expect(maplibregl.Map).toHaveBeenCalled());
-    
     const mapInstances = vi.mocked(maplibregl.Map).mock.results;
     const mapMock = mapInstances[mapInstances.length - 1]?.value as any;
 
@@ -39,7 +37,6 @@ describe('PolygonArea Component', () => {
 
   it('binds events on mount', async () => {
     vi.clearAllMocks();
-    
     const { unmount } = render(
       <VWorldMap apiKey="test-key" center={[127, 37]}>
         <PolygonArea id="test-poly" data={dummyGeoJSON} onClick={() => {}} />

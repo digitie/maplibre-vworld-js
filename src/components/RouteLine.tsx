@@ -58,16 +58,17 @@ export const RouteLine: React.FC<RouteLineProps> = ({
   const stableOnMouseLeave = useEvent(onMouseLeave);
 
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') {
+    // @ts-ignore
+    if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
       if (data) {
         const result = RouteLineGeoJSONSchema.safeParse(data);
         if (!result.success) {
-          console.warn(`[RouteLine] Invalid data prop:`, result.error.errors);
+          console.warn(`[RouteLine] Invalid data prop:`, result.error.issues);
         }
       } else if (coordinates) {
         const result = RouteCoordinatesSchema.safeParse(coordinates);
         if (!result.success) {
-          console.warn(`[RouteLine] Invalid coordinates prop:`, result.error.errors);
+          console.warn(`[RouteLine] Invalid coordinates prop:`, result.error.issues);
         }
       }
     }
@@ -99,9 +100,9 @@ export const RouteLine: React.FC<RouteLineProps> = ({
 
       const source = map.getSource(sourceId) as maplibregl.GeoJSONSource | undefined;
       if (source) {
-        if (typeof sourceData !== 'string') source.setData(sourceData as any);
+        source.setData(sourceData as any);
       } else {
-        map.addSource(sourceId, { type: 'geojson', data: sourceData });
+        map.addSource(sourceId, { type: 'geojson', data: sourceData as any });
       }
 
       if (!map.getLayer(layerId)) {

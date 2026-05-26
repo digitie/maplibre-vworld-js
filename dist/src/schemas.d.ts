@@ -69,3 +69,9 @@ export declare function extendPointSchema<T extends z.ZodRawShape>(properties: T
  */
 export declare const RouteCoordinatesSchema: z.ZodArray<z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>>;
 export type RouteCoordinates = z.infer<typeof RouteCoordinatesSchema>;
+export declare const PolygonAreaInputSchema: z.ZodUnion<readonly [z.ZodString, z.ZodObject<{
+    type: z.ZodString;
+}, z.core.$loose>]>;
+export declare const RouteLineGeoJSONSchema: z.ZodUnion<readonly [z.ZodString, z.ZodObject<{
+    type: z.ZodString;
+}, z.core.$loose>]>;

@@ -54,7 +54,7 @@ export interface ClusterLayerProps {
   /** Maximum zoom at which clustering still applies. @default 16 */
   maxZoom?: number;
   /**
-   * If true, supercluster will generate stable IDs for clusters. 
+   * If true, supercluster will generate stable IDs for clusters.
    * This is recommended to prevent React key churn on re-renders.
    * @default true
    */

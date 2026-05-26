@@ -7,7 +7,6 @@ import { VWorldMap } from '../src/components/VWorldMap';
 describe('RouteLine Component', () => {
   it('adds source and layer on mount and cleans up on unmount', async () => {
     vi.clearAllMocks();
-    
     const { unmount } = render(
       <VWorldMap apiKey="test-key" center={[127, 37]}>
         <RouteLine id="test-route" coordinates={[[127, 37], [128, 38]]} />
@@ -34,7 +33,6 @@ describe('RouteLine Component', () => {
 
   it('binds map events on mount and removes them on unmount', async () => {
     vi.clearAllMocks();
-    
     const { unmount } = render(
       <VWorldMap apiKey="test-key" center={[127, 37]}>
         <RouteLine id="test-route" coordinates={[[127, 37], [128, 38]]} onClick={() => {}} />

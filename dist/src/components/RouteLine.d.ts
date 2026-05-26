@@ -10,7 +10,12 @@ export interface RouteLineProps {
      * Polyline coordinates as `[longitude, latitude]` tuples. Must be
      * referentially stable: reference changes trigger a `setData` call.
      */
-    coordinates: [number, number][];
+    coordinates?: [number, number][];
+    /**
+     * GeoJSON LineString / MultiLineString Feature, FeatureCollection, or URL.
+     * If provided, overrides `coordinates`. Must be referentially stable.
+     */
+    data?: GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString> | GeoJSON.FeatureCollection | string;
     /** @default '#2196F3' */
     color?: string;
     /** Width in pixels. @default 4 */
