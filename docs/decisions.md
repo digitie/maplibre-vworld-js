@@ -553,3 +553,33 @@ ADR-10을 폐기(supersede)하고, API 키가 필요 없는 단위/빌드 테스
 ### 후속
 
 - 주기적으로 VWorld 공지사항 및 매뉴얼을 확인하여 줌 레벨 지원 범위가 공식적으로 확장되었는지 확인하는 수동 모니터링 절차 유지.
+
+---
+
+## ADR-15: 우클릭 메뉴(ContextMenu) 라이브러리화 및 도메인 마커의 책임 분리
+
+- 상태: accepted
+- 날짜: 2026-05-28
+- 결정자: human, AI agent
+
+### 컨텍스트
+
+1. 기존 `dev/main.tsx`에 구현되어 있던 우클릭 메뉴(Context Menu) 예제는 `position: fixed`와 `window.addEventListener`를 사용한 하드코딩 방식이었습니다. 소비자 앱이 이를 매번 직접 구현하는 것은 비효율적이므로, 범용적인 `<MapContextMenu>` 컴포넌트를 라이브러리 레벨에서 제공해야 할 필요성이 제기되었습니다.
+2. 이전 작업(T-022)에서 다중 가격 표시 및 LOD(Level of Detail) 기능이 탑재된 `PriceMarker`와, `PlaceMarker`, `WeatherMarker` 등 도메인 특화 마커가 라이브러리 패키지(`src/components/`)에 직접 포함되었습니다. 이는 소비자 앱의 비즈니스 로직을 라이브러리에 박지 않도록 규정한 **ADR-7** 및 `consumer-feature-catalog.md`의 정책과 충돌합니다.
+
+### 결정
+
+1. **MapContextMenu 추가**: 외부 클릭 닫기(click-away) 및 ESC 키 닫기 기능을 내장한 범용 `<MapContextMenu>` 컴포넌트를 `src/components/`에 신규 추가하고 라이브러리 외부로 노출(export)합니다.
+2. **도메인 마커의 예제화 (PlaceMarker, WeatherMarker)**: 특정 도메인 로직이 강하게 결합된 `PlaceMarker.tsx`, `WeatherMarker.tsx`를 라이브러리 배포 대상(`src/components/`)에서 제거하고, 개발 및 데모 목적인 `dev/examples/markers/` 디렉토리로 이동시킵니다.
+3. **PriceMarker의 예외적 라이브러리 유지**: 단, `PriceMarker`는 다중 가격 표시 및 3단계 Semantic Zoom LOD 처리라는 범용적 UI/UX 패턴을 매우 잘 보여주는 레퍼런스로 인정되어 예외적으로 라이브러리(`src/components/`)에 유지하기로 결정합니다. (`consumer-feature-catalog.md` 예외 조항 추가 완료)
+
+### 근거
+
+- **코드 재사용성 향상**: 우클릭 메뉴는 지도 상호작용에서 매우 빈번하게 사용되는 패턴이므로 라이브러리 차원에서 Portal 기반의 안전한 컴포넌트로 제공하는 것이 타당합니다.
+- **아키텍처 원칙(ADR-7) 준수**: 소비자 앱에서 도메인 데이터를 맵핑하기 위해 사용하는 마커(Place, Weather)를 라이브러리에서 강제 배포하지 않음으로써 책임을 분리하고 불필요한 번들 사이즈 증가를 방지합니다.
+- **실용적 예외 허용**: `PriceMarker`는 부동산, 여행, 숙박 등 지도 기반 플랫폼에서 가장 보편적으로 쓰이는 복합 마커 패턴이므로 기본 기능으로 제공할 가치가 있습니다.
+
+### 결과
+
+- `maplibre-vworld` 라이브러리가 더욱 범용적인(primitive) 도구 모음으로서의 정체성을 강화하였습니다.
+- `MapContextMenu`를 통해 소비자는 마커 메뉴와 지도 메뉴를 쉽게 구분하여 구현할 수 있습니다.

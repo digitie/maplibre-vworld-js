@@ -6,9 +6,7 @@ export { PinMarker, type PinMarkerProps } from './components/PinMarker';
 export { MakiMarker, type MakiMarkerProps } from './components/MakiMarker';
 export { PulsingMarker, type PulsingMarkerProps } from './components/PulsingMarker';
 export { SimpleMarker, type SimpleMarkerProps } from './components/SimpleMarker';
-export { PlaceMarker, type PlaceMarkerProps } from './components/PlaceMarker';
 export { PriceMarker, type PriceMarkerProps, type PriceItem } from './components/PriceMarker';
-export { WeatherMarker, type WeatherMarkerProps, type WeatherCondition, type HourlyForecast, } from './components/WeatherMarker';
 export { RoutePointMarker, type RoutePointMarkerProps } from './components/RoutePointMarker';
 export { ClusterMarker, type ClusterMarkerProps } from './components/ClusterMarker';
 export { ClusterLayer, type ClusterLayerProps, type ClusterPoint, type ClusterPointFeature, } from './components/ClusterLayer';
@@ -16,4 +14,5 @@ export { ServerClusterLayer, type ServerClusterLayerProps, type ServerClusterPoi
 export { RouteLine, type RouteLineProps } from './components/RouteLine';
 export { PolygonArea, type PolygonAreaProps, type PolygonAreaInput } from './components/PolygonArea';
 export { Popup, type PopupProps } from './components/Popup';
+export { MapContextMenu, type MapContextMenuProps } from './components/MapContextMenu';
 export { LngLatSchema, BoundsSchema, PointSchema, RouteCoordinatesSchema, type LngLat, type Bounds, type Point, type RouteCoordinates, makeBoundedLngLatSchema, makeBoundedBoundsSchema, extendPointSchema, formatLngLat, serializeBounds, parseBoundsParam, } from './schemas';

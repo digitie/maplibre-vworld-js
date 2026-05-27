@@ -2,6 +2,18 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-05-28 (MapContextMenu 추가 및 도메인 마커 분리 - T-031)
+
+**작업**: 범용 우클릭 메뉴 추가 및 도메인 마커 예제 분리 (T-031).
+
+**구현 상세**:
+- `MapContextMenu` 컴포넌트 추가 및 `index.ts` 노출
+- `PlaceMarker`, `WeatherMarker`를 `dev/examples/markers/`로 이동 (ADR-15)
+- `PriceMarker`는 범용성 인정으로 라이브러리 기본 제공 유지 (consumer-feature-catalog 예외 등록)
+- `dev/main.tsx` 우클릭 메뉴 예제를 `MapContextMenu`를 사용하도록 리팩토링
+
+---
+
 ## 2026-05-28 (VWorld getCapabilities 동적 검증 도입 거부)
 
 **작업**: VWorld WMTS Capabilities XML을 활용한 줌 범위 동적 검증 가능 여부 확인 (T-019).

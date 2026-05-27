@@ -8,6 +8,7 @@
 ## 대기 (우선순위 순)
 
 ## 완료
+- [x] T-031 MapContextMenu 컴포넌트 추가 및 도메인 마커(PlaceMarker, WeatherMarker) 예제로 분리 (PriceMarker는 예외 유지). (2026-05-28)
 - [x] T-019 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 동적 도입 검토 결과 ADR-14를 작성하여 성능 및 안정성 이유로 기각(reject)하고 기존 하드코딩 방식 유지. (2026-05-28)
 - [x] T-029 CI/CD 활성화 재검토 — ADR-13 작성하여 ADR-10 대체, GitHub Actions (`.github/workflows/ci.yml`)에 제한적 범위의 CI/CD (테스트 및 빌드 게이트) 복원 완료. (2026-05-28)
 - [x] T-028 지원되지 않는 타일 대체 이미지/동작 구현 — VWorld layer/zoom 상한 또는 provider 오류 시 금지 아이콘이 포함된 중립 목업 타일을 표시하고, `isVWorldTileError`/`redactVWorldUrl` 로깅 패턴과 연결 완료. (2026-05-28)

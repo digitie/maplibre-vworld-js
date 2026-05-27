@@ -1,10 +1,13 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 import {
-  VWorldMap, Marker, WeatherMarker, PlaceMarker, SimpleMarker,
+  VWorldMap, Marker, SimpleMarker, MapContextMenu,
   PriceMarker, PulsingMarker, PinMarker, MakiMarker, ClusterLayer, RoutePointMarker, RouteLine,
   type VWorldLayerType, PolygonArea, type ClusterPoint,
 } from '../src';
+
+import { WeatherMarker } from './examples/markers/WeatherMarker';
+import { PlaceMarker } from './examples/markers/PlaceMarker';
 
 const API_KEY = import.meta.env.VITE_VWORLD_API_KEY || 'YOUR_API_KEY';
 
@@ -24,13 +27,6 @@ const App = () => {
     type: 'map' | 'marker';
     data?: any;
   } | null>(null);
-
-  // Close context menu on external click
-  useEffect(() => {
-    const handleWindowClick = () => setContextMenu(null);
-    window.addEventListener('click', handleWindowClick);
-    return () => window.removeEventListener('click', handleWindowClick);
-  }, []);
 
   // Dummy GeoJSON for Namsan Park Area (Polygon)
   const namsanAreaGeoJSON = useMemo<GeoJSON.Feature<GeoJSON.Polygon>>(() => ({
@@ -323,24 +319,14 @@ const App = () => {
         </div>
       </div>
 
-      {/* Context Menu UI */}
-      {contextMenu && (
-        <div
-          style={{
-            position: 'fixed',
-            top: contextMenu.y,
-            left: contextMenu.x,
-            background: 'white',
-            border: '1px solid #ccc',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-            padding: '8px 0',
-            borderRadius: '4px',
-            zIndex: 9999,
-            minWidth: '160px',
-            fontFamily: 'sans-serif'
-          }}
-        >
-          {contextMenu.type === 'map' ? (
+        {/* Context Menu UI */}
+        {contextMenu && (
+          <MapContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            onClose={() => setContextMenu(null)}
+          >
+            {contextMenu.type === 'map' ? (
             <>
               <div style={{ padding: '4px 16px', fontSize: '12px', fontWeight: 'bold', color: '#888', borderBottom: '1px solid #eee', marginBottom: '4px' }}>지도 옵션</div>
               <div 
@@ -381,8 +367,8 @@ const App = () => {
               </div>
             </>
           )}
-        </div>
-      )}
+          </MapContextMenu>
+        )}
     </div>
   );
 };
