@@ -6,9 +6,9 @@
 - (없음)
 
 ## 대기 (우선순위 순)
-- T-019 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 현재 `getVWorldMaxZoom`은 하드코딩된 표. WMTS Capabilities XML을 fetch해서 layer-별 zoom 범위를 동적으로 검증할 수 있는지 검토.
 
 ## 완료
+- [x] T-019 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 동적 도입 검토 결과 ADR-14를 작성하여 성능 및 안정성 이유로 기각(reject)하고 기존 하드코딩 방식 유지. (2026-05-28)
 - [x] T-029 CI/CD 활성화 재검토 — ADR-13 작성하여 ADR-10 대체, GitHub Actions (`.github/workflows/ci.yml`)에 제한적 범위의 CI/CD (테스트 및 빌드 게이트) 복원 완료. (2026-05-28)
 - [x] T-028 지원되지 않는 타일 대체 이미지/동작 구현 — VWorld layer/zoom 상한 또는 provider 오류 시 금지 아이콘이 포함된 중립 목업 타일을 표시하고, `isVWorldTileError`/`redactVWorldUrl` 로깅 패턴과 연결 완료. (2026-05-28)
 - [x] T-027 마커 클릭/지도 클릭 구분 context 지원 — raw 이벤트를 유지하면서 두 번째 인자로 `source`, `interactionId`, `lngLat` 같은 context를 전달하는 비파괴 API 구현 완료. (2026-05-28)
