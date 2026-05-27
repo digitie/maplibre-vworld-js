@@ -6,12 +6,12 @@
 - (없음)
 
 ## 대기 (우선순위 순)
-- T-027 마커 클릭/지도 클릭 구분 context 지원 — raw 이벤트를 유지하면서 두 번째 인자로 `source`, `interactionId`, `lngLat` 같은 context를 전달하는 비파괴 API 검토. TripMate 선택 해제 UX와 tour-map 디버그 패널 클릭 구분이 주요 요구. 예제는 R-002 참고.
 - T-028 지원되지 않는 타일 대체 이미지/동작 구현 — VWorld layer/zoom 상한 또는 provider 오류 시 금지 아이콘이 포함된 중립 목업 타일을 표시하고, `isVWorldTileError`/`redactVWorldUrl` 로깅 패턴과 연결. 예제는 R-003 참고.
 - T-029 CI/CD 활성화 재검토 — ADR-10과 충돌하므로 새 ADR로 범위와 게이트를 먼저 결정. 최소 게이트는 type-check/test/build/dist drift/pack:check. 예제는 R-004 참고.
 - T-019 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 현재 `getVWorldMaxZoom`은 하드코딩된 표. WMTS Capabilities XML을 fetch해서 layer-별 zoom 범위를 동적으로 검증할 수 있는지 검토.
 
 ## 완료
+- [x] T-027 마커 클릭/지도 클릭 구분 context 지원 — raw 이벤트를 유지하면서 두 번째 인자로 `source`, `interactionId`, `lngLat` 같은 context를 전달하는 비파괴 API 구현 완료. (2026-05-28)
 - [x] T-026 `<VWorldMap>` lazy loading 지원 — `IntersectionObserver` 기반으로 viewport 진입 전 MapLibre 인스턴스와 VWorld 타일 요청 지연 적용. `lazy`, `lazyRootMargin`, manual enable 기능 구현 및 테스트 작성. (2026-05-27)
 - [x] T-030 Antigravity 2.0 에 맞게 프로젝트 MCP 설정 반영 — `.gemini/mcp.json` 파일 생성 및 `dev-environment.md` 업데이트. (2026-05-27)
 - [x] T-025 CodeGraph + 에이전트별 고정 worktree 운영 정책 적용 — `geo-codex` worktree 생성, `.codegraph/` gitignore, `.codex/config.toml` MCP 설정, ADR-12 및 개발 환경 문서 추가. (2026-05-27)

@@ -133,7 +133,7 @@ describe('VWorldMap', () => {
       const event = { lngLat: { lng: 127, lat: 37 } };
       mapHandler<typeof event>(map, 'click')(event);
 
-      expect(onClick).toHaveBeenCalledWith(event);
+      expect(onClick).toHaveBeenCalledWith(event, expect.objectContaining({ source: 'map' }));
     });
 
     it('passes raw MapLibre context menu events to onContextMenu', () => {
@@ -145,7 +145,7 @@ describe('VWorldMap', () => {
       const event = { lngLat: { lng: 127.1, lat: 37.5 }, point: { x: 12, y: 24 } };
       mapHandler<typeof event>(map, 'contextmenu')(event);
 
-      expect(onContextMenu).toHaveBeenCalledWith(event);
+      expect(onContextMenu).toHaveBeenCalledWith(event, expect.objectContaining({ source: 'map' }));
     });
 
     it('passes raw MapLibre error events to onError', () => {

@@ -109,7 +109,7 @@ const App = () => {
           lngLat={[127.02, 37.53]} 
           label="강남역 주변 (우클릭 해보세요)" 
           bgColor="#ff5500" 
-          onContextMenu={(e, marker) => {
+          onContextMenu={(e, _context, marker) => {
             e.preventDefault();
             e.stopPropagation();
             setContextMenu({
