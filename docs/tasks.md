@@ -13,6 +13,7 @@
 - T-019 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 현재 `getVWorldMaxZoom`은 하드코딩된 표. WMTS Capabilities XML을 fetch해서 layer-별 zoom 범위를 동적으로 검증할 수 있는지 검토.
 
 ## 완료
+- [x] T-030 Antigravity 2.0 에 맞게 프로젝트 MCP 설정 반영 — `.gemini/mcp.json` 파일 생성 및 `dev-environment.md` 업데이트. (2026-05-27)
 - [x] T-025 CodeGraph + 에이전트별 고정 worktree 운영 정책 적용 — `geo-codex` worktree 생성, `.codegraph/` gitignore, `.codex/config.toml` MCP 설정, ADR-12 및 개발 환경 문서 추가. (2026-05-27)
 - [x] T-024 TripMate/tour-map 소비자 요구사항 문서화 — lazy loading, 클릭 context, 지원되지 않는 타일 fallback, CI/CD 활성화 검토를 `docs/consumer-requirements.md`에 수용 기준과 예제로 정리. 코드 구현은 후속 T-026~T-029로 분리. (2026-05-27)
 - [x] T-023 PR #23 — ADR-11 추가. 동적 z-index와 시멘틱 줌 manual expand에 대한 결정 기록. (2026-05-26)
