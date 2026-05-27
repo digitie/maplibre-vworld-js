@@ -115,11 +115,11 @@ function M() {
 	let e = O();
 	return u(e.subscribe, () => k(e.getSnapshot()), () => 0);
 }
-function N() {
+function te() {
 	let e = O();
 	return u(e.subscribe, () => A(e.getSnapshot()), () => !1);
 }
-function P(e) {
+function N(e) {
 	let t = O(), n = c(e);
 	o(() => {
 		n.current = e;
@@ -138,7 +138,7 @@ function P(e) {
 	}, [t]);
 	return u(t.subscribe, a, a);
 }
-function F(e) {
+function P(e) {
 	let t = c(e);
 	return o(() => {
 		t.current = e;
@@ -146,7 +146,7 @@ function F(e) {
 }
 //#endregion
 //#region node_modules/react/cjs/react-jsx-runtime.production.js
-var te = /* @__PURE__ */ m(((e) => {
+var ne = /* @__PURE__ */ m(((e) => {
 	var t = Symbol.for("react.transitional.element"), n = Symbol.for("react.fragment");
 	function r(e, n, r) {
 		var i = null;
@@ -161,7 +161,7 @@ var te = /* @__PURE__ */ m(((e) => {
 		};
 	}
 	e.Fragment = n, e.jsx = r, e.jsxs = r;
-})), I = /* @__PURE__ */ m(((e) => {
+})), F = /* @__PURE__ */ m(((e) => {
 	process.env.NODE_ENV !== "production" && (function() {
 		function t(e) {
 			if (e == null) return null;
@@ -233,7 +233,7 @@ var te = /* @__PURE__ */ m(((e) => {
 		}
 		function c(e, t) {
 			function n() {
-				N || (N = !0, console.error("%s: `key` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://react.dev/link/special-props)", t));
+				te || (te = !0, console.error("%s: `key` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://react.dev/link/special-props)", t));
 			}
 			n.isReactWarning = !0, Object.defineProperty(e, "key", {
 				get: n,
@@ -242,7 +242,7 @@ var te = /* @__PURE__ */ m(((e) => {
 		}
 		function l() {
 			var e = t(this.type);
-			return P[e] || (P[e] = !0, console.error("Accessing element.ref was removed in React 19. ref is now a regular prop. It will be removed from the JSX Element type in a future release.")), e = this.props.ref, e === void 0 ? null : e;
+			return N[e] || (N[e] = !0, console.error("Accessing element.ref was removed in React 19. ref is now a regular prop. It will be removed from the JSX Element type in a future release.")), e = this.props.ref, e === void 0 ? null : e;
 		}
 		function u(e, t, n, r, i, a) {
 			var o = n.ref;
@@ -292,7 +292,7 @@ var te = /* @__PURE__ */ m(((e) => {
 				var m = Object.keys(n).filter(function(e) {
 					return e !== "key";
 				});
-				o = 0 < m.length ? "{key: someKey, " + m.join(": ..., ") + ": ...}" : "{key: someKey}", I[p + o] || (m = 0 < m.length ? "{" + m.join(": ..., ") + ": ...}" : "{}", console.error("A props object containing a \"key\" prop is being spread into JSX:\n  let props = %s;\n  <%s {...props} />\nReact keys must be passed directly to JSX without using spread:\n  let props = %s;\n  <%s key={someKey} {...props} />", o, p, m, p), I[p + o] = !0);
+				o = 0 < m.length ? "{key: someKey, " + m.join(": ..., ") + ": ...}" : "{key: someKey}", F[p + o] || (m = 0 < m.length ? "{" + m.join(": ..., ") + ": ...}" : "{}", console.error("A props object containing a \"key\" prop is being spread into JSX:\n  let props = %s;\n  <%s {...props} />\nReact keys must be passed directly to JSX without using spread:\n  let props = %s;\n  <%s key={someKey} {...props} />", o, p, m, p), F[p + o] = !0);
 			}
 			if (p = null, i !== void 0 && (r(i), p = "" + i), s(n) && (r(n.key), p = "" + n.key), "key" in n) for (var h in i = {}, n) h !== "key" && (i[h] = n[h]);
 			else i = n;
@@ -310,55 +310,78 @@ var te = /* @__PURE__ */ m(((e) => {
 		m = { react_stack_bottom_frame: function(e) {
 			return e();
 		} };
-		var N, P = {}, F = m.react_stack_bottom_frame.bind(m, o)(), te = M(i(o)), I = {};
+		var te, N = {}, P = m.react_stack_bottom_frame.bind(m, o)(), ne = M(i(o)), F = {};
 		e.Fragment = v, e.jsx = function(e, t, n) {
 			var r = 1e4 > k.recentlyCreatedOwnerStacks++;
-			return d(e, t, n, !1, r ? Error("react-stack-top-frame") : F, r ? M(i(e)) : te);
+			return d(e, t, n, !1, r ? Error("react-stack-top-frame") : P, r ? M(i(e)) : ne);
 		}, e.jsxs = function(e, t, n) {
 			var r = 1e4 > k.recentlyCreatedOwnerStacks++;
-			return d(e, t, n, !0, r ? Error("react-stack-top-frame") : F, r ? M(i(e)) : te);
+			return d(e, t, n, !0, r ? Error("react-stack-top-frame") : P, r ? M(i(e)) : ne);
 		};
 	})();
-})), L = (/* @__PURE__ */ m(((e, t) => {
-	process.env.NODE_ENV === "production" ? t.exports = te() : t.exports = I();
+})), I = (/* @__PURE__ */ m(((e, t) => {
+	process.env.NODE_ENV === "production" ? t.exports = ne() : t.exports = F();
 })))();
-function ne(e, t) {
+function re(e, t) {
 	return e === void 0 ? null : typeof e == "function" ? e(t) : e;
 }
-function re(e) {
+function ie(e) {
 	let t = [e.error?.url, e.url];
 	for (let e of t) if (typeof e == "string" && e.length > 0) return e;
 }
-function ie(e, t) {
+function ae(e, t) {
 	return e.center[0] === t.center[0] && e.center[1] === t.center[1] && e.zoom === t.zoom && e.pitch === t.pitch && e.bearing === t.bearing;
 }
-var ae = ({ apiKey: e, layerType: t = "Base", center: n, zoom: i = 12, pitch: s = 0, bearing: u = 0, minZoom: f = 6, maxZoom: p = 19, maxBounds: m, semanticZoomThreshold: h, navigation: g = !0, geolocate: _ = !0, scale: v = !0, className: y = "", style: b = {
+var oe = ({ apiKey: e, layerType: t = "Base", center: n, zoom: i = 12, pitch: s = 0, bearing: u = 0, minZoom: f = 6, maxZoom: p = 19, maxBounds: m, semanticZoomThreshold: h, navigation: g = !0, geolocate: _ = !0, scale: v = !0, className: y = "", style: b = {
 	width: "100%",
 	height: "100%"
-}, children: C, onLoad: T, onClick: O, onContextMenu: ee, onMoveEnd: k, onZoomEnd: A, onIdle: j, onError: M, transformRequest: N, fallback: P, loadingSkeleton: te, animateCameraChanges: I = !0, flyToOptions: ae }) => {
-	let R = c(null), [z] = l(() => new E()), [B, V] = l(null), [H, se] = l(!1), ce = c({
+}, children: C, onLoad: T, onClick: O, onContextMenu: ee, onMoveEnd: k, onZoomEnd: A, onIdle: j, onError: M, transformRequest: te, fallback: N, loadingSkeleton: ne, animateCameraChanges: F = !0, flyToOptions: oe, lazy: L = !1, lazyEnabled: ce = !1, lazyRootMargin: R = "0px" }) => {
+	let z = c(null), [B] = l(() => new E()), [le, ue] = l(null), [de, V] = l(() => L === !1), [H, fe] = l(!1), pe = c({
 		center: n,
 		zoom: i,
 		pitch: s,
 		bearing: u
-	}), le = c(null), U = c({
+	}), U = c(null), W = c({
 		apiKey: e,
 		layerType: t
-	}), ue = F(T), de = F(O), fe = F(ee), pe = F(k), me = F(A), he = F(j), ge = c(M);
+	}), me = P(T), he = P(O), ge = P(ee), _e = P(k), ve = P(A), ye = P(j), G = c(M);
 	o(() => {
-		ge.current = M;
+		G.current = M;
 	});
-	let _e = typeof e == "string" && e.trim().length > 0, ve = _e && B === null;
+	let K = typeof e == "string" && e.trim().length > 0, q = K && le === null && de;
 	a(() => {
-		V(null);
+		ue(null);
 	}, [e, t]), a(() => {
-		z.setSemanticZoomThreshold(h);
-	}, [z, h]), a(() => {
-		if (!ve || !R.current) return;
+		B.setSemanticZoomThreshold(h);
+	}, [B, h]), a(() => {
+		if (L === "manual") {
+			ce && V(!0);
+			return;
+		}
+		if (L !== !0) {
+			V(!0);
+			return;
+		}
+		if (de) return;
+		if (typeof IntersectionObserver > "u") {
+			V(!0);
+			return;
+		}
+		let e = new IntersectionObserver((t) => {
+			t[0]?.isIntersecting && (V(!0), e.disconnect());
+		}, { rootMargin: R });
+		return z.current && e.observe(z.current), () => e.disconnect();
+	}, [
+		L,
+		ce,
+		R,
+		de
+	]), a(() => {
+		if (!q || !z.current) return;
 		let r = Math.min(p, x(t)), a;
 		try {
 			a = new d.Map({
-				container: R.current,
+				container: z.current,
 				style: w(e, t),
 				center: n,
 				zoom: i,
@@ -367,16 +390,16 @@ var ae = ({ apiKey: e, layerType: t = "Base", center: n, zoom: i = 12, pitch: s 
 				minZoom: f,
 				maxZoom: r,
 				maxBounds: m,
-				transformRequest: N
+				transformRequest: te
 			});
 		} catch (e) {
-			V(e instanceof Error ? e : Error(String(e)));
+			ue(e instanceof Error ? e : Error(String(e)));
 			return;
 		}
-		se(!1), U.current = {
+		fe(!1), W.current = {
 			apiKey: e,
 			layerType: t
-		}, z.setMap(a), z.setZoom(a.getZoom()), g && a.addControl(new d.NavigationControl({ visualizePitch: !0 }), "top-right"), _ && a.addControl(new d.GeolocateControl({
+		}, B.setMap(a), B.setZoom(a.getZoom()), g && a.addControl(new d.NavigationControl({ visualizePitch: !0 }), "top-right"), _ && a.addControl(new d.GeolocateControl({
 			positionOptions: { enableHighAccuracy: !0 },
 			trackUserLocation: !0
 		}), "top-right"), v && a.addControl(new d.ScaleControl({
@@ -384,34 +407,34 @@ var ae = ({ apiKey: e, layerType: t = "Base", center: n, zoom: i = 12, pitch: s 
 			unit: "metric"
 		}), "bottom-right");
 		let o = () => {
-			z.setLoaded(!0), z.setZoom(a.getZoom()), se(!0), ue(a);
+			B.setLoaded(!0), B.setZoom(a.getZoom()), fe(!0), me(a);
 		}, c = (e) => {
-			z.setZoom(a.getZoom()), me(e);
+			B.setZoom(a.getZoom()), ve(e);
 		}, l = (e) => {
-			G(a), pe(e);
+			J(a), _e(e);
 		}, h = (e) => {
-			he(e);
+			ye(e);
 		}, y = (e) => {
-			de(e);
+			he(e);
 		}, b = (e) => {
-			fe(e);
+			ge(e);
 		}, C = (e) => {
-			let t = ge.current;
+			let t = G.current;
 			if (t) {
 				t(e);
 				return;
 			}
-			let n = re(e), r = n ? S(n) : "", i = e.error?.message ?? "unknown error";
+			let n = ie(e), r = n ? S(n) : "", i = e.error?.message ?? "unknown error";
 			console.warn(`[VWorldMap] ${i}`, r);
 		};
 		a.on("load", o), a.on("zoomend", c), a.on("moveend", l), a.on("idle", h), a.on("click", y), a.on("contextmenu", b), a.on("error", C);
 		let T = typeof ResizeObserver < "u" ? new ResizeObserver(() => a.resize()) : null;
-		return T && R.current && T.observe(R.current), () => {
-			T?.disconnect(), a.off("load", o), a.off("zoomend", c), a.off("moveend", l), a.off("idle", h), a.off("click", y), a.off("contextmenu", b), a.off("error", C), a.remove(), se(!1), z.setMap(null);
+		return T && z.current && T.observe(z.current), () => {
+			T?.disconnect(), a.off("load", o), a.off("zoomend", c), a.off("moveend", l), a.off("idle", h), a.off("click", y), a.off("contextmenu", b), a.off("error", C), a.remove(), fe(!1), B.setMap(null);
 		};
-	}, [ve]), a(() => {
-		let n = z.getSnapshot().map;
-		n && H && (U.current.apiKey === e && U.current.layerType === t || (n.setStyle(w(e, t)), U.current = {
+	}, [q]), a(() => {
+		let n = B.getSnapshot().map;
+		n && H && (W.current.apiKey === e && W.current.layerType === t || (n.setStyle(w(e, t)), W.current = {
 			apiKey: e,
 			layerType: t
 		}));
@@ -419,29 +442,29 @@ var ae = ({ apiKey: e, layerType: t = "Base", center: n, zoom: i = 12, pitch: s 
 		e,
 		t,
 		H,
-		z
+		B
 	]);
-	let W = c({
-		animateCameraChanges: I,
-		flyToOptions: ae
+	let be = c({
+		animateCameraChanges: F,
+		flyToOptions: oe
 	});
 	o(() => {
-		W.current = {
-			animateCameraChanges: I,
-			flyToOptions: ae
+		be.current = {
+			animateCameraChanges: F,
+			flyToOptions: oe
 		};
 	});
-	let G = r((e) => {
-		let t = le.current;
+	let J = r((e) => {
+		let t = U.current;
 		if (!t || e.isMoving() || e.isEasing()) return;
-		let { animateCameraChanges: n, flyToOptions: r } = W.current;
+		let { animateCameraChanges: n, flyToOptions: r } = be.current;
 		n ? e.flyTo({
 			...r,
 			...t
-		}) : e.jumpTo(t), ce.current = t, le.current = null;
+		}) : e.jumpTo(t), pe.current = t, U.current = null;
 	}, []);
 	a(() => {
-		let e = z.getSnapshot().map;
+		let e = B.getSnapshot().map;
 		if (!e || !H) return;
 		let t = {
 			center: n,
@@ -449,7 +472,7 @@ var ae = ({ apiKey: e, layerType: t = "Base", center: n, zoom: i = 12, pitch: s 
 			pitch: s,
 			bearing: u
 		};
-		ie(ce.current, t) || (le.current = t, G(e));
+		ae(pe.current, t) || (U.current = t, J(e));
 	}, [
 		n[0],
 		n[1],
@@ -457,36 +480,36 @@ var ae = ({ apiKey: e, layerType: t = "Base", center: n, zoom: i = 12, pitch: s 
 		s,
 		u,
 		H,
-		z,
-		G
+		B,
+		J
 	]), a(() => {
-		let e = z.getSnapshot().map;
+		let e = B.getSnapshot().map;
 		e && (e.setMinZoom(f), e.setMaxZoom(Math.min(p, x(t))), e.setMaxBounds(m));
 	}, [
 		f,
 		p,
 		t,
 		m,
-		z
+		B
 	]);
-	let K = _e ? B ? {
+	let xe = K ? le ? {
 		reason: "map-init-error",
-		error: B
+		error: le
 	} : null : { reason: "missing-api-key" };
-	return /* @__PURE__ */ (0, L.jsx)(D.Provider, {
-		value: z,
-		children: K ? ne(P, K) : /* @__PURE__ */ (0, L.jsxs)(L.Fragment, { children: [/* @__PURE__ */ (0, L.jsx)("div", {
-			ref: R,
+	return /* @__PURE__ */ (0, I.jsx)(D.Provider, {
+		value: B,
+		children: xe ? re(N, xe) : /* @__PURE__ */ (0, I.jsxs)(I.Fragment, { children: [/* @__PURE__ */ (0, I.jsx)("div", {
+			ref: z,
 			className: y,
 			style: b,
 			"data-testid": "vworld-map-container"
-		}), /* @__PURE__ */ (0, L.jsx)(oe, {
-			loadingSkeleton: te,
+		}), /* @__PURE__ */ (0, I.jsx)(se, {
+			loadingSkeleton: ne,
 			children: C
 		})] })
 	});
-}, oe = ({ children: e, loadingSkeleton: t }) => /* @__PURE__ */ (0, L.jsx)(L.Fragment, { children: N() ? e : t }), R = 1e3;
-function z(e, t, { selected: n, highlighted: r, zIndex: i, ariaLabel: a, className: o }) {
+}, se = ({ children: e, loadingSkeleton: t }) => /* @__PURE__ */ (0, I.jsx)(I.Fragment, { children: te() ? e : t }), L = 1e3;
+function ce(e, t, { selected: n, highlighted: r, zIndex: i, ariaLabel: a, className: o }) {
 	e.dataset.selected = n ? "true" : "false", e.dataset.highlighted = r ? "true" : "false", e.style.zIndex = i === void 0 ? "" : String(i);
 	let s = n ? "1.18" : r ? "1.1" : "1";
 	e.style.setProperty("--vworld-marker-scale", s), e.style.setProperty("scale", s === "1" ? "" : s), e.style.filter = n ? "drop-shadow(0 6px 14px rgba(0,0,0,0.34))" : r ? "drop-shadow(0 4px 10px rgba(0,0,0,0.26))" : "", a ? (e.setAttribute("aria-label", a), e.setAttribute("role", "button")) : (e.removeAttribute("aria-label"), e.removeAttribute("role"));
@@ -495,10 +518,10 @@ function z(e, t, { selected: n, highlighted: r, zIndex: i, ariaLabel: a, classNa
 	let d = new Set(c);
 	for (let t of l) d.has(t) || e.classList.add(t);
 }
-var B = ({ lngLat: e, color: t = "#3FB1CE", anchor: n, offset: r, draggable: i = !1, onDragEnd: l, onClick: u, onContextMenu: p, selected: m, highlighted: h, zIndex: g, ariaLabel: _, className: v, children: y }) => {
+var R = ({ lngLat: e, color: t = "#3FB1CE", anchor: n, offset: r, draggable: i = !1, onDragEnd: l, onClick: u, onContextMenu: p, selected: m, highlighted: h, zIndex: g, ariaLabel: _, className: v, children: y }) => {
 	let b = j(), x = c(null), S = c(void 0), C = c(void 0), w = c(g), T = c(u !== void 0);
 	w.current !== g && (C.current = void 0, w.current = g);
-	let E = c(p !== void 0), D = y != null && y !== !1, O = F(u), ee = F(p), k = F(l);
+	let E = c(p !== void 0), D = y != null && y !== !1, O = P(u), ee = P(p), k = P(l);
 	o(() => {
 		T.current = u !== void 0, E.current = p !== void 0;
 	}, [u, p]);
@@ -517,7 +540,7 @@ var B = ({ lngLat: e, color: t = "#3FB1CE", anchor: n, offset: r, draggable: i =
 			offset: r
 		}, o = new d.Marker(a).setLngLat(e).addTo(b), s = o.getElement(), c = (e) => {
 			let t = w.current ?? 0;
-			R = Math.max(R, t) + 1, C.current = R, s.style.zIndex = String(C.current), T.current && (e.stopPropagation(), O(e, o));
+			L = Math.max(L, t) + 1, C.current = L, s.style.zIndex = String(C.current), T.current && (e.stopPropagation(), O(e, o));
 		}, l = (e) => {
 			E.current && (e.preventDefault(), e.stopPropagation(), ee(e, o));
 		}, u = () => {
@@ -542,7 +565,7 @@ var B = ({ lngLat: e, color: t = "#3FB1CE", anchor: n, offset: r, draggable: i =
 		let e = x.current;
 		if (!e) return;
 		let t = C.current === void 0 ? g : C.current;
-		z(e.getElement(), S.current, {
+		ce(e.getElement(), S.current, {
 			selected: m,
 			highlighted: h,
 			zIndex: t,
@@ -556,12 +579,12 @@ var B = ({ lngLat: e, color: t = "#3FB1CE", anchor: n, offset: r, draggable: i =
 		_,
 		v
 	]), D && A ? f(y, A) : null;
-}, V = ({ color: e = "#DB4437", icon: t, size: n = 40, showInnerCircle: r = !0, label: i, tooltip: a, ...o }) => {
+}, z = ({ color: e = "#DB4437", icon: t, size: n = 40, showInnerCircle: r = !0, label: i, tooltip: a, ...o }) => {
 	let s = n * 1.5;
-	return /* @__PURE__ */ (0, L.jsx)(B, {
+	return /* @__PURE__ */ (0, I.jsx)(R, {
 		...o,
 		anchor: "bottom",
-		children: /* @__PURE__ */ (0, L.jsxs)("div", {
+		children: /* @__PURE__ */ (0, I.jsxs)("div", {
 			title: a,
 			style: {
 				width: n,
@@ -570,7 +593,7 @@ var B = ({ lngLat: e, color: t = "#3FB1CE", anchor: n, offset: r, draggable: i =
 				cursor: "pointer"
 			},
 			children: [
-				/* @__PURE__ */ (0, L.jsxs)("svg", {
+				/* @__PURE__ */ (0, I.jsxs)("svg", {
 					viewBox: "0 0 24 36",
 					width: n,
 					height: s,
@@ -580,17 +603,17 @@ var B = ({ lngLat: e, color: t = "#3FB1CE", anchor: n, offset: r, draggable: i =
 						left: 0,
 						filter: "drop-shadow(0 2px 6px rgba(0,0,0,0.3))"
 					},
-					children: [/* @__PURE__ */ (0, L.jsx)("path", {
+					children: [/* @__PURE__ */ (0, I.jsx)("path", {
 						fill: e,
 						d: "M12,0 C5.372583,0 0,5.372583 0,12 C0,21 12,36 12,36 C12,36 24,21 24,12 C24,5.372583 18.627417,0 12,0 Z"
-					}), r && /* @__PURE__ */ (0, L.jsx)("circle", {
+					}), r && /* @__PURE__ */ (0, I.jsx)("circle", {
 						cx: "12",
 						cy: "12",
 						r: "8",
 						fill: "white"
 					})]
 				}),
-				/* @__PURE__ */ (0, L.jsx)("div", {
+				/* @__PURE__ */ (0, I.jsx)("div", {
 					style: {
 						position: "absolute",
 						top: 12 / 36 * s,
@@ -606,7 +629,7 @@ var B = ({ lngLat: e, color: t = "#3FB1CE", anchor: n, offset: r, draggable: i =
 					},
 					children: t
 				}),
-				i && /* @__PURE__ */ (0, L.jsx)("div", {
+				i && /* @__PURE__ */ (0, I.jsx)("div", {
 					style: {
 						position: "absolute",
 						top: s + 4,
@@ -628,13 +651,13 @@ var B = ({ lngLat: e, color: t = "#3FB1CE", anchor: n, offset: r, draggable: i =
 			]
 		})
 	});
-}, H = "https://unpkg.com/@mapbox/maki@8.0.0/icons", se = ({ icon: e, iconBaseUrl: t = H, color: n = "#2c3e50", iconColor: r = "white", size: i = 40, ...a }) => {
+}, B = "https://unpkg.com/@mapbox/maki@8.0.0/icons", le = ({ icon: e, iconBaseUrl: t = B, color: n = "#2c3e50", iconColor: r = "white", size: i = 40, ...a }) => {
 	let o = s(() => `${t.replace(/\/+$/, "")}/${e}.svg`, [t, e]);
-	return /* @__PURE__ */ (0, L.jsx)(V, {
+	return /* @__PURE__ */ (0, I.jsx)(z, {
 		color: n,
 		size: i,
 		showInnerCircle: !1,
-		icon: /* @__PURE__ */ (0, L.jsx)("div", { style: s(() => ({
+		icon: /* @__PURE__ */ (0, I.jsx)("div", { style: s(() => ({
 			width: "100%",
 			height: "100%",
 			backgroundColor: r,
@@ -643,21 +666,21 @@ var B = ({ lngLat: e, color: t = "#3FB1CE", anchor: n, offset: r, draggable: i =
 		}), [r, o]) }),
 		...a
 	});
-}, ce = "vworld-pulsing-marker-keyframes";
-function le() {
-	if (typeof document > "u" || document.getElementById(ce)) return;
+}, ue = "vworld-pulsing-marker-keyframes";
+function de() {
+	if (typeof document > "u" || document.getElementById(ue)) return;
 	let e = document.createElement("style");
-	e.id = ce, e.textContent = "\n    @keyframes vworld-pulsing-ripple {\n      0%   { transform: scale(0.3); opacity: 0.8; }\n      80%  { transform: scale(1);   opacity: 0; }\n      100% { transform: scale(1);   opacity: 0; }\n    }\n  ", document.head.appendChild(e);
+	e.id = ue, e.textContent = "\n    @keyframes vworld-pulsing-ripple {\n      0%   { transform: scale(0.3); opacity: 0.8; }\n      80%  { transform: scale(1);   opacity: 0; }\n      100% { transform: scale(1);   opacity: 0; }\n    }\n  ", document.head.appendChild(e);
 }
-var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */ (0, L.jsx)(B, {
+var V = ({ color: e = "#4285F4", size: t = 14, ...n }) => (de(), /* @__PURE__ */ (0, I.jsx)(R, {
 	...n,
-	children: /* @__PURE__ */ (0, L.jsxs)("div", {
+	children: /* @__PURE__ */ (0, I.jsxs)("div", {
 		style: {
 			position: "relative",
 			width: t,
 			height: t
 		},
-		children: [/* @__PURE__ */ (0, L.jsx)("div", { style: {
+		children: [/* @__PURE__ */ (0, I.jsx)("div", { style: {
 			position: "absolute",
 			top: 0,
 			left: 0,
@@ -669,7 +692,7 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 			boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
 			zIndex: 2,
 			boxSizing: "border-box"
-		} }), /* @__PURE__ */ (0, L.jsx)("div", { style: {
+		} }), /* @__PURE__ */ (0, I.jsx)("div", { style: {
 			position: "absolute",
 			top: "-100%",
 			left: "-100%",
@@ -681,17 +704,17 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 			animation: "vworld-pulsing-ripple 2s infinite ease-out"
 		} })]
 	})
-})), ue = ({ label: e, bgColor: t = "#222", textColor: n = "white", simplifyAtZoom: i, ...a }) => P(r((e) => {
+})), H = ({ label: e, bgColor: t = "#222", textColor: n = "white", simplifyAtZoom: i, ...a }) => N(r((e) => {
 	let t = i ?? e.semanticZoomThreshold;
 	return t !== void 0 && e.zoom < t;
-}, [i])) ? /* @__PURE__ */ (0, L.jsx)(V, {
+}, [i])) ? /* @__PURE__ */ (0, I.jsx)(z, {
 	lngLat: a.lngLat,
 	color: t,
 	size: 20,
 	showInnerCircle: !1
-}) : /* @__PURE__ */ (0, L.jsx)(B, {
+}) : /* @__PURE__ */ (0, I.jsx)(R, {
 	...a,
-	children: /* @__PURE__ */ (0, L.jsx)("div", {
+	children: /* @__PURE__ */ (0, I.jsx)("div", {
 		style: {
 			background: t,
 			color: n,
@@ -705,12 +728,12 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 		},
 		children: e
 	})
-}), de = ({ title: e, description: t, category: n, photoUrl: i, link: a, linkLabel: o = "View more", simplifyAtZoom: s, ...u }) => {
-	let d = P(r((e) => {
+}), fe = ({ title: e, description: t, category: n, photoUrl: i, link: a, linkLabel: o = "View more", simplifyAtZoom: s, ...u }) => {
+	let d = N(r((e) => {
 		let t = s ?? e.semanticZoomThreshold;
 		return t !== void 0 && e.zoom < t;
 	}, [s])), [f, p] = l(!1), m = c(d);
-	return m.current !== d && (d === !1 && p(!1), m.current = d), d && !f ? /* @__PURE__ */ (0, L.jsx)(V, {
+	return m.current !== d && (d === !1 && p(!1), m.current = d), d && !f ? /* @__PURE__ */ (0, I.jsx)(z, {
 		lngLat: u.lngLat,
 		color: "#333",
 		size: 24,
@@ -718,11 +741,11 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 		onClick: (e, t) => {
 			u.onClick && u.onClick(e, t), p(!0);
 		}
-	}) : /* @__PURE__ */ (0, L.jsx)(B, {
+	}) : /* @__PURE__ */ (0, I.jsx)(R, {
 		...u,
 		anchor: "bottom",
 		offset: [0, -8],
-		children: /* @__PURE__ */ (0, L.jsxs)("div", {
+		children: /* @__PURE__ */ (0, I.jsxs)("div", {
 			style: {
 				position: "relative",
 				background: "white",
@@ -734,7 +757,7 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 				cursor: "default"
 			},
 			children: [
-				f && /* @__PURE__ */ (0, L.jsx)("button", {
+				f && /* @__PURE__ */ (0, I.jsx)("button", {
 					onClick: (e) => {
 						e.stopPropagation(), p(!1);
 					},
@@ -760,7 +783,7 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 					"aria-label": "Close",
 					children: "✕"
 				}),
-				/* @__PURE__ */ (0, L.jsx)("div", { style: {
+				/* @__PURE__ */ (0, I.jsx)("div", { style: {
 					position: "absolute",
 					bottom: "-8px",
 					left: "50%",
@@ -771,7 +794,7 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 					display: "block",
 					width: 0
 				} }),
-				i && /* @__PURE__ */ (0, L.jsx)("img", {
+				i && /* @__PURE__ */ (0, I.jsx)("img", {
 					src: i,
 					alt: e,
 					style: {
@@ -781,10 +804,10 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 						display: "block"
 					}
 				}),
-				/* @__PURE__ */ (0, L.jsxs)("div", {
+				/* @__PURE__ */ (0, I.jsxs)("div", {
 					style: { padding: "12px" },
 					children: [
-						/* @__PURE__ */ (0, L.jsx)("div", {
+						/* @__PURE__ */ (0, I.jsx)("div", {
 							style: {
 								fontSize: "10px",
 								color: "#888",
@@ -794,7 +817,7 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 							},
 							children: n
 						}),
-						/* @__PURE__ */ (0, L.jsx)("div", {
+						/* @__PURE__ */ (0, I.jsx)("div", {
 							style: {
 								fontSize: "14px",
 								fontWeight: "bold",
@@ -803,7 +826,7 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 							},
 							children: e
 						}),
-						/* @__PURE__ */ (0, L.jsx)("div", {
+						/* @__PURE__ */ (0, I.jsx)("div", {
 							style: {
 								fontSize: "12px",
 								color: "#666",
@@ -812,7 +835,7 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 							},
 							children: t
 						}),
-						a && /* @__PURE__ */ (0, L.jsxs)("a", {
+						a && /* @__PURE__ */ (0, I.jsxs)("a", {
 							href: a,
 							target: "_blank",
 							rel: "noreferrer",
@@ -829,13 +852,13 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 			]
 		})
 	});
-}, fe = ({ price: e, currency: t = "", isHoverable: n = !0, lodThresholds: r = [13, 11], ...i }) => {
-	let [a, o] = l(!1), s = P((e) => e.zoom >= r[0] ? 1 : e.zoom >= r[1] ? 2 : 3), [u, d] = l(!1), f = c(s);
+}, pe = ({ price: e, currency: t = "", isHoverable: n = !0, lodThresholds: r = [13, 11], ...i }) => {
+	let [a, o] = l(!1), s = N((e) => e.zoom >= r[0] ? 1 : e.zoom >= r[1] ? 2 : 3), [u, d] = l(!1), f = c(s);
 	f.current !== s && (s === 1 && d(!1), f.current = s);
 	let p = u ? 1 : s, m = (e) => typeof e == "number" ? e.toLocaleString() : e, h = Array.isArray(e);
-	if (p === 3) return /* @__PURE__ */ (0, L.jsx)(B, {
+	if (p === 3) return /* @__PURE__ */ (0, I.jsx)(R, {
 		...i,
-		children: /* @__PURE__ */ (0, L.jsx)("div", {
+		children: /* @__PURE__ */ (0, I.jsx)("div", {
 			onClick: () => {
 				d(!0);
 			},
@@ -855,9 +878,9 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 		})
 	});
 	let g = h && p === 2 ? e.slice(0, 2) : e;
-	return /* @__PURE__ */ (0, L.jsx)(B, {
+	return /* @__PURE__ */ (0, I.jsx)(R, {
 		...i,
-		children: /* @__PURE__ */ (0, L.jsx)("div", {
+		children: /* @__PURE__ */ (0, I.jsx)("div", {
 			onClick: () => {
 				u && d(!1);
 			},
@@ -881,72 +904,72 @@ var U = ({ color: e = "#4285F4", size: t = 14, ...n }) => (le(), /* @__PURE__ */
 				gap: h ? "4px" : "2px",
 				minWidth: h ? "120px" : "auto"
 			},
-			children: h ? g.map((e, r) => /* @__PURE__ */ (0, L.jsxs)("div", {
+			children: h ? g.map((e, r) => /* @__PURE__ */ (0, I.jsxs)("div", {
 				style: {
 					display: "flex",
 					justifyContent: "space-between",
 					alignItems: "center",
 					gap: "12px"
 				},
-				children: [e.label && /* @__PURE__ */ (0, L.jsx)("span", {
+				children: [e.label && /* @__PURE__ */ (0, I.jsx)("span", {
 					style: {
 						color: a && n ? "#aaa" : "#666",
 						fontSize: "12px",
 						fontWeight: "normal"
 					},
 					children: e.label
-				}), /* @__PURE__ */ (0, L.jsxs)("span", { children: [e.currency === void 0 ? t : e.currency, m(e.price)] })]
-			}, r)) : /* @__PURE__ */ (0, L.jsxs)(L.Fragment, { children: [/* @__PURE__ */ (0, L.jsx)("span", { children: t }), /* @__PURE__ */ (0, L.jsx)("span", { children: m(g) })] })
+				}), /* @__PURE__ */ (0, I.jsxs)("span", { children: [e.currency === void 0 ? t : e.currency, m(e.price)] })]
+			}, r)) : /* @__PURE__ */ (0, I.jsxs)(I.Fragment, { children: [/* @__PURE__ */ (0, I.jsx)("span", { children: t }), /* @__PURE__ */ (0, I.jsx)("span", { children: m(g) })] })
 		})
 	});
-}, pe = {
+}, U = {
 	sunny: "☀️",
 	cloudy: "☁️",
 	rainy: "🌧️",
 	snowy: "❄️"
-}, me = {
+}, W = {
 	sunny: "#FFA500",
 	cloudy: "#808080",
 	rainy: "#4169E1",
 	snowy: "#ADD8E6"
-}, he = "vworld-weather-marker-fadein";
-function ge() {
-	if (typeof document > "u" || document.getElementById(he)) return;
+}, me = "vworld-weather-marker-fadein";
+function he() {
+	if (typeof document > "u" || document.getElementById(me)) return;
 	let e = document.createElement("style");
-	e.id = he, e.textContent = "\n    @keyframes vworld-weather-fadeIn {\n      from { opacity: 0; transform: translateY(-10px); }\n      to { opacity: 1; transform: translateY(0); }\n    }\n  ", document.head.appendChild(e);
+	e.id = me, e.textContent = "\n    @keyframes vworld-weather-fadeIn {\n      from { opacity: 0; transform: translateY(-10px); }\n      to { opacity: 1; transform: translateY(0); }\n    }\n  ", document.head.appendChild(e);
 }
-var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, ...a }) => {
-	let [o, s] = l(!1), u = P(r((e) => {
+var ge = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, ...a }) => {
+	let [o, s] = l(!1), u = N(r((e) => {
 		let t = i ?? e.semanticZoomThreshold;
 		return t !== void 0 && e.zoom < t;
 	}, [i])), [d, f] = l(!1), p = c(u);
-	if (p.current !== u && (u === !1 && f(!1), p.current = u), u && !d) return /* @__PURE__ */ (0, L.jsx)(V, {
+	if (p.current !== u && (u === !1 && f(!1), p.current = u), u && !d) return /* @__PURE__ */ (0, I.jsx)(z, {
 		lngLat: a.lngLat,
-		color: me[t],
+		color: W[t],
 		size: 24,
 		showInnerCircle: !0,
 		onClick: (e, t) => {
 			a.onClick && a.onClick(e, t), f(!0);
 		}
 	});
-	ge();
+	he();
 	let m = !!n?.length;
-	return /* @__PURE__ */ (0, L.jsx)(B, {
+	return /* @__PURE__ */ (0, I.jsx)(R, {
 		...a,
-		children: /* @__PURE__ */ (0, L.jsxs)("div", {
+		children: /* @__PURE__ */ (0, I.jsxs)("div", {
 			style: {
 				position: "relative",
 				display: "flex",
 				flexDirection: "column",
 				alignItems: "center"
 			},
-			children: [/* @__PURE__ */ (0, L.jsxs)("div", {
+			children: [/* @__PURE__ */ (0, I.jsxs)("div", {
 				onClick: (e) => {
 					e.stopPropagation(), m && s((e) => !e);
 				},
 				style: {
 					background: "white",
-					border: `2px solid ${me[t]}`,
+					border: `2px solid ${W[t]}`,
 					borderRadius: "20px",
 					padding: "4px 10px",
 					display: "flex",
@@ -962,12 +985,12 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 					zIndex: o ? 10 : 1
 				},
 				children: [
-					/* @__PURE__ */ (0, L.jsx)("span", {
+					/* @__PURE__ */ (0, I.jsx)("span", {
 						style: { fontSize: "16px" },
-						children: pe[t]
+						children: U[t]
 					}),
-					/* @__PURE__ */ (0, L.jsxs)("span", { children: [e, "°C"] }),
-					u && d && /* @__PURE__ */ (0, L.jsx)("button", {
+					/* @__PURE__ */ (0, I.jsxs)("span", { children: [e, "°C"] }),
+					u && d && /* @__PURE__ */ (0, I.jsx)("button", {
 						"aria-label": "Close",
 						onClick: (e) => {
 							e.stopPropagation(), f(!1), s(!1);
@@ -989,7 +1012,7 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 						},
 						children: "✕"
 					}),
-					m && /* @__PURE__ */ (0, L.jsx)("span", {
+					m && /* @__PURE__ */ (0, I.jsx)("span", {
 						style: {
 							fontSize: "10px",
 							color: "#999",
@@ -998,7 +1021,7 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 						children: o ? "▲" : "▼"
 					})
 				]
-			}), o && m && /* @__PURE__ */ (0, L.jsx)("div", {
+			}), o && m && /* @__PURE__ */ (0, I.jsx)("div", {
 				style: {
 					position: "absolute",
 					top: "100%",
@@ -1013,7 +1036,7 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 					cursor: "default",
 					animation: "vworld-weather-fadeIn 0.2s ease"
 				},
-				children: n.map((e, t) => /* @__PURE__ */ (0, L.jsxs)("div", {
+				children: n.map((e, t) => /* @__PURE__ */ (0, I.jsxs)("div", {
 					style: {
 						display: "flex",
 						flexDirection: "column",
@@ -1021,7 +1044,7 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 						minWidth: "40px"
 					},
 					children: [
-						/* @__PURE__ */ (0, L.jsx)("div", {
+						/* @__PURE__ */ (0, I.jsx)("div", {
 							style: {
 								fontSize: "12px",
 								color: "#666",
@@ -1029,14 +1052,14 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 							},
 							children: e.time
 						}),
-						/* @__PURE__ */ (0, L.jsx)("div", {
+						/* @__PURE__ */ (0, I.jsx)("div", {
 							style: {
 								fontSize: "18px",
 								marginBottom: "4px"
 							},
-							children: pe[e.condition]
+							children: U[e.condition]
 						}),
-						/* @__PURE__ */ (0, L.jsxs)("div", {
+						/* @__PURE__ */ (0, I.jsxs)("div", {
 							style: {
 								fontSize: "13px",
 								fontWeight: "bold"
@@ -1048,9 +1071,9 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 			})]
 		})
 	});
-}, ve = ({ label: e, color: t = "#111", size: n = 24, ...r }) => /* @__PURE__ */ (0, L.jsx)(B, {
+}, _e = ({ label: e, color: t = "#111", size: n = 24, ...r }) => /* @__PURE__ */ (0, I.jsx)(R, {
 	...r,
-	children: /* @__PURE__ */ (0, L.jsx)("div", {
+	children: /* @__PURE__ */ (0, I.jsx)("div", {
 		style: {
 			width: n,
 			height: n,
@@ -1068,16 +1091,16 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 		},
 		children: e
 	})
-}), W = ({ count: e, color: t, size: n, onClick: i, ...a }) => {
-	let o = n ?? (e > 500 ? 50 : e > 100 ? 40 : 30), c = t ?? (e > 500 ? "#f28cb1" : e > 100 ? "#f1f075" : "#51bbd6"), l = F(i), u = s(() => i ? () => l() : void 0, [i === void 0, l]), d = r((e) => {
+}), ve = ({ count: e, color: t, size: n, onClick: i, ...a }) => {
+	let o = n ?? (e > 500 ? 50 : e > 100 ? 40 : 30), c = t ?? (e > 500 ? "#f28cb1" : e > 100 ? "#f1f075" : "#51bbd6"), l = P(i), u = s(() => i ? () => l() : void 0, [i === void 0, l]), d = r((e) => {
 		e.currentTarget.style.transform = "scale(1.1)";
 	}, []), f = r((e) => {
 		e.currentTarget.style.transform = "scale(1)";
 	}, []);
-	return /* @__PURE__ */ (0, L.jsx)(B, {
+	return /* @__PURE__ */ (0, I.jsx)(R, {
 		...a,
 		onClick: u,
-		children: /* @__PURE__ */ (0, L.jsx)("div", {
+		children: /* @__PURE__ */ (0, I.jsx)("div", {
 			style: {
 				width: o,
 				height: o,
@@ -1098,7 +1121,7 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 			children: e > 999 ? "999+" : e
 		})
 	});
-}, G = [
+}, ye = [
 	Int8Array,
 	Uint8Array,
 	Uint8ClampedArray,
@@ -1108,14 +1131,14 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 	Uint32Array,
 	Float32Array,
 	Float64Array
-], K = 1, q = 8, J = new Uint32Array(96), ye = class e {
+], G = 1, K = 8, q = new Uint32Array(96), be = class e {
 	static from(t) {
 		if (!t || t.byteLength === void 0 || t.buffer) throw Error("Data must be an instance of ArrayBuffer or SharedArrayBuffer.");
 		let [n, r] = new Uint8Array(t, 0, 2);
 		if (n !== 219) throw Error("Data does not appear to be in a KDBush format.");
 		let i = r >> 4;
-		if (i !== K) throw Error(`Got v${i} data when expected v${K}.`);
-		let a = G[r & 15];
+		if (i !== G) throw Error(`Got v${i} data when expected v${G}.`);
+		let a = ye[r & 15];
 		if (!a) throw Error("Unrecognized array type.");
 		let [o] = new Uint16Array(t, 2, 1), [s] = new Uint32Array(t, 4, 1);
 		return new e(s, o, a, void 0, t);
@@ -1123,12 +1146,12 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 	constructor(e, t = 64, n = Float64Array, r = ArrayBuffer, i) {
 		if (isNaN(e) || e < 0) throw Error(`Unexpected numItems value: ${e}.`);
 		this.numItems = +e, this.nodeSize = Math.min(Math.max(+t, 2), 65535), this.ArrayType = n, this.IndexArrayType = e < 65536 ? Uint16Array : Uint32Array;
-		let a = G.indexOf(this.ArrayType), o = e * 2 * this.ArrayType.BYTES_PER_ELEMENT, s = e * this.IndexArrayType.BYTES_PER_ELEMENT, c = (8 - s % 8) % 8;
+		let a = ye.indexOf(this.ArrayType), o = e * 2 * this.ArrayType.BYTES_PER_ELEMENT, s = e * this.IndexArrayType.BYTES_PER_ELEMENT, c = (8 - s % 8) % 8;
 		if (a < 0) throw Error(`Unexpected typed array class: ${n}.`);
-		if (i) this.data = i, this.ids = new this.IndexArrayType(i, q, e), this.coords = new n(i, q + s + c, e * 2), this._pos = e * 2, this._finished = !0;
+		if (i) this.data = i, this.ids = new this.IndexArrayType(i, K, e), this.coords = new n(i, K + s + c, e * 2), this._pos = e * 2, this._finished = !0;
 		else {
-			let i = this.data = new r(q + o + s + c);
-			this.ids = new this.IndexArrayType(i, q, e), this.coords = new n(i, q + s + c, e * 2), this._pos = 0, this._finished = !1, new Uint8Array(i, 0, 2).set([219, (K << 4) + a]), new Uint16Array(i, 2, 1)[0] = t, new Uint32Array(i, 4, 1)[0] = e;
+			let i = this.data = new r(K + o + s + c);
+			this.ids = new this.IndexArrayType(i, K, e), this.coords = new n(i, K + s + c, e * 2), this._pos = 0, this._finished = !1, new Uint8Array(i, 0, 2).set([219, (G << 4) + a]), new Uint16Array(i, 2, 1)[0] = t, new Uint32Array(i, 4, 1)[0] = e;
 		}
 	}
 	add(e, t) {
@@ -1138,15 +1161,15 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 	finish() {
 		let e = this._pos >> 1;
 		if (e !== this.numItems) throw Error(`Added ${e} items when expected ${this.numItems}.`);
-		return be(this.ids, this.coords, this.nodeSize, 0, this.numItems - 1, 0), this._finished = !0, this;
+		return J(this.ids, this.coords, this.nodeSize, 0, this.numItems - 1, 0), this._finished = !0, this;
 	}
 	range(e, t, n, r) {
 		if (!this._finished) throw Error("Data not yet indexed - call index.finish().");
 		let { ids: i, coords: a, nodeSize: o } = this;
-		J[0] = 0, J[1] = i.length - 1, J[2] = 0;
+		q[0] = 0, q[1] = i.length - 1, q[2] = 0;
 		let s = 3, c = [];
 		for (; s > 0;) {
-			let l = J[--s], u = J[--s], d = J[--s];
+			let l = q[--s], u = q[--s], d = q[--s];
 			if (u - d <= o) {
 				for (let o = d; o <= u; o++) {
 					let s = a[2 * o], l = a[2 * o + 1];
@@ -1155,7 +1178,7 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 				continue;
 			}
 			let f = d + u >> 1, p = a[2 * f], m = a[2 * f + 1];
-			p >= e && p <= n && m >= t && m <= r && c.push(i[f]), (l === 0 ? e <= p : t <= m) && (J[s++] = d, J[s++] = f - 1, J[s++] = 1 - l), (l === 0 ? n >= p : r >= m) && (J[s++] = f + 1, J[s++] = u, J[s++] = 1 - l);
+			p >= e && p <= n && m >= t && m <= r && c.push(i[f]), (l === 0 ? e <= p : t <= m) && (q[s++] = d, q[s++] = f - 1, q[s++] = 1 - l), (l === 0 ? n >= p : r >= m) && (q[s++] = f + 1, q[s++] = u, q[s++] = 1 - l);
 		}
 		return c;
 	}
@@ -1166,24 +1189,24 @@ var _e = ({ temperature: e, condition: t, hourlyForecast: n, simplifyAtZoom: i, 
 	withinInto(e, t, n, r) {
 		if (!this._finished) throw Error("Data not yet indexed - call index.finish().");
 		let { ids: i, coords: a, nodeSize: o } = this;
-		J[0] = 0, J[1] = i.length - 1, J[2] = 0;
+		q[0] = 0, q[1] = i.length - 1, q[2] = 0;
 		let s = 3, c = 0, l = n * n;
 		for (; s > 0;) {
-			let u = J[--s], d = J[--s], f = J[--s];
+			let u = q[--s], d = q[--s], f = q[--s];
 			if (d - f <= o) {
 				for (let n = f; n <= d; n++) Ce(a[2 * n], a[2 * n + 1], e, t) <= l && (r[c++] = i[n]);
 				continue;
 			}
 			let p = f + d >> 1, m = a[2 * p], h = a[2 * p + 1];
-			Ce(m, h, e, t) <= l && (r[c++] = i[p]), (u === 0 ? e - n <= m : t - n <= h) && (J[s++] = f, J[s++] = p - 1, J[s++] = 1 - u), (u === 0 ? e + n >= m : t + n >= h) && (J[s++] = p + 1, J[s++] = d, J[s++] = 1 - u);
+			Ce(m, h, e, t) <= l && (r[c++] = i[p]), (u === 0 ? e - n <= m : t - n <= h) && (q[s++] = f, q[s++] = p - 1, q[s++] = 1 - u), (u === 0 ? e + n >= m : t + n >= h) && (q[s++] = p + 1, q[s++] = d, q[s++] = 1 - u);
 		}
 		return c;
 	}
 };
-function be(e, t, n, r, i, a) {
+function J(e, t, n, r, i, a) {
 	if (i - r <= n) return;
 	let o = r + i >> 1;
-	xe(e, t, o, r, i, a), be(e, t, n, r, o - 1, 1 - a), be(e, t, n, o + 1, i, 1 - a);
+	xe(e, t, o, r, i, a), J(e, t, n, r, o - 1, 1 - a), J(e, t, n, o + 1, i, 1 - a);
 }
 function xe(e, t, n, r, i, a) {
 	for (; i > r;) {
@@ -1311,7 +1334,7 @@ var we = {
 		return i;
 	}
 	_createTree(e) {
-		let t = new ye(e.length / this.stride | 0, this.options.nodeSize, Float32Array);
+		let t = new be(e.length / this.stride | 0, this.options.nodeSize, Float32Array);
 		for (let n = 0; n < e.length; n += this.stride) t.add(e[n], e[n + 1]);
 		return t.finish(), t.data = e, t;
 	}
@@ -1531,11 +1554,11 @@ var ze = function(e) {
 		zoom: p,
 		options: g
 	});
-	return u ? /* @__PURE__ */ (0, L.jsx)(L.Fragment, { children: _.map((e) => {
+	return u ? /* @__PURE__ */ (0, I.jsx)(I.Fragment, { children: _.map((e) => {
 		let [i, a] = e.geometry.coordinates, { cluster: o, point_count: s, cluster_id: c } = e.properties;
 		if (o) {
 			let n = v, o = s ?? 0;
-			return r && n ? /* @__PURE__ */ (0, L.jsx)(t.Fragment, { children: r(e, o, n) }, `cluster-${c ?? `${i},${a}`}`) : c === void 0 || !n ? null : /* @__PURE__ */ (0, L.jsx)(W, {
+			return r && n ? /* @__PURE__ */ (0, I.jsx)(t.Fragment, { children: r(e, o, n) }, `cluster-${c ?? `${i},${a}`}`) : c === void 0 || !n ? null : /* @__PURE__ */ (0, I.jsx)(ve, {
 				lngLat: [i, a],
 				count: o,
 				onClick: () => {
@@ -1548,7 +1571,7 @@ var ze = function(e) {
 			}, `cluster-${c}`);
 		}
 		let l = e.properties;
-		return /* @__PURE__ */ (0, L.jsx)(t.Fragment, { children: n(l) }, l.id);
+		return /* @__PURE__ */ (0, I.jsx)(t.Fragment, { children: n(l) }, l.id);
 	}) }) : null;
 };
 //#endregion
@@ -1579,9 +1602,9 @@ var He = ({ clusters: e, renderCluster: n, onClusterClick: i, fitBoundsOptions: 
 		s,
 		i
 	]);
-	return s ? /* @__PURE__ */ (0, L.jsx)(L.Fragment, { children: e.map((e) => {
+	return s ? /* @__PURE__ */ (0, I.jsx)(I.Fragment, { children: e.map((e) => {
 		let r = () => c(e);
-		return n ? /* @__PURE__ */ (0, L.jsx)(t.Fragment, { children: n(e, r) }, e.id) : /* @__PURE__ */ (0, L.jsx)(W, {
+		return n ? /* @__PURE__ */ (0, I.jsx)(t.Fragment, { children: n(e, r) }, e.id) : /* @__PURE__ */ (0, I.jsx)(ve, {
 			lngLat: e.lngLat,
 			count: e.count,
 			color: e.color,
@@ -1643,7 +1666,7 @@ var $e = p.array(Ue).min(2, "Route must have at least 2 points"), et = p.object(
 	}
 	return !1;
 }, "data must be a GeoJSON Feature(LineString/MultiLineString), FeatureCollection, or a valid URL string")]), rt = ({ id: e = "route-line", coordinates: t, data: n, color: r = "#2196F3", width: i = 4, dashArray: o, onClick: c, onMouseEnter: l, onMouseLeave: u }) => {
-	let d = j(), f = `${e}-source`, p = `${e}-layer`, m = F(c), h = F(l), g = F(u);
+	let d = j(), f = `${e}-source`, p = `${e}-layer`, m = P(c), h = P(l), g = P(u);
 	a(() => {
 		if (typeof process < "u" && process.env.NODE_ENV !== "production") {
 			if (n) {
@@ -1720,7 +1743,7 @@ var $e = p.array(Ue).min(2, "Route must have at least 2 points"), et = p.object(
 		g
 	]), null;
 }, it = ({ id: e, data: t, fillColor: n = "rgba(33, 150, 243, 0.4)", outlineColor: r = "#2196F3", outlineWidth: i = 2, onClick: o, onMouseEnter: s, onMouseLeave: c }) => {
-	let l = j(), u = `${e}-source`, d = `${e}-fill-layer`, f = `${e}-line-layer`, p = F(o), m = F(s), h = F(c);
+	let l = j(), u = `${e}-source`, d = `${e}-fill-layer`, f = `${e}-line-layer`, p = P(o), m = P(s), h = P(c);
 	return a(() => {
 		if (typeof process < "u" && process.env.NODE_ENV !== "production") {
 			let e = tt.safeParse(t);
@@ -1781,7 +1804,7 @@ var $e = p.array(Ue).min(2, "Route must have at least 2 points"), et = p.object(
 		h
 	]), null;
 }, at = 1, ot = ({ lngLat: e, children: t, offset: n, closeButton: r = !0, closeOnClick: i = !0, maxWidth: o, className: l, onClose: u }) => {
-	let p = j(), m = c(null), h = F(u), g = c({
+	let p = j(), m = c(null), h = P(u), g = c({
 		closeButton: r,
 		closeOnClick: i,
 		className: l
@@ -1809,4 +1832,4 @@ var $e = p.array(Ue).min(2, "Route must have at least 2 points"), et = p.object(
 	}, [o]), _ ? f(t, _) : null;
 };
 //#endregion
-export { We as BoundsSchema, Be as ClusterLayer, W as ClusterMarker, Ue as LngLatSchema, se as MakiMarker, E as MapStore, D as MapStoreContext, B as Marker, V as PinMarker, de as PlaceMarker, Ze as PointSchema, it as PolygonArea, ot as Popup, fe as PriceMarker, U as PulsingMarker, $e as RouteCoordinatesSchema, rt as RouteLine, ve as RoutePointMarker, He as ServerClusterLayer, ue as SimpleMarker, ae as VWorldMap, _e as WeatherMarker, Qe as extendPointSchema, Je as formatLngLat, x as getVWorldMaxZoom, w as getVWorldStyle, b as getVWorldTileUrl, C as isVWorldTileError, Ke as makeBoundedBoundsSchema, Ge as makeBoundedLngLatSchema, Xe as parseBoundsParam, S as redactVWorldUrl, Ye as serializeBounds, F as useEvent, j as useMap, N as useMapLoaded, P as useMapSelector, M as useMapZoom };
+export { We as BoundsSchema, Be as ClusterLayer, ve as ClusterMarker, Ue as LngLatSchema, le as MakiMarker, E as MapStore, D as MapStoreContext, R as Marker, z as PinMarker, fe as PlaceMarker, Ze as PointSchema, it as PolygonArea, ot as Popup, pe as PriceMarker, V as PulsingMarker, $e as RouteCoordinatesSchema, rt as RouteLine, _e as RoutePointMarker, He as ServerClusterLayer, H as SimpleMarker, oe as VWorldMap, ge as WeatherMarker, Qe as extendPointSchema, Je as formatLngLat, x as getVWorldMaxZoom, w as getVWorldStyle, b as getVWorldTileUrl, C as isVWorldTileError, Ke as makeBoundedBoundsSchema, Ge as makeBoundedLngLatSchema, Xe as parseBoundsParam, S as redactVWorldUrl, Ye as serializeBounds, P as useEvent, j as useMap, te as useMapLoaded, N as useMapSelector, M as useMapZoom };

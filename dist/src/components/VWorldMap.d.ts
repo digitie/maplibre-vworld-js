@@ -122,6 +122,22 @@ export interface VWorldMapProps {
      * corresponding props.
      */
     flyToOptions?: Omit<maplibregl.FlyToOptions, 'center' | 'zoom' | 'pitch' | 'bearing'>;
+    /**
+     * If `true`, uses `IntersectionObserver` to defer map initialization until the
+     * container enters the viewport. If `'manual'`, waits until `lazyEnabled` is true.
+     * @default false
+     */
+    lazy?: boolean | 'manual';
+    /**
+     * When `lazy="manual"`, controls whether the map should start loading.
+     * Ignored if `lazy` is true or false.
+     */
+    lazyEnabled?: boolean;
+    /**
+     * Root margin for the IntersectionObserver when `lazy=true`.
+     * @default '0px'
+     */
+    lazyRootMargin?: string;
 }
 /**
  * VWorld + MapLibre map container.
