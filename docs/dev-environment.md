@@ -23,6 +23,50 @@ $EDITOR .env.local                  # VITE_VWORLD_API_KEY=... 채우기
 npm run dev                         # http://localhost:5173
 ```
 
+## 에이전트 worktree + CodeGraph
+
+여러 AI 에이전트가 같은 저장소를 번갈아 작업하면 브랜치 전환, 캐시, 인덱스 상태가 서로 충돌한다. 본 저장소는 에이전트별 고정 worktree를 두고, 작업마다 해당 worktree 안에서 브랜치만 새로 딴다(ADR-12).
+
+| 에이전트 | worktree 디렉토리 |
+|----------|-------------------|
+| ChatGPT Codex | `F:\dev\geo-codex` |
+| Claude Code | `F:\dev\geo-claude` |
+| Google Antigravity 2.0 | `F:\dev\geo-antigravity` |
+
+최초 setup:
+
+```bash
+cd F:\dev\maplibre-vworld-js
+git fetch
+git worktree add ../geo-codex main
+
+cd ../geo-codex
+PUPPETEER_SKIP_DOWNLOAD=1 npm ci
+codegraph init -i
+```
+
+작업 사이클:
+
+```bash
+cd F:\dev\geo-codex
+git fetch
+git switch -c agent/codex-next main
+
+# .codegraph/가 이미 있으면 재초기화하지 않는다.
+codegraph sync
+
+# <작업 / commit / PR / merge>
+```
+
+`main` 브랜치는 원본 checkout(`F:\dev\maplibre-vworld-js`)에 고정해 둔다. worktree에서 직접 `main`으로 전환하지 않고, 최신 `main`을 기준으로 작업 브랜치만 새로 만든다.
+
+원칙:
+
+- `.codegraph/`는 worktree마다 1회만 만든다. 이후에는 `codegraph sync`로 유지한다.
+- `.codegraph/`는 로컬 인덱스이므로 git에 커밋하지 않는다.
+- CodeGraph는 컨텍스트 탐색 도구이지 품질 게이트가 아니다. `npm run type-check`, `npm test`, `npm run build`를 대체하지 않는다.
+- MCP 서버는 프로젝트 루트의 `.codex/config.toml`에 등록한다. 현재 CLI 기준으로 `npx -y @colbymchenry/codegraph serve --mcp`를 사용한다.
+
 ## 환경변수
 
 ### `VITE_VWORLD_API_KEY` (dev 서버 / 테스트 스크립트)

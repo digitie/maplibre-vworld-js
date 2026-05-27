@@ -42,6 +42,8 @@ npm run dev                      # 로컬 dev 서버 (.env.local에 VITE_VWORLD_
 
 자세한 환경 셋업은 `docs/dev-environment.md`.
 
+에이전트 작업은 고정 worktree에서 진행한다. ChatGPT Codex는 `F:\dev\geo-codex`, Claude Code는 `F:\dev\geo-claude`, Google Antigravity 2.0은 `F:\dev\geo-antigravity`를 사용한다. worktree마다 한 번만 `codegraph init -i`를 실행하고, 작업 시작마다 `git fetch` 후 새 브랜치를 만들고 `codegraph sync`를 실행한다(ADR-12).
+
 ## 3. 디렉토리 지도
 
 ```
@@ -65,6 +67,7 @@ test/
   *.test.tsx              — Vitest + @testing-library/react
 dist/                     — 빌드 산출물 (git 커밋 대상, drift 검사는 PR 전 로컬에서)
 docs/                     — architecture, decisions, journal, tasks, resume, dev-environment
+docs/consumer-requirements.md — TripMate/tour-map 소비자 요구사항과 예정 API 예제
 ```
 
 의존 방향은 **`store` → `vworld`/`schemas` → `components` → `index.ts`** 한 방향. `components`는 서로 import 가능(`Marker` ⇄ `PinMarker` 등 합성).
@@ -85,6 +88,7 @@ docs/                     — architecture, decisions, journal, tasks, resume, d
 12. **API 키 평문 커밋 금지**: `dev/` 안의 hardcode도 금지(과거 보안 사고). `.env.local` 권한 600. 로그는 `redactVWorldUrl()`로 마스킹.
 13. **zod v3 코드 추가 금지**: peer + dev 모두 v4 고정(ADR-6). `src/schemas.ts`는 v3/v4 공통 표면(`z.tuple`, `z.union`, `z.array().min`, `z.number().min().max`)만 사용.
 14. **소비자 앱에 마커 portal teardown 책임 떠넘기기 금지**: `<Marker>` unmount 시 React fiber를 정리하지 않으면 stale handler가 남는다 — portal 해제는 라이브러리 책임.
+15. **`.codegraph/` 커밋 금지**: CodeGraph 인덱스는 worktree 로컬 산출물이다. 새 worktree에서만 `codegraph init -i`, 기존 worktree에서는 `codegraph sync`.
 
 ## 5. 자주 묻는 작업
 

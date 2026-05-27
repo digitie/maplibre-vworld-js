@@ -254,6 +254,10 @@ const PlaceSchema = extendPointSchema({ name: z.string(), rating: z.number() });
 
 `redactVWorldUrl(url)`로 마스킹한 뒤 로깅한다. `.env.local` 권한을 600으로 두고 절대 git에 커밋하지 않는다.
 
+## 소비자 요구사항 로드맵
+
+TripMate와 tour-map에서 필요한 lazy loading, 클릭 context, 지원되지 않는 타일 fallback, CI/CD 활성화 검토는 [`docs/consumer-requirements.md`](./docs/consumer-requirements.md)에 수용 기준과 예정 API 예제로 정리되어 있다. 2026-05-27 기준 해당 문서는 문서화 단계이며, 실제 public API 구현은 T-026~T-029 후속 작업에서 진행한다.
+
 ## 라이선스
 
 MIT.
@@ -262,7 +266,8 @@ MIT.
 
 - [`CHANGELOG.md`](./CHANGELOG.md) — 사용자 가시 변경 이력
 - [`docs/architecture.md`](./docs/architecture.md) — 내부 아키텍처 (`MapStore` + `useSyncExternalStore`)
-- [`docs/decisions.md`](./docs/decisions.md) — Architecture Decision Records (ADR-1 ~ ADR-10)
+- [`docs/decisions.md`](./docs/decisions.md) — Architecture Decision Records (ADR-1 ~ ADR-12)
+- [`docs/consumer-requirements.md`](./docs/consumer-requirements.md) — TripMate/tour-map 요구사항과 예정 API 예제
 - [`AI_AGENT_GUIDE.md`](./AI_AGENT_GUIDE.md) — 본 라이브러리를 소비자 앱에서 사용하는 AI/개발자 가이드
 - [`CLAUDE.md`](./CLAUDE.md) — 본 저장소에서 작업하는 컨트리뷰터/에이전트 컨텍스트
 - [`SKILL.md`](./SKILL.md) — 본 저장소 컨트리뷰터/에이전트 매뉴얼 (DO NOT, 자주 묻는 작업)

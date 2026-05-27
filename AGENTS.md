@@ -38,14 +38,16 @@ PC 개발은 Windows 호스트에서 직접 진행한다. 본 저장소는 Node.
 - **`dist/`는 커밋 대상**: `vite build` 산출물을 저장소에 포함한다(ADR-5). 빌드 후 `git diff --exit-code -- dist/`가 깨끗해야 한다.
 - **GitHub Actions 비사용**: 본 저장소는 GitHub CI/CD를 사용하지 않는다(ADR-10). 품질 게이트는 PR 머지 직전 작업자가 로컬에서 실행한다.
 - **`tsconfig.build.json`만 declaration emission**: `dev/`와 `test/` 타입 오류가 배포 산출물에 섞이지 않도록 `tsconfig.build.json`이 `src/`만 대상으로 한다.
+- **에이전트별 고정 worktree**: ChatGPT Codex는 `F:\dev\geo-codex`, Claude Code는 `F:\dev\geo-claude`, Google Antigravity 2.0은 `F:\dev\geo-antigravity`를 사용한다. 작업마다 브랜치만 새로 만들고, CodeGraph는 worktree마다 1회 `codegraph init -i` 후 `codegraph sync`로 유지한다(ADR-12).
 
 작업 전에 반드시 다음을 읽는다:
 
 1. `CLAUDE.md` — 현재 작업과 잔존 부채
 2. `SKILL.md` — DO NOT 룰, 자주 묻는 작업, 도메인 어휘
 3. `docs/architecture.md` — `MapStore` + `useSyncExternalStore` 구조
-4. `docs/decisions.md` — ADR-1 ~ ADR-8
+4. `docs/decisions.md` — ADR-1 ~ ADR-12
 5. `docs/tasks.md` — T-NNN 백로그
+6. `docs/consumer-requirements.md` — TripMate/tour-map 소비자 요구사항과 예제
 
 ## 지시 우선순위
 
@@ -73,6 +75,7 @@ PC 개발은 Windows 호스트에서 직접 진행한다. 본 저장소는 Node.
 10. **zod v3 코드 추가 금지** — peer + dev 모두 v4 고정(ADR-6).
 11. **API 키 평문 커밋 금지** — `.env.local`은 권한 600, 로그에는 `redactVWorldUrl()` 사용. `dev/`의 hardcode도 절대 금지(과거 보안 사고).
 12. **`map.isMoving()` 가드 없이 카메라 prop 적용 금지** — 사용자 제스처 중 강제 `flyTo`는 진동을 만든다. 대신 `pendingCameraRef`로 큐잉하고 `moveend`에서 재시도.
+13. **`.codegraph/` 커밋 금지** — CodeGraph 인덱스는 worktree 로컬 산출물이다. 이미 초기화된 worktree에서는 `codegraph init` 재실행 대신 `codegraph sync`를 사용한다.
 
 ## 외부 의존성 사용 원칙
 

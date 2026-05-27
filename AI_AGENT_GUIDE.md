@@ -126,6 +126,10 @@ isVWorldTileError(errorEvent)         // tile vs style 오류 분류
 - VWorld에 `map.setTerrain()`을 호출하지 말 것 — VWorld는 Terrain-RGB를 제공하지 않는다.
 - `next/dynamic({ ssr: false })`로 본 라이브러리를 감싸지 말 것. 이미 SSR 안전하다. 소비자가 특수한 이유가 있는 경우에만 사용.
 
+## 문서화된 후속 요구사항
+
+TripMate와 tour-map에서 필요한 lazy loading, 마커/지도 클릭 context, 지원되지 않는 타일 fallback, CI/CD 활성화 검토는 [`docs/consumer-requirements.md`](./docs/consumer-requirements.md)에 있다. 이 문서의 "예정 API" 코드는 2026-05-27 기준 구현 전 예시이므로, 소비자 앱 코드를 생성할 때 현재 README의 실제 API와 혼동하지 말 것.
+
 ## 머지 정책
 
 브랜치 + PR만 허용. `main`은 보호됨 — 직접 push 금지, `--no-verify` 금지.
@@ -137,7 +141,8 @@ isVWorldTileError(errorEvent)         // tile vs style 오류 분류
 - [`AGENTS.md`](./AGENTS.md) — 언어 정책, 식별자 매트릭스, DO NOT 규칙
 - [`SKILL.md`](./SKILL.md) — 본 저장소 컨트리뷰터/에이전트 매뉴얼
 - [`docs/architecture.md`](./docs/architecture.md) — `MapStore` + `useSyncExternalStore` 심층 분석
-- [`docs/decisions.md`](./docs/decisions.md) — ADR-1 ~ ADR-10
+- [`docs/decisions.md`](./docs/decisions.md) — ADR-1 ~ ADR-12
+- [`docs/consumer-requirements.md`](./docs/consumer-requirements.md) — TripMate/tour-map 요구사항과 예정 API 예제
 - [`docs/journal.md`](./docs/journal.md) — 작업 일지 (역시간순)
 - [`docs/tasks.md`](./docs/tasks.md) — T-NNN 백로그
 - [`docs/dev-environment.md`](./docs/dev-environment.md) — 로컬 셋업

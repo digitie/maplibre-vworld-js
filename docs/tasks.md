@@ -6,9 +6,15 @@
 - (없음)
 
 ## 대기 (우선순위 순)
+- T-026 `<VWorldMap>` lazy loading 지원 — `IntersectionObserver` 기반으로 viewport 진입 전 MapLibre 인스턴스와 VWorld 타일 요청을 지연. `lazy`, `lazyRootMargin`, manual enable 정책 검토. 예제는 `docs/consumer-requirements.md` R-001 참고.
+- T-027 마커 클릭/지도 클릭 구분 context 지원 — raw 이벤트를 유지하면서 두 번째 인자로 `source`, `interactionId`, `lngLat` 같은 context를 전달하는 비파괴 API 검토. TripMate 선택 해제 UX와 tour-map 디버그 패널 클릭 구분이 주요 요구. 예제는 R-002 참고.
+- T-028 지원되지 않는 타일 대체 이미지/동작 구현 — VWorld layer/zoom 상한 또는 provider 오류 시 금지 아이콘이 포함된 중립 목업 타일을 표시하고, `isVWorldTileError`/`redactVWorldUrl` 로깅 패턴과 연결. 예제는 R-003 참고.
+- T-029 CI/CD 활성화 재검토 — ADR-10과 충돌하므로 새 ADR로 범위와 게이트를 먼저 결정. 최소 게이트는 type-check/test/build/dist drift/pack:check. 예제는 R-004 참고.
 - T-019 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 현재 `getVWorldMaxZoom`은 하드코딩된 표. WMTS Capabilities XML을 fetch해서 layer-별 zoom 범위를 동적으로 검증할 수 있는지 검토.
 
 ## 완료
+- [x] T-025 CodeGraph + 에이전트별 고정 worktree 운영 정책 적용 — `geo-codex` worktree 생성, `.codegraph/` gitignore, `.codex/config.toml` MCP 설정, ADR-12 및 개발 환경 문서 추가. (2026-05-27)
+- [x] T-024 TripMate/tour-map 소비자 요구사항 문서화 — lazy loading, 클릭 context, 지원되지 않는 타일 fallback, CI/CD 활성화 검토를 `docs/consumer-requirements.md`에 수용 기준과 예제로 정리. 코드 구현은 후속 T-026~T-029로 분리. (2026-05-27)
 - [x] T-023 PR #23 — ADR-11 추가. 동적 z-index와 시멘틱 줌 manual expand에 대한 결정 기록. (2026-05-26)
 - [x] T-022 PR #22 — PriceMarker 다중 가격 배열 지원, 3단계 LOD 적용, 시멘틱 줌 마커 강제 확장(Manual Expand) 기능 추가, 우클릭(onContextMenu) 예제 추가. (2026-05-26)
 - [x] T-021 PR #21 — 겹치는 마커/팝업 클릭 시 전역 카운터 기반 동적 `z-index` 증가 로직 도입으로 클릭 요소 최상단 노출. (2026-05-26)
