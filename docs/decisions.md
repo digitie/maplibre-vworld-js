@@ -522,3 +522,40 @@ args = ["-y", "@colbymchenry/codegraph", "serve", "--mcp"]
 ---
 
 ## ADR-1: ?뚮뜑留??붿쭊?쇰줈 MapLibre GL JS 梨꾪깮
+
+---
+
+## ADR-14: VWorld getCapabilities 동적 검증 도입 거부
+
+- 상태: accepted
+- 날짜: 2026-05-28
+- 결정자: human
+
+### 컨텍스트
+
+현재 maplibre-vworld-js는 getVWorldMaxZoom() 함수에 레이어별 최대 줌 레벨(Base/midnight/Hybrid/white는 19, Satellite는 18)을 하드코딩하고 있다. T-019 작업에서 VWorld WMTS API의 getCapabilities XML을 애플리케이션 런타임에 동적으로 fetch하여 각 레이어별 정확한 TileMatrix 범위를 검증하고 적용할지 검토하였다.
+
+### 결정
+
+런타임에 getCapabilities XML을 fetch하여 동적으로 레이어의 maxZoom을 설정하는 방안을 기각(reject)하고, 기존의 하드코딩 방식을 유지한다.
+
+### 근거
+
+1. **부정확한 Capabilities XML**: XML 분석 결과, Satellite와 Hybrid 레이어가 모두 GoogleMapsCompatible TileMatrixSet을 참조하고 있으며, 이는 줌 레벨 19까지 선언되어 있다. 공식 매뉴얼에서는 Satellite가 18까지만 지원된다고 명시하고 있으므로 XML 응답을 신뢰하기 어렵다.
+2. **성능 페널티**: 약 50KB에 달하는 XML을 지도 렌더링 전마다 fetch하고 파싱하는 것은 초기 로딩 속도에 부정적 영향을 미치며, 네트워크 지연을 추가한다.
+3. **안정성 확보**: 하드코딩된 값은 VWorld API 인프라 상태(Capabilities 엔드포인트의 일시적 장애)에 영향을 받지 않아 지도를 즉시 렌더링할 수 있도록 보장한다.
+4. **Fallback의 존재**: T-028에서 구현한 unsupportedTileFallback 메커니즘이 존재하여, 줌 레벨 오차로 인해 발생할 수 있는 404 타일 에러에도 지도가 깨지지 않고 우아하게 복구된다.
+
+### 결과(긍정)
+
+- 지도 초기 로딩 지연(Zero-latency) 유지.
+- VWorld XML 스펙의 부정확성에 의한 사이드이펙트 회피.
+- VWorld 메타데이터 API 엔드포인트 장애로부터 독립성 확보.
+
+### 결과(부정)
+
+- VWorld에서 향후 Satellite 레이어의 19레벨 타일을 추가 지원하더라도 라이브러리를 수동으로 업데이트해야 함.
+
+### 후속
+
+- 주기적으로 VWorld 공지사항 및 매뉴얼을 확인하여 줌 레벨 지원 범위가 공식적으로 확장되었는지 확인하는 수동 모니터링 절차 유지.

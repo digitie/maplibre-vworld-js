@@ -2,6 +2,19 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-05-28 (VWorld getCapabilities 동적 검증 도입 거부)
+
+**작업**: VWorld WMTS Capabilities XML을 활용한 줌 범위 동적 검증 가능 여부 확인 (T-019).
+
+**구현 상세**:
+- `WMTSCapabilities.xml` 내용을 fetch 및 분석하여 Satellite 레이어의 TileMatrixSet을 확인.
+- VWorld 공식 매뉴얼(Satellite 18)과 XML 응답(`GoogleMapsCompatible` 최대 19)이 불일치하는 현상 및 성능 오버헤드, 네트워크 지연 등의 이유로 동적 검증 도입 기각.
+- 해당 내용을 ADR-14로 작성하여 기존 하드코딩 패턴의 타당성 증명.
+
+**다음 작업**: 대기 중인 Task 없음.
+
+---
+
 ## 2026-05-28 (CI/CD 활성화 재검토)
 
 **작업**: 제한적 범위의 GitHub Actions CI/CD 파이프라인 복원 (T-029).
