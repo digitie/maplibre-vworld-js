@@ -56,7 +56,7 @@ export type Point = z.infer<typeof PointSchema>;
  * @example
  * const PlaceSchema = extendPointSchema({ name: z.string(), category: z.string() });
  */
-export declare function extendPointSchema<T extends z.ZodRawShape>(properties: T): z.ZodObject<(("lngLat" | "id") & keyof T extends never ? {
+export declare function extendPointSchema<T extends z.ZodRawShape>(properties: T): z.ZodObject<(("id" | "lngLat") & keyof T extends never ? {
     id: z.ZodUnion<readonly [z.ZodString, z.ZodNumber]>;
     lngLat: z.ZodTuple<[z.ZodNumber, z.ZodNumber], null>;
 } & { -readonly [P in keyof T]: T[P]; } : ({

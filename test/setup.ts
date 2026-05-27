@@ -107,6 +107,7 @@ vi.mock('maplibre-gl', () => {
       ScaleControl,
       Marker,
       Popup,
+      addProtocol: vi.fn(),
     },
     Map,
     NavigationControl,
@@ -114,6 +115,7 @@ vi.mock('maplibre-gl', () => {
     ScaleControl,
     Marker,
     Popup,
+    addProtocol: vi.fn(),
   };
 });
 

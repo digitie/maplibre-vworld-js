@@ -1,4 +1,82 @@
-import type { ErrorEvent, StyleSpecification } from 'maplibre-gl';
+import maplibregl, { type ErrorEvent, type StyleSpecification, type AddProtocolAction } from 'maplibre-gl';
+
+let vworldProtocolRegistered = false;
+const fallbackCache = new Map<string, ArrayBuffer>();
+
+async function getFallbackImageData(imageUrl: string | null, label: string | null): Promise<ArrayBuffer> {
+  const cacheKey = `${imageUrl || ''}|${label || ''}`;
+  const cached = fallbackCache.get(cacheKey);
+  if (cached) return cached;
+
+  if (imageUrl) {
+    try {
+      const res = await fetch(imageUrl);
+      if (res.ok) {
+        const data = await res.arrayBuffer();
+        fallbackCache.set(cacheKey, data);
+        return data;
+      }
+    } catch {
+      // Ignore and fallback to default SVG
+    }
+  }
+
+  const text = label || '지원하지 않는 타일';
+  const svg = `<svg width="256" height="256" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" fill="#f5f5f5" />
+  <circle cx="128" cy="110" r="24" fill="none" stroke="#ccc" stroke-width="4" />
+  <line x1="111" y1="93" x2="145" y2="127" stroke="#ccc" stroke-width="4" />
+  <text x="128" y="155" font-family="sans-serif" font-size="14" fill="#999" text-anchor="middle">${text}</text>
+</svg>`;
+  
+  const blob = new Blob([svg], { type: 'image/svg+xml' });
+  const data = await blob.arrayBuffer();
+  fallbackCache.set(cacheKey, data);
+  return data;
+}
+
+const vworldProtocolHandler: AddProtocolAction = async (params, abortController) => {
+  const urlObj = new URL(params.url);
+  const fallbackUrl = urlObj.searchParams.get('fallback');
+  const label = urlObj.searchParams.get('label');
+  const mapId = urlObj.searchParams.get('mapId');
+  
+  urlObj.protocol = 'https:';
+  urlObj.searchParams.delete('fallback');
+  urlObj.searchParams.delete('label');
+  urlObj.searchParams.delete('mapId');
+  const realUrl = urlObj.toString();
+
+  try {
+    const response = await fetch(realUrl, { signal: abortController.signal });
+    if (!response.ok) {
+      throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+    }
+    const data = await response.arrayBuffer();
+    return { data };
+  } catch (error: unknown) {
+    if (abortController.signal.aborted) throw error;
+    
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('vworld-tile-error', { 
+        detail: { url: realUrl, error, mapId } 
+      }));
+    }
+
+    const data = await getFallbackImageData(fallbackUrl, label);
+    return { data };
+  }
+};
+
+/**
+ * Registers the `vworld://` custom protocol handler with MapLibre.
+ * This enables rendering a fallback image when a tile fails to load.
+ */
+export function registerVWorldProtocol(): void {
+  if (vworldProtocolRegistered || typeof window === 'undefined') return;
+  vworldProtocolRegistered = true;
+  maplibregl.addProtocol('vworld', vworldProtocolHandler);
+}
 
 /**
  * VWorld layer identifier. `gray` is a synonym for the VWorld "white" basemap.

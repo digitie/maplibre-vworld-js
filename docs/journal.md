@@ -2,6 +2,24 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-05-28 (지원되지 않는 타일 대체 이미지 구현)
+
+**작업**: 지원되지 않는 타일 요청 시 대체 이미지(목업) 렌더링 지원 (T-028).
+
+**구현 상세**:
+- `maplibregl.addProtocol`을 활용한 `vworld://` 커스텀 프로토콜 핸들러 등록 로직(`registerVWorldProtocol`) 추가.
+- `VWorldMapProps`에 `unsupportedTileFallback` 옵션 추가.
+- 옵션 활성화 시 `StyleSpecification`의 타일 URL을 `vworld://`로 치환하고, 타일 로드 실패 시(404, 502 등) MapLibre에 에러를 던지는 대신 SVG로 생성한 대체 이미지(기본 금지 마크 및 안내 문구)의 `ArrayBuffer`를 반환.
+- 이와 동시에 `window.dispatchEvent`로 `vworld-tile-error` 커스텀 이벤트를 발생시키고, `<VWorldMap>`이 이를 감지해 소비자 앱에 합성된 MapLibre `ErrorEvent`를 전달(`onError`)하여 기존 로깅 패턴(`isVWorldTileError`, `redactVWorldUrl`)을 그대로 사용할 수 있도록 연동.
+
+**검증**:
+- `unsupportedTileFallback`에 따른 스타일 URL 변환 및 커스텀 이벤트 감지 단위 테스트 작성.
+- `npm run type-check`, `npm test`, `npm run build` 통과.
+
+**다음 작업**: CI/CD 활성화 재검토 (T-029).
+
+---
+
 ## 2026-05-27 (T-024/T-025 — 소비자 요구사항 문서화 및 CodeGraph worktree 적용)
 
 **작업**: 사용자 요청에 따라 lazy loading, 마커 클릭/지도 클릭 구분 context, 지원되지 않는 타일 대체 이미지, CI/CD 활성화 검토, TripMate/tour-map 요구사항을 문서화했다. 코드 구현은 하지 않고 후속 T-026~T-029로 분리했다. 별도 요청된 CodeGraph는 즉시 적용 범위로 보고 `geo-codex` worktree와 프로젝트 로컬 MCP 설정을 추가했다.

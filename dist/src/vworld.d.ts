@@ -1,5 +1,10 @@
 import { ErrorEvent, StyleSpecification } from 'maplibre-gl';
 /**
+ * Registers the `vworld://` custom protocol handler with MapLibre.
+ * This enables rendering a fallback image when a tile fails to load.
+ */
+export declare function registerVWorldProtocol(): void;
+/**
  * VWorld layer identifier. `gray` is a synonym for the VWorld "white" basemap.
  */
 export type VWorldLayerType = 'Base' | 'gray' | 'midnight' | 'Hybrid' | 'Satellite';
