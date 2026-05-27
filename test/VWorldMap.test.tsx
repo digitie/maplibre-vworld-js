@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import { VWorldMap } from '../src/components/VWorldMap';
 import maplibregl from 'maplibre-gl';
 
@@ -330,6 +330,66 @@ describe('VWorldMap', () => {
       rerender(<VWorldMap apiKey="test-key" center={[127, 37]} />);
 
       await waitFor(() => expect(map.setMaxBounds).toHaveBeenCalledWith(undefined));
+    });
+  });
+
+  describe('lazy loading', () => {
+    let OriginalIntersectionObserver: any;
+    let observerCallback: IntersectionObserverCallback;
+    let observeMock: ReturnType<typeof vi.fn>;
+    let disconnectMock: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      OriginalIntersectionObserver = globalThis.IntersectionObserver;
+      observeMock = vi.fn();
+      disconnectMock = vi.fn();
+      class MockIntersectionObserver {
+        constructor(cb: IntersectionObserverCallback) {
+          observerCallback = cb;
+        }
+        observe = observeMock;
+        unobserve = vi.fn();
+        disconnect = disconnectMock;
+      }
+      globalThis.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
+    });
+
+    afterEach(() => {
+      globalThis.IntersectionObserver = OriginalIntersectionObserver;
+    });
+
+    it('defers map creation until container intersects when lazy=true', () => {
+      vi.clearAllMocks();
+      const { getByTestId, queryByText } = render(
+        <VWorldMap apiKey="test-key" center={[127, 37]} lazy={true} loadingSkeleton={<div>SKELETON</div>} />
+      );
+
+      // MapLibre is not created yet
+      expect(maplibregl.Map).not.toHaveBeenCalled();
+      // Container and skeleton are rendered
+      expect(getByTestId('vworld-map-container')).toBeInTheDocument();
+      expect(queryByText('SKELETON')).toBeInTheDocument();
+
+      // Trigger intersection
+      act(() => {
+        observerCallback([{ isIntersecting: true }] as IntersectionObserverEntry[], {} as IntersectionObserver);
+      });
+
+      // Now MapLibre should be created
+      expect(maplibregl.Map).toHaveBeenCalled();
+    });
+
+    it('defers map creation until lazyEnabled is true when lazy="manual"', () => {
+      vi.clearAllMocks();
+      const { rerender } = render(
+        <VWorldMap apiKey="test-key" center={[127, 37]} lazy="manual" lazyEnabled={false} />
+      );
+
+      expect(maplibregl.Map).not.toHaveBeenCalled();
+
+      rerender(<VWorldMap apiKey="test-key" center={[127, 37]} lazy="manual" lazyEnabled={true} />);
+
+      expect(maplibregl.Map).toHaveBeenCalled();
     });
   });
 });

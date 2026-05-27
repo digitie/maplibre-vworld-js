@@ -135,6 +135,22 @@ export interface VWorldMapProps {
    * corresponding props.
    */
   flyToOptions?: Omit<maplibregl.FlyToOptions, 'center' | 'zoom' | 'pitch' | 'bearing'>;
+  /**
+   * If `true`, uses `IntersectionObserver` to defer map initialization until the
+   * container enters the viewport. If `'manual'`, waits until `lazyEnabled` is true.
+   * @default false
+   */
+  lazy?: boolean | 'manual';
+  /**
+   * When `lazy="manual"`, controls whether the map should start loading.
+   * Ignored if `lazy` is true or false.
+   */
+  lazyEnabled?: boolean;
+  /**
+   * Root margin for the IntersectionObserver when `lazy=true`.
+   * @default '0px'
+   */
+  lazyRootMargin?: string;
 }
 
 function renderFallback(
@@ -210,10 +226,14 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   loadingSkeleton,
   animateCameraChanges = true,
   flyToOptions,
+  lazy = false,
+  lazyEnabled = false,
+  lazyRootMargin = '0px',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [store] = useState(() => new MapStore());
   const [initError, setInitError] = useState<Error | null>(null);
+  const [shouldMountLazy, setShouldMountLazy] = useState(() => lazy === false);
   const [mapLoadedForEffects, setMapLoadedForEffects] = useState(false);
   const lastCameraRef = useRef<CameraSnapshot>({ center, zoom, pitch, bearing });
   const pendingCameraRef = useRef<CameraSnapshot | null>(null);
@@ -239,7 +259,7 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   });
 
   const hasApiKey = typeof apiKey === 'string' && apiKey.trim().length > 0;
-  const shouldMountMap = hasApiKey && initError === null;
+  const shouldMountMap = hasApiKey && initError === null && shouldMountLazy;
 
   // Clear init error when the consumer rotates the key or switches layers —
   // a terminal failure will re-trip immediately, so this is safe.
@@ -251,6 +271,41 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   useEffect(() => {
     store.setSemanticZoomThreshold(semanticZoomThreshold);
   }, [store, semanticZoomThreshold]);
+
+  // Handle lazy loading state
+  useEffect(() => {
+    if (lazy === 'manual') {
+      if (lazyEnabled) setShouldMountLazy(true);
+      return;
+    }
+    if (lazy !== true) {
+      setShouldMountLazy(true);
+      return;
+    }
+
+    if (shouldMountLazy) return;
+
+    if (typeof IntersectionObserver === 'undefined') {
+      setShouldMountLazy(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setShouldMountLazy(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: lazyRootMargin }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [lazy, lazyEnabled, lazyRootMargin, shouldMountLazy]);
 
   // Mount / unmount the MapLibre instance.
   useEffect(() => {
