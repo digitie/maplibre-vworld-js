@@ -145,6 +145,15 @@ export interface VWorldMapProps {
      * @default '0px'
      */
     lazyRootMargin?: string;
+    /**
+     * Configuration for fallback mock tiles displayed when a VWorld tile fails
+     * to load (e.g. out of zoom range or temporary provider error).
+     * Providing this prop (even as an empty object `{}`) enables the fallback.
+     */
+    unsupportedTileFallback?: {
+        imageUrl?: string;
+        label?: string;
+    };
 }
 /**
  * VWorld + MapLibre map container.

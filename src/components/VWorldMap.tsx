@@ -7,6 +7,7 @@ import {
   getVWorldMaxZoom,
   getVWorldStyle,
   redactVWorldUrl,
+  registerVWorldProtocol,
   type VWorldLayerType,
 } from '../vworld';
 import { MapStore } from '../store/mapStore';
@@ -160,6 +161,15 @@ export interface VWorldMapProps {
    * @default '0px'
    */
   lazyRootMargin?: string;
+  /**
+   * Configuration for fallback mock tiles displayed when a VWorld tile fails
+   * to load (e.g. out of zoom range or temporary provider error).
+   * Providing this prop (even as an empty object `{}`) enables the fallback.
+   */
+  unsupportedTileFallback?: {
+    imageUrl?: string;
+    label?: string;
+  };
 }
 
 function renderFallback(
@@ -221,6 +231,33 @@ function getInteractionContext(event: maplibregl.MapMouseEvent): MapInteractionC
   };
 }
 
+let mapInstanceCounter = 0;
+
+function applyFallbackToStyle(
+  style: maplibregl.StyleSpecification,
+  fallback: NonNullable<VWorldMapProps['unsupportedTileFallback']>,
+  mapId: string
+): maplibregl.StyleSpecification {
+  registerVWorldProtocol();
+  const fallbackParams = new URLSearchParams();
+  if (fallback.imageUrl) fallbackParams.set('fallback', fallback.imageUrl);
+  if (fallback.label) fallbackParams.set('label', fallback.label);
+  fallbackParams.set('mapId', mapId);
+
+  const sources = { ...style.sources };
+  for (const [id, source] of Object.entries(sources)) {
+    if (source.type === 'raster' && source.tiles) {
+      sources[id] = {
+        ...source,
+        tiles: source.tiles.map((url) =>
+          url.replace('https://api.vworld.kr', 'vworld://api.vworld.kr') + '?' + fallbackParams.toString()
+        ),
+      };
+    }
+  }
+  return { ...style, sources };
+}
+
 /**
  * VWorld + MapLibre map container.
  *
@@ -262,9 +299,11 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   lazy = false,
   lazyEnabled = false,
   lazyRootMargin = '0px',
+  unsupportedTileFallback,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [store] = useState(() => new MapStore());
+  const [mapId] = useState(() => String(++mapInstanceCounter));
   const [initError, setInitError] = useState<Error | null>(null);
   const [shouldMountLazy, setShouldMountLazy] = useState(() => lazy === false);
   const [mapLoadedForEffects, setMapLoadedForEffects] = useState(false);
@@ -299,6 +338,28 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   useEffect(() => {
     setInitError(null);
   }, [apiKey, layerType]);
+
+  // Listen for custom protocol tile errors
+  useEffect(() => {
+    if (!unsupportedTileFallback) return;
+    const handleCustomTileError = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail.mapId !== mapId) return;
+      const handler = onErrorRef.current;
+      if (handler) {
+        const fakeErrorEvent = {
+          type: 'error',
+          error: Object.assign(new Error(customEvent.detail.error?.message ?? 'Tile fetch error'), {
+            url: customEvent.detail.url,
+            status: customEvent.detail.error?.message?.match(/HTTP error (\d+)/)?.[1],
+          }),
+        } as unknown as maplibregl.ErrorEvent;
+        handler(fakeErrorEvent);
+      }
+    };
+    window.addEventListener('vworld-tile-error', handleCustomTileError);
+    return () => window.removeEventListener('vworld-tile-error', handleCustomTileError);
+  }, [mapId, unsupportedTileFallback]);
 
   // Keep store's semanticZoomThreshold in sync with the prop.
   useEffect(() => {
@@ -349,9 +410,13 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
 
     let map: MapLibreMap;
     try {
+      let style = getVWorldStyle(apiKey, layerType);
+      if (unsupportedTileFallback) {
+        style = applyFallbackToStyle(style, unsupportedTileFallback, mapId);
+      }
       map = new maplibregl.Map({
         container: containerRef.current,
-        style: getVWorldStyle(apiKey, layerType),
+        style,
         center,
         zoom,
         pitch,
@@ -475,9 +540,14 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
     ) {
       return;
     }
-    map.setStyle(getVWorldStyle(apiKey, layerType));
+    
+    let style = getVWorldStyle(apiKey, layerType);
+    if (unsupportedTileFallback) {
+      style = applyFallbackToStyle(style, unsupportedTileFallback, mapId);
+    }
+    map.setStyle(style);
     appliedStyleRef.current = { apiKey, layerType };
-  }, [apiKey, layerType, mapLoadedForEffects, store]);
+  }, [apiKey, layerType, mapLoadedForEffects, store, mapId, unsupportedTileFallback]);
 
   // Apply camera changes. If the map is currently moving from a user
   // gesture, queue the new camera and re-apply when the map settles

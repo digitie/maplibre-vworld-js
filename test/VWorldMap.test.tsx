@@ -269,7 +269,7 @@ describe('VWorldMap', () => {
       expect(map.flyTo).not.toHaveBeenCalled();
       expect(map.jumpTo).not.toHaveBeenCalled();
 
-      // Gesture ends → moveend fires → pending camera is applied.
+      // Gesture ends ??moveend fires ??pending camera is applied.
       map.isMoving.mockReturnValue(false);
       mapHandler(map, 'moveend')({} as never);
 
@@ -391,5 +391,66 @@ describe('VWorldMap', () => {
 
       expect(maplibregl.Map).toHaveBeenCalled();
     });
+  });
+
+  describe('unsupportedTileFallback', () => {
+    it('applies vworld:// protocol and fallback params when unsupportedTileFallback is provided', () => {
+      vi.clearAllMocks();
+      render(
+        <VWorldMap
+          apiKey="test-key"
+          center={[127, 37]}
+          unsupportedTileFallback={{ imageUrl: '/fallback.png', label: 'Missing' }}
+        />
+      );
+      
+      const mapCall = vi.mocked(maplibregl.Map).mock.calls[0][0];
+      const style = mapCall.style as any;
+      const tiles = style.sources['vworld-Base'].tiles[0];
+      
+      expect(tiles).toContain('vworld://api.vworld.kr');
+      expect(tiles).toContain('fallback=%2Ffallback.png');
+      expect(tiles).toContain('label=Missing');
+      expect(maplibregl.addProtocol).toHaveBeenCalledWith('vworld', expect.any(Function));
+    });
+
+    it('synthesizes onError when vworld-tile-error event is dispatched', () => {
+      vi.clearAllMocks();
+      const onError = vi.fn();
+      render(
+        <VWorldMap
+          apiKey="test-key"
+          center={[127, 37]}
+          unsupportedTileFallback={{}}
+          onError={onError}
+        />
+      );
+
+      // Extract the generated mapId from the transformed style
+      const mapCall = vi.mocked(maplibregl.Map).mock.calls[0][0];
+      const style = mapCall.style as any;
+      const tileUrl = style.sources['vworld-Base'].tiles[0];
+      const mapIdMatch = tileUrl.match(/mapId=([^&]+)/);
+      const mapId = mapIdMatch ? mapIdMatch[1] : 'unknown';
+
+      // Dispatch the custom window event
+      window.dispatchEvent(
+        new CustomEvent('vworld-tile-error', {
+          detail: {
+            url: 'https://api.vworld.kr/req/wmts/1.0.0/test-key/Base/20/0/0.png',
+            error: new Error('HTTP error 404: Not Found'),
+            mapId,
+          },
+        })
+      );
+
+      expect(onError).toHaveBeenCalledTimes(1);
+      const errorEvent = onError.mock.calls[0][0];
+      expect(errorEvent.type).toBe('error');
+      expect(errorEvent.error.message).toBe('HTTP error 404: Not Found');
+      expect(errorEvent.error.url).toBe('https://api.vworld.kr/req/wmts/1.0.0/test-key/Base/20/0/0.png');
+      expect(errorEvent.error.status).toBe('404');
+    });
+
   });
 });
