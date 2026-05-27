@@ -6,6 +6,11 @@
 - (없음)
 
 ## 대기 (우선순위 순)
+- [ ] T-033: [Consumer] 사용자 위치 마커 검토 (`UserLocationMarker` 필요 여부 및 `PulsingMarker` 활용)
+- [ ] T-034: [Consumer] Marker 컴포넌트 범용 프로퍼티(`title`, `description`, `imageUrl`, `selected`) 및 Hover/Tooltip 이벤트 지원 확장
+- [ ] T-035: [Consumer] 카메라 및 애니메이션 통합 Prop (`cameraTarget`, `cameraTransition`, `bbox`) 구현
+- [ ] T-036: [Consumer] 거리 및 측정 유틸리티 (`MeasureLine` 컴포넌트, `haversine` 함수) 추가
+- [ ] T-037: [Consumer] `EventMarker`, `NoticeMarker` 등 도메인 마커 확장 가이드 및 예제 제공
 
 ## 완료
 - [x] T-032 PlaceMarker, WeatherMarker, PriceMarker 등 도메인 마커를 범용 라이브러리 컴포넌트로 인정하고 복구 (ADR-16). (2026-05-28)
