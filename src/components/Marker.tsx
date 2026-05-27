@@ -4,6 +4,7 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import maplibregl from 'maplibre-gl';
 import { useMap, useEvent } from '../store/hooks';
+import type { MapInteractionContext } from './VWorldMap';
 
 let globalMarkerZIndex = 1000;
 
@@ -34,13 +35,17 @@ export interface MarkerProps {
   /** Fired after a drag ends, with the new `[lng, lat]`. */
   onDragEnd?: (lngLat: [number, number]) => void;
   /** Fired on click of the marker DOM. */
-  onClick?: (event: MouseEvent, marker: maplibregl.Marker) => void;
+  onClick?: (event: MouseEvent, context: MapInteractionContext, marker: maplibregl.Marker) => void;
   /** Fired on right-click of the marker DOM. */
-  onContextMenu?: (event: MouseEvent, marker: maplibregl.Marker) => void;
+  onContextMenu?: (event: MouseEvent, context: MapInteractionContext, marker: maplibregl.Marker) => void;
   /** Visual selected state — sets `data-selected="true"` and applies a scale + shadow. */
   selected?: boolean;
   /** Visual highlighted state — sets `data-highlighted="true"` and applies a softer scale + shadow. */
   highlighted?: boolean;
+  /** Interaction ID used for context differentiation when clicked. */
+  interactionId?: string;
+  /** Whether this marker is a cluster (used for context source differentiation). */
+  isCluster?: boolean;
   /** CSS `z-index` for stacking among other markers. */
   zIndex?: number;
   /** `aria-label` for accessibility. When set, the element also gets `role="button"`. */
@@ -63,10 +68,22 @@ function applyMarkerState(
     zIndex,
     ariaLabel,
     className,
-  }: Pick<MarkerProps, 'selected' | 'highlighted' | 'zIndex' | 'ariaLabel' | 'className'>,
+    interactionId,
+    isCluster,
+  }: Pick<MarkerProps, 'selected' | 'highlighted' | 'zIndex' | 'ariaLabel' | 'className' | 'interactionId' | 'isCluster'>,
 ): void {
   element.dataset.selected = selected ? 'true' : 'false';
   element.dataset.highlighted = highlighted ? 'true' : 'false';
+  if (interactionId !== undefined) {
+    element.dataset.interactionId = interactionId;
+  } else {
+    delete element.dataset.interactionId;
+  }
+  if (isCluster) {
+    element.dataset.isCluster = 'true';
+  } else {
+    delete element.dataset.isCluster;
+  }
   element.style.zIndex = zIndex === undefined ? '' : String(zIndex);
   // MapLibre owns the root `transform` for positioning. Keep a CSS variable
   // for consumer hooks and set the individual `scale` property so selected /
@@ -123,6 +140,8 @@ export const Marker: React.FC<MarkerProps> = ({
   onContextMenu,
   selected,
   highlighted,
+  interactionId,
+  isCluster,
   zIndex,
   ariaLabel,
   className,
@@ -168,6 +187,13 @@ export const Marker: React.FC<MarkerProps> = ({
     const marker = new maplibregl.Marker(options).setLngLat(lngLat).addTo(map);
     const element = marker.getElement();
 
+    const getContext = (): MapInteractionContext => ({
+      source: isCluster ? 'cluster' : 'marker',
+      interactionId,
+      lngLat: [lngLat[0], lngLat[1]],
+      defaultPrevented: false,
+    });
+
     const handleClick = (event: MouseEvent) => {
       const baseZIndex = prevZIndexPropRef.current ?? 0;
       globalMarkerZIndex = Math.max(globalMarkerZIndex, baseZIndex) + 1;
@@ -176,13 +202,13 @@ export const Marker: React.FC<MarkerProps> = ({
 
       if (!hasOnClickRef.current) return;
       event.stopPropagation();
-      stableOnClick(event, marker);
+      stableOnClick(event, getContext(), marker);
     };
     const handleContextMenu = (event: MouseEvent) => {
       if (!hasOnContextMenuRef.current) return;
       event.preventDefault();
       event.stopPropagation();
-      stableOnContextMenu(event, marker);
+      stableOnContextMenu(event, getContext(), marker);
     };
     const handleDragEnd = () => {
       const { lng, lat } = marker.getLngLat();
@@ -235,9 +261,11 @@ export const Marker: React.FC<MarkerProps> = ({
       zIndex: effectiveZIndex,
       ariaLabel,
       className,
+      interactionId,
+      isCluster,
     });
     prevClassNameRef.current = className;
-  }, [selected, highlighted, zIndex, ariaLabel, className]);
+  }, [selected, highlighted, zIndex, ariaLabel, className, interactionId, isCluster]);
 
   if (hasChildren && container) {
     return createPortal(children, container);

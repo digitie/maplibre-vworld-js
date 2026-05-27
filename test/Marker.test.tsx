@@ -69,8 +69,8 @@ describe('Marker', () => {
     element.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     element.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true }));
 
-    expect(onClick).toHaveBeenCalledWith(expect.any(MouseEvent), marker);
-    expect(onContextMenu).toHaveBeenCalledWith(expect.any(MouseEvent), marker);
+    expect(onClick).toHaveBeenCalledWith(expect.any(MouseEvent), expect.objectContaining({ source: 'marker' }), marker);
+    expect(onContextMenu).toHaveBeenCalledWith(expect.any(MouseEvent), expect.objectContaining({ source: 'marker' }), marker);
     expect(element.dataset.selected).toBe('true');
     expect(element.style.zIndex).toBe('1001'); // clicked -> dynamic zIndex
     expect(element.style.getPropertyValue('scale')).toBe('1.18');
@@ -148,7 +148,7 @@ describe('Marker', () => {
     );
 
     marker.getElement().dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(onClick).toHaveBeenCalledWith(expect.any(MouseEvent), marker);
+    expect(onClick).toHaveBeenCalledWith(expect.any(MouseEvent), expect.objectContaining({ source: 'marker' }), marker);
     expect(maplibregl.Marker).toHaveBeenCalledTimes(1);
   });
 });

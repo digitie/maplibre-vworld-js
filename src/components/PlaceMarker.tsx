@@ -55,8 +55,8 @@ export const PlaceMarker: React.FC<PlaceMarkerProps> = ({
         color="#333" 
         size={24} 
         showInnerCircle={false} 
-        onClick={(e, marker) => {
-          if (props.onClick) props.onClick(e, marker);
+        onClick={(e, context, marker) => {
+          if (props.onClick) props.onClick(e, context, marker);
           setIsManuallyExpanded(true);
         }}
       />

@@ -28,6 +28,15 @@ export interface VWorldMapFallbackInfo {
   error?: Error;
 }
 
+export type MapInteractionSource = 'map' | 'marker' | 'popup' | 'cluster' | 'layer';
+
+export interface MapInteractionContext {
+  source: MapInteractionSource;
+  interactionId?: string;
+  lngLat?: [number, number];
+  defaultPrevented: boolean;
+}
+
 /**
  * Props for the {@link VWorldMap} component.
  *
@@ -96,10 +105,10 @@ export interface VWorldMapProps {
   children?: React.ReactNode;
   /** Fired once after the MapLibre `load` event. */
   onLoad?: (map: MapLibreMap) => void;
-  /** Raw MapLibre `click` event. */
-  onClick?: (event: maplibregl.MapMouseEvent) => void;
-  /** Raw MapLibre `contextmenu` event (right-click). */
-  onContextMenu?: (event: maplibregl.MapMouseEvent) => void;
+  /** Raw MapLibre `click` event with interaction context. */
+  onClick?: (event: maplibregl.MapMouseEvent, context: MapInteractionContext) => void;
+  /** Raw MapLibre `contextmenu` event (right-click) with interaction context. */
+  onContextMenu?: (event: maplibregl.MapMouseEvent, context: MapInteractionContext) => void;
   /** Raw MapLibre `moveend` event — camera came to rest after a pan/zoom. */
   onMoveEnd?: (event: maplibregl.MapLibreEvent) => void;
   /** Raw MapLibre `zoomend` event. */
@@ -186,6 +195,30 @@ function sameCamera(a: CameraSnapshot, b: CameraSnapshot): boolean {
     a.zoom === b.zoom &&
     a.pitch === b.pitch &&
     a.bearing === b.bearing;
+}
+
+function getInteractionContext(event: maplibregl.MapMouseEvent): MapInteractionContext {
+  const target = event.originalEvent?.target as HTMLElement | undefined;
+  let source: MapInteractionSource = 'map';
+  let interactionId: string | undefined;
+
+  const markerEl = target?.closest('.maplibregl-marker') as HTMLElement | undefined;
+  const popupEl = target?.closest('.maplibregl-popup') as HTMLElement | undefined;
+
+  if (markerEl) {
+    source = markerEl.dataset.isCluster === 'true' ? 'cluster' : 'marker';
+    interactionId = markerEl.dataset.interactionId;
+  } else if (popupEl) {
+    source = 'popup';
+    interactionId = popupEl.dataset.interactionId;
+  }
+
+  return {
+    source,
+    interactionId,
+    lngLat: [event.lngLat.lng, event.lngLat.lat],
+    defaultPrevented: event.originalEvent?.defaultPrevented ?? false,
+  };
 }
 
 /**
@@ -377,10 +410,10 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
       stableOnIdle(event);
     };
     const handleClick = (event: maplibregl.MapMouseEvent) => {
-      stableOnClick(event);
+      stableOnClick(event, getInteractionContext(event));
     };
     const handleContextMenu = (event: maplibregl.MapMouseEvent) => {
-      stableOnContextMenu(event);
+      stableOnContextMenu(event, getInteractionContext(event));
     };
     const handleError = (event: maplibregl.ErrorEvent) => {
       const handler = onErrorRef.current;

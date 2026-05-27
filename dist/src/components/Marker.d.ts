@@ -1,5 +1,6 @@
 import { default as React } from 'react';
 import { default as maplibregl } from 'maplibre-gl';
+import { MapInteractionContext } from './VWorldMap';
 export interface MarkerProps {
     /** Marker position as `[longitude, latitude]`. */
     lngLat: [number, number];
@@ -27,13 +28,17 @@ export interface MarkerProps {
     /** Fired after a drag ends, with the new `[lng, lat]`. */
     onDragEnd?: (lngLat: [number, number]) => void;
     /** Fired on click of the marker DOM. */
-    onClick?: (event: MouseEvent, marker: maplibregl.Marker) => void;
+    onClick?: (event: MouseEvent, context: MapInteractionContext, marker: maplibregl.Marker) => void;
     /** Fired on right-click of the marker DOM. */
-    onContextMenu?: (event: MouseEvent, marker: maplibregl.Marker) => void;
+    onContextMenu?: (event: MouseEvent, context: MapInteractionContext, marker: maplibregl.Marker) => void;
     /** Visual selected state — sets `data-selected="true"` and applies a scale + shadow. */
     selected?: boolean;
     /** Visual highlighted state — sets `data-highlighted="true"` and applies a softer scale + shadow. */
     highlighted?: boolean;
+    /** Interaction ID used for context differentiation when clicked. */
+    interactionId?: string;
+    /** Whether this marker is a cluster (used for context source differentiation). */
+    isCluster?: boolean;
     /** CSS `z-index` for stacking among other markers. */
     zIndex?: number;
     /** `aria-label` for accessibility. When set, the element also gets `role="button"`. */

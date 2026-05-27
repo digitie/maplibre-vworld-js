@@ -15,6 +15,13 @@ export interface VWorldMapFallbackInfo {
     /** Present when `reason === 'map-init-error'`. */
     error?: Error;
 }
+export type MapInteractionSource = 'map' | 'marker' | 'popup' | 'cluster' | 'layer';
+export interface MapInteractionContext {
+    source: MapInteractionSource;
+    interactionId?: string;
+    lngLat?: [number, number];
+    defaultPrevented: boolean;
+}
 /**
  * Props for the {@link VWorldMap} component.
  *
@@ -83,10 +90,10 @@ export interface VWorldMapProps {
     children?: React.ReactNode;
     /** Fired once after the MapLibre `load` event. */
     onLoad?: (map: MapLibreMap) => void;
-    /** Raw MapLibre `click` event. */
-    onClick?: (event: maplibregl.MapMouseEvent) => void;
-    /** Raw MapLibre `contextmenu` event (right-click). */
-    onContextMenu?: (event: maplibregl.MapMouseEvent) => void;
+    /** Raw MapLibre `click` event with interaction context. */
+    onClick?: (event: maplibregl.MapMouseEvent, context: MapInteractionContext) => void;
+    /** Raw MapLibre `contextmenu` event (right-click) with interaction context. */
+    onContextMenu?: (event: maplibregl.MapMouseEvent, context: MapInteractionContext) => void;
     /** Raw MapLibre `moveend` event — camera came to rest after a pan/zoom. */
     onMoveEnd?: (event: maplibregl.MapLibreEvent) => void;
     /** Raw MapLibre `zoomend` event. */

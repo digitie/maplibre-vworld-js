@@ -83,8 +83,8 @@ export const WeatherMarker: React.FC<WeatherMarkerProps> = ({
         color={conditionColors[condition]}
         size={24}
         showInnerCircle
-        onClick={(e, marker) => {
-          if (props.onClick) props.onClick(e, marker);
+        onClick={(e, context, marker) => {
+          if (props.onClick) props.onClick(e, context, marker);
           setIsManuallyExpanded(true);
         }}
       />
