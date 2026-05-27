@@ -583,3 +583,30 @@ ADR-10을 폐기(supersede)하고, API 키가 필요 없는 단위/빌드 테스
 
 - `maplibre-vworld` 라이브러리가 더욱 범용적인(primitive) 도구 모음으로서의 정체성을 강화하였습니다.
 - `MapContextMenu`를 통해 소비자는 마커 메뉴와 지도 메뉴를 쉽게 구분하여 구현할 수 있습니다.
+
+---
+
+## ADR-16: 도메인 특화 마커의 라이브러리 기본 포함 결정 (T-032)
+
+- 상태: accepted
+- 날짜: 2026-05-28
+- 결정자: human
+
+### 컨텍스트
+
+ADR-15를 통해 `PlaceMarker`, `WeatherMarker`를 라이브러리 패키지 밖(소비자 측 예제)으로 분리했으나, 이후 논의 결과 `PlaceMarker`, `WeatherMarker`, `PriceMarker`는 특정 도메인(TripMate 등)에 국한되지 않고 다양한 공간정보 애플리케이션에서 광범위하게 재사용될 수 있는 보편적인 컴포넌트(공통 라이브러리 범주)로 판명되었습니다.
+
+### 결정
+
+1. ADR-15에서 이동시켰던 `PlaceMarker`, `WeatherMarker`를 다시 라이브러리 소스(`src/components/`)로 복구하여 정식 노출(export)합니다.
+2. `PriceMarker`와 더불어, 이 세 가지 마커를 '도메인 특화 마커'가 아닌 '범용 컴포넌트'로 공식 인정하고 라이브러리 유지보수 범위 내에 포함합니다.
+
+### 근거
+
+- **높은 재사용성**: 장소 표기(Place), 날씨 표기(Weather), 가격 표기(Price)는 부동산, 관광, 기상 등 대다수 지도 애플리케이션에서 공통적으로 요구하는 기본 UI 요소입니다.
+- **편의성 제공**: 소비자가 매번 유사한 로직(LOD, 디자인, Semantic Zoom 확장 등)을 구현하는 것보다, 라이브러리에서 완성도 높은 프리셋(preset)을 제공하는 것이 사용자 경험과 개발 속도 향상에 기여합니다.
+
+### 결과
+
+- `PlaceMarker`, `WeatherMarker`, `PriceMarker`가 `maplibre-vworld`의 정식 컴포넌트로 관리됩니다.
+- `consumer-feature-catalog.md`의 분류가 업데이트되어, 세 마커가 소비자 전용이 아닌 라이브러리 기능 목록(공통 기능)으로 재배치되었습니다.

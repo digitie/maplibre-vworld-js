@@ -35,7 +35,14 @@ export { PinMarker, type PinMarkerProps } from './components/PinMarker';
 export { MakiMarker, type MakiMarkerProps } from './components/MakiMarker';
 export { PulsingMarker, type PulsingMarkerProps } from './components/PulsingMarker';
 export { SimpleMarker, type SimpleMarkerProps } from './components/SimpleMarker';
+export { PlaceMarker, type PlaceMarkerProps } from './components/PlaceMarker';
 export { PriceMarker, type PriceMarkerProps, type PriceItem } from './components/PriceMarker';
+export {
+  WeatherMarker,
+  type WeatherMarkerProps,
+  type WeatherCondition,
+  type HourlyForecast,
+} from './components/WeatherMarker';
 export { RoutePointMarker, type RoutePointMarkerProps } from './components/RoutePointMarker';
 export { ClusterMarker, type ClusterMarkerProps } from './components/ClusterMarker';
 

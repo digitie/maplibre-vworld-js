@@ -1,13 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 import {
-  VWorldMap, Marker, SimpleMarker, MapContextMenu,
+  VWorldMap, Marker, WeatherMarker, PlaceMarker, SimpleMarker, MapContextMenu,
   PriceMarker, PulsingMarker, PinMarker, MakiMarker, ClusterLayer, RoutePointMarker, RouteLine,
   type VWorldLayerType, PolygonArea, type ClusterPoint,
 } from '../src';
-
-import { WeatherMarker } from './examples/markers/WeatherMarker';
-import { PlaceMarker } from './examples/markers/PlaceMarker';
 
 const API_KEY = import.meta.env.VITE_VWORLD_API_KEY || 'YOUR_API_KEY';
 

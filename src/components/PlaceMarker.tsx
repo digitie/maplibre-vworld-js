@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useCallback, useState, useRef } from 'react';
-import { Marker, type MarkerProps } from '../../../src/components/Marker';
-import { PinMarker } from '../../../src/components/PinMarker';
-import { useMapSelector } from '../../../src/store/hooks';
+import { Marker, type MarkerProps } from './Marker';
+import { PinMarker } from './PinMarker';
+import { useMapSelector } from '../store/hooks';
 
 export interface PlaceMarkerProps extends Omit<MarkerProps, 'children'> {
   title: string;
