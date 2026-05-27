@@ -2,6 +2,22 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-05-28 (CI/CD 활성화 재검토)
+
+**작업**: 제한적 범위의 GitHub Actions CI/CD 파이프라인 복원 (T-029).
+
+**구현 상세**:
+- ADR-13 작성하여 ADR-10 폐기(superseded). API 키 필요 없는 단위/빌드 테스트로 범위 한정.
+- `.github/workflows/ci.yml` 작성: `type-check`, `test`, `build`, `git diff --exit-code -- dist/`, `npm run pack:check` 단계 포함.
+- `PUPPETEER_SKIP_DOWNLOAD=1` 환경변수 설정으로 불필요한 리소스 소모 방지.
+
+**검증**:
+- 저장소에 반영 후 GitHub Actions 실행 예정.
+
+**다음 작업**: T-019 `getCapabilities` 활용 layer 검증.
+
+---
+
 ## 2026-05-28 (지원되지 않는 타일 대체 이미지 구현)
 
 **작업**: 지원되지 않는 타일 요청 시 대체 이미지(목업) 렌더링 지원 (T-028).
