@@ -65,7 +65,10 @@ codegraph sync
 - `.codegraph/`는 worktree마다 1회만 만든다. 이후에는 `codegraph sync`로 유지한다.
 - `.codegraph/`는 로컬 인덱스이므로 git에 커밋하지 않는다.
 - CodeGraph는 컨텍스트 탐색 도구이지 품질 게이트가 아니다. `npm run type-check`, `npm test`, `npm run build`를 대체하지 않는다.
-- MCP 서버는 프로젝트 루트의 `.codex/config.toml`에 등록한다. 현재 CLI 기준으로 `npx -y @colbymchenry/codegraph serve --mcp`를 사용한다.
+- MCP 서버는 프로젝트 루트에 에이전트에 맞는 설정 파일로 등록한다. 
+  - Codex의 경우 `.codex/config.toml`에 등록한다.
+  - Antigravity 2.0의 경우 `.gemini/mcp.json`에 등록한다.
+  - 두 에이전트 모두 `npx -y @colbymchenry/codegraph serve --mcp` 커맨드를 사용해 CodeGraph 서버를 등록한다.
 
 ## 환경변수
 
