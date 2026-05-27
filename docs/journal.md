@@ -2,6 +2,29 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-05-27 (T-024/T-025 — 소비자 요구사항 문서화 및 CodeGraph worktree 적용)
+
+**작업**: 사용자 요청에 따라 lazy loading, 마커 클릭/지도 클릭 구분 context, 지원되지 않는 타일 대체 이미지, CI/CD 활성화 검토, TripMate/tour-map 요구사항을 문서화했다. 코드 구현은 하지 않고 후속 T-026~T-029로 분리했다. 별도 요청된 CodeGraph는 즉시 적용 범위로 보고 `geo-codex` worktree와 프로젝트 로컬 MCP 설정을 추가했다.
+
+**구현 상세**:
+- `docs/consumer-requirements.md` 신설. R-001~R-004 요구사항별 배경, 수용 기준, 예정 API 예시, TripMate/tour-map 예제를 정리.
+- `docs/tasks.md`에 T-024/T-025 완료와 T-026~T-029 후속 구현 백로그 추가.
+- `docs/decisions.md`에 ADR-12 추가. 에이전트별 고정 worktree(`geo-codex`, `geo-claude`, `geo-antigravity`)와 CodeGraph `init -i`/`sync` 운영 방식을 결정으로 기록.
+- `docs/dev-environment.md`, `AGENTS.md`, `SKILL.md`, `CLAUDE.md`, `docs/resume.md`에 worktree + CodeGraph 절차와 새 요구사항 문서 진입점을 반영.
+- `.gitignore`에 `.codegraph/` 추가, `.codex/config.toml`에 CodeGraph MCP 서버 설정 추가.
+
+**검증**:
+- CodeGraph 공식 문서와 CLI help 기준으로 `init -i`, `sync`, `status`, `serve --mcp` 흐름 확인.
+- `npx -y @colbymchenry/codegraph init -i` → 성공. 36 files, 275 nodes, 235 edges 인덱싱.
+- `npx -y @colbymchenry/codegraph sync` → Already up to date.
+- `npx -y @colbymchenry/codegraph status` → Index is up to date. 36 files, 275 nodes, 474 edges, DB Size 0.59 MB.
+- `PUPPETEER_SKIP_DOWNLOAD=1 npm ci` → 통과.
+- 사용자 요청으로 app 재시작 전 PR/머지를 우선하여 `npm run type-check`, `npm test`, `npm run build`, `git diff --exit-code -- dist/`, `npm run pack:check`는 생략.
+
+**다음 작업**: T-026~T-029 중 우선순위를 정해 실제 구현. CI/CD 활성화는 ADR-10과 충돌하므로 새 ADR을 먼저 작성.
+
+---
+
 ## 2026-05-26 (UX/UI 디테일 보강 및 다중 가격 지원 — PR #21, #22)
 
 **작업**: 겹치는 마커/팝업의 클릭 UX 개선, 주유소 등 다중 가격을 표시하기 위한 `PriceMarker` 배열 지원, 그리고 시멘틱 줌으로 인해 축소된 마커를 수동으로 확장할 수 있는 강제 확장(Manual Expand) 기능 추가. 더불어 개발용 앱(`dev/main.tsx`)에 컨텍스트 메뉴(우클릭) 커스텀 예제 추가.

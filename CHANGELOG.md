@@ -6,6 +6,8 @@
 
 ### Added
 
+- TripMate/tour-map 소비자 요구사항 문서 `docs/consumer-requirements.md` 추가. lazy loading, 클릭 context, 지원되지 않는 타일 fallback, CI/CD 활성화 검토를 수용 기준과 예정 API 예제로 정리 (T-024).
+- CodeGraph MCP 프로젝트 설정 `.codex/config.toml` 추가 및 `.codegraph/` gitignore 등록 (T-025).
 - `RouteLine`에 GeoJSON 포맷을 직접 주입할 수 있는 `data` Prop 복구. (단일 `LineString` 외에 `MultiLineString` 지원)
 - 개발 환경(`NODE_ENV !== 'production'`) 한정으로 `PolygonArea`와 `RouteLine`의 입력 데이터(GeoJSON 등) 구조를 검증하여 경고를 띄우는 Zod 런타임 유효성 검사 추가. (`PolygonAreaInputSchema`, `RouteLineGeoJSONSchema`)
 - `ClusterLayer`에 React Key Churn을 방지하는 클러스터 고유 ID 자동 생성 옵션 `generateId` 노출 (T-018).
@@ -18,6 +20,7 @@
 
 ### Changed
 
+- 에이전트별 고정 worktree(`geo-codex`, `geo-claude`, `geo-antigravity`)와 CodeGraph `init -i`/`sync` 운영 방식을 ADR-12 및 개발 문서에 반영 (T-025).
 - 모든 Markdown 문서를 한글로 작성하도록 정책을 강화하고 영문으로 남아 있던 `README.md`, `AI_AGENT_GUIDE.md`, `CHANGELOG.md`를 한글화 (T-017). 코드 식별자, 명령어, URL, 외부 공식 용어, 벤더/제품명, Keep-a-Changelog 표준 keyword는 영문을 유지.
 - `python-kraddr-geo` 식 문서 구조 채택 (T-015): 루트에 `CLAUDE.md`/`AGENTS.md`/`SKILL.md`, 나머지는 `docs/{architecture,decisions,journal,tasks,resume,dev-environment}.md`. public API는 변경 없음.
 

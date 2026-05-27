@@ -258,6 +258,10 @@ onError={(event) => {
 - vitest + `@testing-library/react` + jsdom.
 - `test/setup.ts`가 `maplibre-gl`을 vi.mock으로 완전 대체 — 실제 WebGL/네트워크 호출 없음.
 - mock된 `Map`이 `setTimeout(callback, 0)`로 비동기 `load` 발화 → `await waitFor(...)` 패턴으로 검증.
+
+## 소비자 요구사항
+
+TripMate와 tour-map에서 들어온 lazy loading, 클릭 context, 지원되지 않는 타일 fallback, CI/CD 활성화 검토는 `docs/consumer-requirements.md`에 별도로 둔다. 해당 문서는 2026-05-27 기준 요구사항과 예정 API 예제만 담고 있으며, 현재 아키텍처의 실제 동작 설명은 본 문서가 기준이다.
 - 새 MapLibre API를 호출하면 setup.ts mock에 method를 추가해야 한다. 누락 시 `TypeError: map.someMethod is not a function`.
 
 ## 호환성

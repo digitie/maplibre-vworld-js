@@ -2,16 +2,24 @@
 
 새 에이전트 세션이 시작될 때 "지금 어디까지 했고, 다음은 뭐 하면 되나"를 한 화면에서 답한다.
 
-## 현재 진척도 (2026-05-26 갱신)
+## 현재 진척도 (2026-05-27 갱신)
 
-- ✅ T-001~T-018, T-020~T-023: 코어 라이브러리 + 보안 패치 + GitHub dependency 패키징 + zod v4 + 디버그 hook + TripMate primitive + 범용 라이브러리 정리 + 런타임 결함 수정 + post-PR13 review fixes + python-kraddr-geo 문서 구조 채택 + GitHub Actions 제거(ADR-10) + 모든 문서 한글화 + RouteLine GeoJSON 복구 + supercluster generateId + Marker portal leak 테스트 + 동적 z-index + PriceMarker 다중 가격/LOD/Manual Expand + ADR-11
+- ✅ T-001~T-018, T-020~T-025: 코어 라이브러리 + 보안 패치 + GitHub dependency 패키징 + zod v4 + 디버그 hook + TripMate primitive + 범용 라이브러리 정리 + 런타임 결함 수정 + post-PR13 review fixes + python-kraddr-geo 문서 구조 채택 + GitHub Actions 제거(ADR-10) + 모든 문서 한글화 + RouteLine GeoJSON 복구 + supercluster generateId + Marker portal leak 테스트 + 동적 z-index + PriceMarker 다중 가격/LOD/Manual Expand + ADR-11 + TripMate/tour-map 요구사항 문서화 + CodeGraph/worktree 운영 정책(ADR-12)
 - ⬜ T-019: VWorld `getCapabilities` 응답 기반 layer/tile matrix 자동 검증
+- ⬜ T-026: `<VWorldMap>` lazy loading 지원
+- ⬜ T-027: 마커 클릭/지도 클릭 구분 context 지원
+- ⬜ T-028: 지원되지 않는 타일 fallback 구현
+- ⬜ T-029: CI/CD 활성화 재검토
 
 ## 다음 한 작업 (1시간 이내 분량)
 
 후보:
+- T-027(클릭 context)는 TripMate 선택/해제 UX에 바로 영향을 주며 API 확장 범위가 작다.
+- T-026(lazy loading)은 초기 렌더 비용과 VWorld 타일 요청량을 줄인다.
+- T-028(지원되지 않는 타일 fallback)은 T-019와 함께 처리하면 layer/zoom 검증 경계가 더 명확해진다.
+- T-029(CI/CD 활성화)는 ADR-10을 먼저 재검토해야 한다.
 - T-019(VWorld getCapabilities)는 WMTS Capabilities XML 파싱 + cache 정책 결정이 필요해 ADR이 먼저 나와야 할 수 있다.
-- 새 백로그가 떠오르면 `docs/tasks.md`에 T-024 이후로 등록한다.
+- 새 백로그가 떠오르면 `docs/tasks.md`에 T-030 이후로 등록한다.
 
 ## 작업 시작 전 확인할 것
 
@@ -20,8 +28,11 @@
 - [ ] `SKILL.md` 읽기 — 도메인 어휘, 자주 묻는 작업
 - [ ] `docs/architecture.md` 읽기 — MapStore + useEvent 구조
 - [ ] `docs/decisions.md` 읽기 — 특히 ADR-7(도메인 코드 비포함), ADR-8(외부 store 패턴)
+- [ ] `docs/consumer-requirements.md` 읽기 — TripMate/tour-map 요구사항과 예정 API 예제
 - [ ] 마지막 `docs/journal.md` 엔트리 읽기
 - [ ] `git status` + `git log --oneline -10` — 어느 브랜치에 있고 어디까지 커밋되었는가
+- [ ] 고정 worktree 확인 — ChatGPT Codex는 `geo-codex`, Claude Code는 `geo-claude`, Google Antigravity 2.0은 `geo-antigravity`
+- [ ] `codegraph sync` + `codegraph status` — 이미 초기화된 worktree에서는 `codegraph init` 재실행 금지
 - [ ] `npm test`가 깨끗하게 통과하는지 — 시작점이 green인지 확인
 
 ## 알려진 함정
@@ -37,6 +48,7 @@
 - **VWorld API key 평문**: `.env.local`에만 두고, 코드/문서/dev 파일에 절대 박지 않는다. 과거 사고로 git history rewrite 발생한 적 있음(2026-05-24).
 - **Puppeteer postinstall**: `npm install` 시 헤드리스 브라우저 다운로드가 일어남. `PUPPETEER_SKIP_DOWNLOAD=1` 환경변수로 회피.
 - **TripMate 같은 도메인 코드 슬립**: PR review에서 카테고리 enum, 통화 단위, 색상 팔레트가 들어오는 PR을 발견하면 ADR-7을 들어 거절. 범용화가 필요하면 factory로 노출.
+- **CodeGraph 재초기화 남발**: `.codegraph/`가 이미 있는 worktree에서는 `codegraph init -i`가 아니라 `codegraph sync`를 쓴다. 인덱스는 로컬 산출물이므로 커밋 금지.
 
 ## 작업 후 의무사항
 
