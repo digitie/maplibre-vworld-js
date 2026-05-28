@@ -1,6 +1,6 @@
 {
   "name": "maplibre-vworld",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "VWorld Maps wrapper for React using MapLibre GL JS",
   "main": "./dist/maplibre-vworld-js.umd.js",
   "module": "./dist/maplibre-vworld-js.mjs",
