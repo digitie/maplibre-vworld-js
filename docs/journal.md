@@ -63,12 +63,12 @@
 
 ## 2026-05-27 (T-024/T-025 — 소비자 요구사항 문서화 및 CodeGraph worktree 적용)
 
-**작업**: 사용자 요청에 따라 lazy loading, 마커 클릭/지도 클릭 구분 context, 지원되지 않는 타일 대체 이미지, CI/CD 활성화 검토, TripMate/tour-map 요구사항을 문서화했다. 코드 구현은 하지 않고 후속 T-026~T-029로 분리했다. 별도 요청된 CodeGraph는 즉시 적용 범위로 보고 `geo-codex` worktree와 프로젝트 로컬 MCP 설정을 추가했다.
+**작업**: 사용자 요청에 따라 lazy loading, 마커 클릭/지도 클릭 구분 context, 지원되지 않는 타일 대체 이미지, CI/CD 활성화 검토, TripMate/tour-map 요구사항을 문서화했다. 코드 구현은 하지 않고 후속 T-026~T-029로 분리했다. 별도 요청된 CodeGraph는 즉시 적용 범위로 보고 `maplibre-vworld-js-codex` worktree와 프로젝트 로컬 MCP 설정을 추가했다.
 
 **구현 상세**:
 - `docs/consumer-requirements.md` 신설. R-001~R-004 요구사항별 배경, 수용 기준, 예정 API 예시, TripMate/tour-map 예제를 정리.
 - `docs/tasks.md`에 T-024/T-025 완료와 T-026~T-029 후속 구현 백로그 추가.
-- `docs/decisions.md`에 ADR-12 추가. 에이전트별 고정 worktree(`geo-codex`, `geo-claude`, `geo-antigravity`)와 CodeGraph `init -i`/`sync` 운영 방식을 결정으로 기록.
+- `docs/decisions.md`에 ADR-12 추가. 에이전트별 고정 worktree(`maplibre-vworld-js-codex`, `maplibre-vworld-js-claude`, `maplibre-vworld-js-antigravity`)와 CodeGraph `init -i`/`sync` 운영 방식을 결정으로 기록.
 - `docs/dev-environment.md`, `AGENTS.md`, `SKILL.md`, `CLAUDE.md`, `docs/resume.md`에 worktree + CodeGraph 절차와 새 요구사항 문서 진입점을 반영.
 - `.gitignore`에 `.codegraph/` 추가, `.codex/config.toml`에 CodeGraph MCP 서버 설정 추가.
 

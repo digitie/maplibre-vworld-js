@@ -20,7 +20,7 @@
 
 ### Changed
 
-- 에이전트별 고정 worktree(`geo-codex`, `geo-claude`, `geo-antigravity`)와 CodeGraph `init -i`/`sync` 운영 방식을 ADR-12 및 개발 문서에 반영 (T-025).
+- 에이전트별 고정 worktree(`maplibre-vworld-js-codex`, `maplibre-vworld-js-claude`, `maplibre-vworld-js-antigravity`)와 CodeGraph `init -i`/`sync` 운영 방식을 ADR-12 및 개발 문서에 반영 (T-025).
 - 모든 Markdown 문서를 한글로 작성하도록 정책을 강화하고 영문으로 남아 있던 `README.md`, `AI_AGENT_GUIDE.md`, `CHANGELOG.md`를 한글화 (T-017). 코드 식별자, 명령어, URL, 외부 공식 용어, 벤더/제품명, Keep-a-Changelog 표준 keyword는 영문을 유지.
 - `python-kraddr-geo` 식 문서 구조 채택 (T-015): 루트에 `CLAUDE.md`/`AGENTS.md`/`SKILL.md`, 나머지는 `docs/{architecture,decisions,journal,tasks,resume,dev-environment}.md`. public API는 변경 없음.
 

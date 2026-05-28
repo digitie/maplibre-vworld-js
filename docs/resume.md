@@ -31,7 +31,7 @@
 - [ ] `docs/consumer-requirements.md` 읽기 — TripMate/tour-map 요구사항과 예정 API 예제
 - [ ] 마지막 `docs/journal.md` 엔트리 읽기
 - [ ] `git status` + `git log --oneline -10` — 어느 브랜치에 있고 어디까지 커밋되었는가
-- [ ] 고정 worktree 확인 — ChatGPT Codex는 `geo-codex`, Claude Code는 `geo-claude`, Google Antigravity 2.0은 `geo-antigravity`
+- [ ] 고정 worktree 확인 — ChatGPT Codex는 `maplibre-vworld-js-codex`, Claude Code는 `maplibre-vworld-js-claude`, Google Antigravity 2.0은 `maplibre-vworld-js-antigravity`
 - [ ] `codegraph sync` + `codegraph status` — 이미 초기화된 worktree에서는 `codegraph init` 재실행 금지
 - [ ] `npm test`가 깨끗하게 통과하는지 — 시작점이 green인지 확인
 
