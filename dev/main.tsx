@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import ReactDOM from 'react-dom/client';
 import {
   VWorldMap, Marker, WeatherMarker, PlaceMarker, SimpleMarker, MapContextMenu,
-  PriceMarker, PulsingMarker, PinMarker, MakiMarker, ClusterLayer, RoutePointMarker, RouteLine,
+  PriceMarker, PulsingMarker, PinMarker, MakiMarker, ClusterLayer, RoutePointMarker, RouteLine, UserLocationMarker, MeasureLine,
   type VWorldLayerType, PolygonArea, type ClusterPoint,
 } from '../src';
 
@@ -10,6 +10,8 @@ const API_KEY = import.meta.env.VITE_VWORLD_API_KEY || 'YOUR_API_KEY';
 
 const App = () => {
   const [layerType, setLayerType] = useState<VWorldLayerType>('Base');
+  const [cameraTarget, setCameraTarget] = useState<any>(undefined);
+  const [bbox, setBbox] = useState<any>(undefined);
   const [markerPos, setMarkerPos] = useState<[number, number]>([127.024612, 37.532600]);
   const [semanticThreshold, setSemanticThreshold] = useState<number>(13);
 
@@ -73,8 +75,10 @@ const App = () => {
       <VWorldMap
         apiKey={API_KEY}
         layerType={layerType}
-        center={[127.024612, 37.532600]}
+        center={markerPos}
         zoom={12}
+        cameraTarget={cameraTarget}
+        bbox={bbox}
         maxBounds={[
           [124.5, 33.0], // Southwest coordinates of Korea
           [132.0, 38.9]  // Northeast coordinates of Korea
@@ -97,6 +101,9 @@ const App = () => {
           color="#ff0000"
         />
         
+        {/* Marker Tooltip Test */}
+        <Marker lngLat={[127.025, 37.538]} title="Tooltip Test" description="Hover over me!" imageUrl="https://via.placeholder.com/150" />
+
         {/* Simple Markers */}
         <SimpleMarker 
           lngLat={[127.02, 37.53]} 
@@ -165,6 +172,9 @@ const App = () => {
           tooltip="남산 서울타워"
         />
 
+        {/* MeasureLine Test */}
+        <MeasureLine points={[[127.024, 37.532], [127.030, 37.535], [127.035, 37.530]]} />
+
         {/* Namsan Park Area (Polygon) */}
         <PolygonArea 
           id="namsan-park"
@@ -205,6 +215,9 @@ const App = () => {
             { label: 'LPG', price: 129 },
           ]}
         />
+
+        {/* UserLocationMarker Test */}
+        <UserLocationMarker lngLat={[127.020, 37.530]} accuracy_m={100} />
 
         {/* Pulsing Marker */}
         <PulsingMarker lngLat={[126.99, 37.54]} color="#E91E63" />
@@ -306,6 +319,14 @@ const App = () => {
           />
           <span style={{ marginLeft: '8px' }}>{semanticThreshold}</span>
         </label>
+        <div style={{ marginBottom: '8px' }}>
+          <div style={{ marginTop: '8px', marginBottom: '8px' }}>
+            <button onClick={() => setCameraTarget({ center: [126.978, 37.566], zoom: 15, pitch: 45 })}>Fly to Seoul City Hall (Pitch 45)</button>
+            <button onClick={() => setBbox([126.9, 37.5, 127.1, 37.6])}>Fit Bounds (Seoul)</button>
+            <button onClick={() => { setCameraTarget(undefined); setBbox(undefined); }}>Reset Camera Props</button>
+          </div>
+          <button onClick={() => setLayerType('Base')}>Base</button>
+        </div>
         <div style={{ fontSize: '12px' }}>
           Marker Pos: {markerPos[0].toFixed(4)}, {markerPos[1].toFixed(4)}
         </div>

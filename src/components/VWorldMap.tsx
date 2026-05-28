@@ -59,10 +59,9 @@ export interface VWorldMapProps {
    */
   layerType?: VWorldLayerType;
   /**
-   * Initial map center, `[longitude, latitude]`. Required: there is no
-   * implicit default, since a sensible center depends on the consuming app.
+   * Initial map center, `[longitude, latitude]`.
    */
-  center: [number, number];
+  center?: [number, number];
   /**
    * Initial zoom level.
    * @default 12
@@ -139,8 +138,14 @@ export interface VWorldMapProps {
    * (instant). `true` (default) uses `flyTo` (animated).
    */
   animateCameraChanges?: boolean;
+  /** Unified prop to set the camera target instead of individual center/zoom/pitch/bearing props. */
+  cameraTarget?: { center: [number, number]; zoom: number; bearing?: number; pitch?: number; };
+  /** How to animate camera changes when cameraTarget or bbox changes. Default is 'smooth'. */
+  cameraTransition?: 'instant' | 'smooth' | 'flyOver';
+  /** Bounding box to fit the camera into. `[minLng, minLat, maxLng, maxLat]` */
+  bbox?: [number, number, number, number];
   /**
-   * Extra options forwarded to `flyTo` when `animateCameraChanges` is true.
+   * Optional settings for flyTo animations when legacy `center` or `zoom` change.
    * `center`, `zoom`, `pitch`, and `bearing` are always taken from the
    * corresponding props.
    */
@@ -270,12 +275,12 @@ function applyFallbackToStyle(
 export const VWorldMap: React.FC<VWorldMapProps> = ({
   apiKey,
   layerType = 'Base',
-  center,
+  center = [127.024612, 37.5326],
   zoom = 12,
   pitch = 0,
   bearing = 0,
   minZoom = 6,
-  maxZoom = 19,
+  maxZoom = 22,
   maxBounds,
   semanticZoomThreshold,
   navigation = true,
@@ -295,6 +300,9 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   fallback,
   loadingSkeleton,
   animateCameraChanges = true,
+  cameraTarget,
+  cameraTransition = 'smooth',
+  bbox,
   flyToOptions,
   lazy = false,
   lazyEnabled = false,
@@ -556,21 +564,42 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   // `flyToOptions` and `animateCameraChanges` are read through a ref so a
   // fresh `flyToOptions` literal does not re-fly the camera on every parent
   // re-render. The latest values are picked up at apply time.
-  const cameraOptionsRef = useRef({ animateCameraChanges, flyToOptions });
+  const cameraOptionsRef = useRef({ animateCameraChanges, flyToOptions, cameraTarget, cameraTransition, bbox });
   useLayoutEffect(() => {
-    cameraOptionsRef.current = { animateCameraChanges, flyToOptions };
+    cameraOptionsRef.current = { animateCameraChanges, flyToOptions, cameraTarget, cameraTransition, bbox };
   });
 
+  const lastBboxRef = useRef(bbox);
+  const pendingBboxRef = useRef<[number, number, number, number] | null>(null);
+
   const applyPendingCameraIfAny = useCallback((map: MapLibreMap): void => {
+    const { cameraTransition: transition } = cameraOptionsRef.current;
+    
+    // Process BBox if pending
+    if (pendingBboxRef.current) {
+      if (map.isMoving() || map.isEasing()) return;
+      const b = pendingBboxRef.current;
+      map.fitBounds(b, {
+        padding: 50,
+        animate: transition !== 'instant',
+        duration: transition === 'smooth' ? 300 : undefined
+      });
+      lastBboxRef.current = b;
+      pendingBboxRef.current = null;
+      return; // Bbox takes precedence, wait for next cycle for camera
+    }
+
     const pending = pendingCameraRef.current;
     if (!pending) return;
     if (map.isMoving() || map.isEasing()) return;
 
     const { animateCameraChanges: animate, flyToOptions: options } = cameraOptionsRef.current;
-    if (animate) {
+    if (transition === 'instant' || !animate) {
+      map.jumpTo(pending);
+    } else if (transition === 'flyOver') {
       map.flyTo({ ...options, ...pending });
     } else {
-      map.jumpTo(pending);
+      map.easeTo({ ...options, ...pending, duration: 300 });
     }
     lastCameraRef.current = pending;
     pendingCameraRef.current = null;
@@ -581,12 +610,23 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
     if (!map) return;
     if (!mapLoadedForEffects) return;
 
-    const nextCamera: CameraSnapshot = { center, zoom, pitch, bearing };
-    if (sameCamera(lastCameraRef.current, nextCamera)) return;
+    // Evaluate bbox
+    if (bbox && bbox !== lastBboxRef.current) {
+      pendingBboxRef.current = bbox;
+    }
 
-    pendingCameraRef.current = nextCamera;
-    applyPendingCameraIfAny(map);
-  }, [center[0], center[1], zoom, pitch, bearing, mapLoadedForEffects, store, applyPendingCameraIfAny]);
+    // Evaluate cameraTarget or fallback to individual props
+    const nextCamera: CameraSnapshot = cameraTarget
+      ? { center: cameraTarget.center, zoom: cameraTarget.zoom, pitch: cameraTarget.pitch ?? pitch, bearing: cameraTarget.bearing ?? bearing }
+      : { center, zoom, pitch, bearing };
+    if (!sameCamera(lastCameraRef.current, nextCamera)) {
+      pendingCameraRef.current = nextCamera;
+    }
+
+    if (pendingBboxRef.current || pendingCameraRef.current) {
+      applyPendingCameraIfAny(map);
+    }
+  }, [center[0], center[1], zoom, pitch, bearing, cameraTarget, bbox, mapLoadedForEffects, store, applyPendingCameraIfAny]);
 
   // Apply min/max zoom and bounds.
   useEffect(() => {
