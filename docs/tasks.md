@@ -6,11 +6,11 @@
 - (없음)
 
 ## 대기 (우선순위 순)
-- [ ] T-033: [Consumer] 사용자 위치 마커 검토 (`UserLocationMarker` 필요 여부 및 `PulsingMarker` 활용)
-- [ ] T-034: [Consumer] Marker 컴포넌트 범용 프로퍼티(`title`, `description`, `imageUrl`, `selected`) 및 Hover/Tooltip 이벤트 지원 확장
-- [ ] T-035: [Consumer] 카메라 및 애니메이션 통합 Prop (`cameraTarget`, `cameraTransition`, `bbox`) 구현
-- [ ] T-036: [Consumer] 거리 및 측정 유틸리티 (`MeasureLine` 컴포넌트, `haversine` 함수) 추가
-- [ ] T-037: [Consumer] `EventMarker`, `NoticeMarker` 등 도메인 마커 확장 가이드 및 예제 제공
+- [x] T-033: [Consumer] 사용자 위치 마커 검토 (`UserLocationMarker` 필요 여부 및 `PulsingMarker` 활용)
+- [x] T-034: [Consumer] Marker 컴포넌트 범용 프로퍼티(`title`, `description`, `imageUrl`, `selected`) 및 Hover/Tooltip 이벤트 지원 확장
+- [x] T-035: [Consumer] 카메라 및 애니메이션 통합 Prop (`cameraTarget`, `cameraTransition`, `bbox`) 구현
+- [x] T-036: [Consumer] 거리 및 측정 유틸리티 (`MeasureLine` 컴포넌트, `haversine` 함수) 추가
+- [x] T-037: [Consumer] `EventMarker`, `NoticeMarker` 등 도메인 마커 확장 가이드 및 예제 제공
 
 ## 완료
 - [x] T-032 PlaceMarker, WeatherMarker, PriceMarker 등 도메인 마커를 범용 라이브러리 컴포넌트로 인정하고 복구 (ADR-16). (2026-05-28)
@@ -21,7 +21,7 @@
 - [x] T-027 마커 클릭/지도 클릭 구분 context 지원 — raw 이벤트를 유지하면서 두 번째 인자로 `source`, `interactionId`, `lngLat` 같은 context를 전달하는 비파괴 API 구현 완료. (2026-05-28)
 - [x] T-026 `<VWorldMap>` lazy loading 지원 — `IntersectionObserver` 기반으로 viewport 진입 전 MapLibre 인스턴스와 VWorld 타일 요청 지연 적용. `lazy`, `lazyRootMargin`, manual enable 기능 구현 및 테스트 작성. (2026-05-27)
 - [x] T-030 Antigravity 2.0 에 맞게 프로젝트 MCP 설정 반영 — `.gemini/mcp.json` 파일 생성 및 `dev-environment.md` 업데이트. (2026-05-27)
-- [x] T-025 CodeGraph + 에이전트별 고정 worktree 운영 정책 적용 — `geo-codex` worktree 생성, `.codegraph/` gitignore, `.codex/config.toml` MCP 설정, ADR-12 및 개발 환경 문서 추가. (2026-05-27)
+- [x] T-025 CodeGraph + 에이전트별 고정 worktree 운영 정책 적용 — `maplibre-vworld-js-codex` worktree 생성, `.codegraph/` gitignore, `.codex/config.toml` MCP 설정, ADR-12 및 개발 환경 문서 추가. (2026-05-27)
 - [x] T-024 TripMate/tour-map 소비자 요구사항 문서화 — lazy loading, 클릭 context, 지원되지 않는 타일 fallback, CI/CD 활성화 검토를 `docs/consumer-requirements.md`에 수용 기준과 예제로 정리. 코드 구현은 후속 T-026~T-029로 분리. (2026-05-27)
 - [x] T-023 PR #23 — ADR-11 추가. 동적 z-index와 시멘틱 줌 manual expand에 대한 결정 기록. (2026-05-26)
 - [x] T-022 PR #22 — PriceMarker 다중 가격 배열 지원, 3단계 LOD 적용, 시멘틱 줌 마커 강제 확장(Manual Expand) 기능 추가, 우클릭(onContextMenu) 예제 추가. (2026-05-26)

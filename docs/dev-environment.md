@@ -29,18 +29,18 @@ npm run dev                         # http://localhost:5173
 
 | 에이전트 | worktree 디렉토리 |
 |----------|-------------------|
-| ChatGPT Codex | `F:\dev\geo-codex` |
-| Claude Code | `F:\dev\geo-claude` |
-| Google Antigravity 2.0 | `F:\dev\geo-antigravity` |
+| ChatGPT Codex | `F:\dev\maplibre-vworld-js-codex` |
+| Claude Code | `F:\dev\maplibre-vworld-js-claude` |
+| Google Antigravity 2.0 | `F:\dev\maplibre-vworld-js-antigravity` |
 
 최초 setup:
 
 ```bash
 cd F:\dev\maplibre-vworld-js
 git fetch
-git worktree add ../geo-codex main
+git worktree add ../maplibre-vworld-js-codex main
 
-cd ../geo-codex
+cd ../maplibre-vworld-js-codex
 PUPPETEER_SKIP_DOWNLOAD=1 npm ci
 codegraph init -i
 ```
@@ -48,7 +48,7 @@ codegraph init -i
 작업 사이클:
 
 ```bash
-cd F:\dev\geo-codex
+cd F:\dev\maplibre-vworld-js-codex
 git fetch
 git switch -c agent/codex-next main
 

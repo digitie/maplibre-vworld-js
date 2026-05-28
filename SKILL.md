@@ -42,7 +42,7 @@ npm run dev                      # 로컬 dev 서버 (.env.local에 VITE_VWORLD_
 
 자세한 환경 셋업은 `docs/dev-environment.md`.
 
-에이전트 작업은 고정 worktree에서 진행한다. ChatGPT Codex는 `F:\dev\geo-codex`, Claude Code는 `F:\dev\geo-claude`, Google Antigravity 2.0은 `F:\dev\geo-antigravity`를 사용한다. worktree마다 한 번만 `codegraph init -i`를 실행하고, 작업 시작마다 `git fetch` 후 새 브랜치를 만들고 `codegraph sync`를 실행한다(ADR-12).
+에이전트 작업은 고정 worktree에서 진행한다. ChatGPT Codex는 `F:\dev\maplibre-vworld-js-codex`, Claude Code는 `F:\dev\maplibre-vworld-js-claude`, Google Antigravity 2.0은 `F:\dev\maplibre-vworld-js-antigravity`를 사용한다. worktree마다 한 번만 `codegraph init -i`를 실행하고, 작업 시작마다 `git fetch` 후 새 브랜치를 만들고 `codegraph sync`를 실행한다(ADR-12).
 
 ## 3. 디렉토리 지도
 
