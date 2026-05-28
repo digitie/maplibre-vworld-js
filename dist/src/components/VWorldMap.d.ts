@@ -43,10 +43,9 @@ export interface VWorldMapProps {
      */
     layerType?: VWorldLayerType;
     /**
-     * Initial map center, `[longitude, latitude]`. Required: there is no
-     * implicit default, since a sensible center depends on the consuming app.
+     * Initial map center, `[longitude, latitude]`.
      */
-    center: [number, number];
+    center?: [number, number];
     /**
      * Initial zoom level.
      * @default 12
@@ -123,8 +122,19 @@ export interface VWorldMapProps {
      * (instant). `true` (default) uses `flyTo` (animated).
      */
     animateCameraChanges?: boolean;
+    /** Unified prop to set the camera target instead of individual center/zoom/pitch/bearing props. */
+    cameraTarget?: {
+        center: [number, number];
+        zoom: number;
+        bearing?: number;
+        pitch?: number;
+    };
+    /** How to animate camera changes when cameraTarget or bbox changes. Default is 'smooth'. */
+    cameraTransition?: 'instant' | 'smooth' | 'flyOver';
+    /** Bounding box to fit the camera into. `[minLng, minLat, maxLng, maxLat]` */
+    bbox?: [number, number, number, number];
     /**
-     * Extra options forwarded to `flyTo` when `animateCameraChanges` is true.
+     * Optional settings for flyTo animations when legacy `center` or `zoom` change.
      * `center`, `zoom`, `pitch`, and `bearing` are always taken from the
      * corresponding props.
      */

@@ -42,6 +42,16 @@ export interface MarkerProps {
   selected?: boolean;
   /** Visual highlighted state — sets `data-highlighted="true"` and applies a softer scale + shadow. */
   highlighted?: boolean;
+  /** Title text to show in a tooltip on hover. */
+  title?: string;
+  /** Description text to show in a tooltip on hover. */
+  description?: string;
+  /** Image URL to show in a tooltip on hover. */
+  imageUrl?: string;
+  /** Fired when the mouse enters the marker. */
+  onMouseEnter?: (event: MouseEvent, context: MapInteractionContext, marker: maplibregl.Marker) => void;
+  /** Fired when the mouse leaves the marker. */
+  onMouseLeave?: (event: MouseEvent, context: MapInteractionContext, marker: maplibregl.Marker) => void;
   /** Interaction ID used for context differentiation when clicked. */
   interactionId?: string;
   /** Whether this marker is a cluster (used for context source differentiation). */
@@ -140,6 +150,11 @@ export const Marker: React.FC<MarkerProps> = ({
   onContextMenu,
   selected,
   highlighted,
+  title,
+  description,
+  imageUrl,
+  onMouseEnter,
+  onMouseLeave,
   interactionId,
   isCluster,
   zIndex,
@@ -153,6 +168,8 @@ export const Marker: React.FC<MarkerProps> = ({
   const dynamicZIndexRef = useRef<number | undefined>(undefined);
   const prevZIndexPropRef = useRef(zIndex);
   const hasOnClickRef = useRef(onClick !== undefined);
+  const [isHovered, setIsHovered] = React.useState(false);
+  const elRef = useRef<HTMLDivElement>(null);
 
   if (prevZIndexPropRef.current !== zIndex) {
     dynamicZIndexRef.current = undefined;
@@ -164,6 +181,8 @@ export const Marker: React.FC<MarkerProps> = ({
   const stableOnClick = useEvent(onClick);
   const stableOnContextMenu = useEvent(onContextMenu);
   const stableOnDragEnd = useEvent(onDragEnd);
+  const stableOnMouseEnter = useEvent(onMouseEnter);
+  const stableOnMouseLeave = useEvent(onMouseLeave);
 
   useLayoutEffect(() => {
     hasOnClickRef.current = onClick !== undefined;
@@ -210,13 +229,23 @@ export const Marker: React.FC<MarkerProps> = ({
       event.stopPropagation();
       stableOnContextMenu(event, getContext(), marker);
     };
+    const handleMouseEnter = (event: MouseEvent) => {
+      setIsHovered(true);
+      stableOnMouseEnter?.(event, getContext(), marker);
+    };
+    const handleMouseLeave = (event: MouseEvent) => {
+      setIsHovered(false);
+      stableOnMouseLeave?.(event, getContext(), marker);
+    };
     const handleDragEnd = () => {
       const { lng, lat } = marker.getLngLat();
-      stableOnDragEnd([lng, lat]);
+      stableOnDragEnd?.([lng, lat]);
     };
 
     element.addEventListener('click', handleClick);
     element.addEventListener('contextmenu', handleContextMenu);
+    element.addEventListener('mouseenter', handleMouseEnter);
+    element.addEventListener('mouseleave', handleMouseLeave);
     if (draggable) marker.on('dragend', handleDragEnd);
 
     markerRef.current = marker;
@@ -224,13 +253,12 @@ export const Marker: React.FC<MarkerProps> = ({
     return () => {
       element.removeEventListener('click', handleClick);
       element.removeEventListener('contextmenu', handleContextMenu);
+      element.removeEventListener('mouseenter', handleMouseEnter);
+      element.removeEventListener('mouseleave', handleMouseLeave);
       if (draggable) marker.off('dragend', handleDragEnd);
       marker.remove();
       markerRef.current = null;
     };
-    // `hasChildren`, `color`, `draggable` affect the construction options
-    // and so genuinely require a re-create. lngLat / offset / state are
-    // applied via the dedicated effects below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, hasChildren, color, draggable, anchor, container]);
 
@@ -268,7 +296,38 @@ export const Marker: React.FC<MarkerProps> = ({
   }, [selected, highlighted, zIndex, ariaLabel, className, interactionId, isCluster]);
 
   if (hasChildren && container) {
-    return createPortal(children, container);
+    return createPortal(
+      <div ref={elRef} style={{ position: 'relative', cursor: onClick ? 'pointer' : 'default' }}>
+        {children}
+        {isHovered && (title || description || imageUrl) && (
+          <div
+            style={{
+              position: 'absolute',
+              bottom: '100%',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              marginBottom: '8px',
+              backgroundColor: 'white',
+              padding: '8px',
+              borderRadius: '4px',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+              zIndex: 1000,
+              width: 'max-content',
+              maxWidth: '200px',
+              textAlign: 'center',
+              pointerEvents: 'none',
+            }}
+          >
+            {imageUrl && (
+              <img src={imageUrl} alt={title} style={{ width: '100%', borderRadius: '2px', marginBottom: '4px' }} />
+            )}
+            {title && <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#333' }}>{title}</div>}
+            {description && <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{description}</div>}
+          </div>
+        )}
+      </div>,
+      container
+    );
   }
   return null;
 };

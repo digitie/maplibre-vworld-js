@@ -35,6 +35,16 @@ export interface MarkerProps {
     selected?: boolean;
     /** Visual highlighted state — sets `data-highlighted="true"` and applies a softer scale + shadow. */
     highlighted?: boolean;
+    /** Title text to show in a tooltip on hover. */
+    title?: string;
+    /** Description text to show in a tooltip on hover. */
+    description?: string;
+    /** Image URL to show in a tooltip on hover. */
+    imageUrl?: string;
+    /** Fired when the mouse enters the marker. */
+    onMouseEnter?: (event: MouseEvent, context: MapInteractionContext, marker: maplibregl.Marker) => void;
+    /** Fired when the mouse leaves the marker. */
+    onMouseLeave?: (event: MouseEvent, context: MapInteractionContext, marker: maplibregl.Marker) => void;
     /** Interaction ID used for context differentiation when clicked. */
     interactionId?: string;
     /** Whether this marker is a cluster (used for context source differentiation). */
