@@ -2,24 +2,19 @@
 
 새 에이전트 세션이 시작될 때 "지금 어디까지 했고, 다음은 뭐 하면 되나"를 한 화면에서 답한다.
 
-## 현재 진척도 (2026-05-27 갱신)
+## 현재 진척도 (2026-05-31 갱신)
 
-- ✅ T-001~T-018, T-020~T-025: 코어 라이브러리 + 보안 패치 + GitHub dependency 패키징 + zod v4 + 디버그 hook + TripMate primitive + 범용 라이브러리 정리 + 런타임 결함 수정 + post-PR13 review fixes + python-kraddr-geo 문서 구조 채택 + GitHub Actions 제거(ADR-10) + 모든 문서 한글화 + RouteLine GeoJSON 복구 + supercluster generateId + Marker portal leak 테스트 + 동적 z-index + PriceMarker 다중 가격/LOD/Manual Expand + ADR-11 + TripMate/tour-map 요구사항 문서화 + CodeGraph/worktree 운영 정책(ADR-12)
-- ⬜ T-019: VWorld `getCapabilities` 응답 기반 layer/tile matrix 자동 검증
-- ⬜ T-026: `<VWorldMap>` lazy loading 지원
-- ⬜ T-027: 마커 클릭/지도 클릭 구분 context 지원
-- ⬜ T-028: 지원되지 않는 타일 fallback 구현
-- ⬜ T-029: CI/CD 활성화 재검토
+- ✅ T-001~T-038: 코어 라이브러리 + 보안 패치 + GitHub dependency 패키징 + zod v4 + 디버그 hook + TripMate primitive + 범용 라이브러리 정리 + python-kraddr-geo 문서 구조/한글화 + RouteLine GeoJSON 복구 + supercluster generateId + Marker portal leak 테스트 + 동적 z-index + PriceMarker 다중 가격/LOD/Manual Expand(ADR-11) + 소비자 요구사항/도메인 마커(ADR-16/17) + CodeGraph/worktree 운영 정책(ADR-12) + 에이전트별 MCP 설정
+- ✅ T-019: ADR-14로 동적 `getCapabilities` 검증 도입을 기각하고 하드코딩 표 유지
+- ✅ T-026: `<VWorldMap>` lazy loading(`IntersectionObserver`, `lazy`/`lazyRootMargin`/manual) 구현
+- ✅ T-027: 마커/지도 클릭 구분 interaction context(`source`/`interactionId`/`lngLat`) 비파괴 구현
+- ✅ T-028: 지원되지 않는 타일 fallback(`unsupportedTileFallback`) 구현
+- ✅ T-029: ADR-13으로 ADR-10을 대체해 제한적 CI 복원(`.github/workflows/ci.yml`)
+- ✅ T-039~T-040 + v0.1.1: 의존성 최신화 + react-doctor 100/100(ADR-18) + v0.1.1 릴리즈 + stale 문서 정합화
 
 ## 다음 한 작업 (1시간 이내 분량)
 
-후보:
-- T-027(클릭 context)는 TripMate 선택/해제 UX에 바로 영향을 주며 API 확장 범위가 작다.
-- T-026(lazy loading)은 초기 렌더 비용과 VWorld 타일 요청량을 줄인다.
-- T-028(지원되지 않는 타일 fallback)은 T-019와 함께 처리하면 layer/zoom 검증 경계가 더 명확해진다.
-- T-029(CI/CD 활성화)는 ADR-10을 먼저 재검토해야 한다.
-- T-019(VWorld getCapabilities)는 WMTS Capabilities XML 파싱 + cache 정책 결정이 필요해 ADR이 먼저 나와야 할 수 있다.
-- 새 백로그가 떠오르면 `docs/tasks.md`에 T-030 이후로 등록한다.
+현재 미완료 기능 백로그는 없다(T-001~T-040 완료). 다음 작업은 새 요구사항이 들어올 때 정해진다. 신규 항목은 `docs/tasks.md`에 `T-041`부터 등록한다.
 
 ## 작업 시작 전 확인할 것
 
@@ -31,7 +26,7 @@
 - [ ] `docs/consumer-requirements.md` 읽기 — TripMate/tour-map 요구사항과 예정 API 예제
 - [ ] 마지막 `docs/journal.md` 엔트리 읽기
 - [ ] `git status` + `git log --oneline -10` — 어느 브랜치에 있고 어디까지 커밋되었는가
-- [ ] 고정 worktree 확인 — ChatGPT Codex는 `maplibre-vworld-js-codex`, Claude Code는 `maplibre-vworld-js-claude`, Google Antigravity 2.0은 `maplibre-vworld-js-antigravity`
+- [ ] 고정 worktree 확인 — ChatGPT Codex는 `vw-codex`, Claude Code는 `vw-claude`, Google Antigravity 2.0은 `vw-antigravity`
 - [ ] `codegraph sync` + `codegraph status` — 이미 초기화된 worktree에서는 `codegraph init` 재실행 금지
 - [ ] `npm test`가 깨끗하게 통과하는지 — 시작점이 green인지 확인
 
