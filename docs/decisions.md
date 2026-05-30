@@ -675,10 +675,10 @@ ADR-15를 통해 `PlaceMarker`, `WeatherMarker`를 라이브러리 패키지 밖
 
 ### 근거
 
-- ADR-10과 일관되게 GitHub Actions는 사용하지 않으며, react-doctor는 로컬 품질 게이트의 보조 점검 도구로 위치시킨다(필수 게이트는 type-check/test/build/dist drift 유지).
+- react-doctor는 GitHub Actions CI(ADR-13으로 ADR-10을 대체해 제한적 복원됨)와 로컬 품질 게이트를 보완하는 온디맨드 점검 도구로 위치시킨다(필수 게이트는 type-check/test/build/dist drift 유지).
 - 의도된 아키텍처를 린터에 맞춰 리팩터링하는 것은 문서화된 결정(ADR-8/11)과 58개 테스트가 검증하는 동작을 위협하므로, false positive는 증거와 함께 억제하는 편이 안전하다.
 
 ### 결과
 
 - `react-doctor.config.json` 추가, `npx react-doctor@latest` 100/100 ("No issues found!").
-- react-doctor는 dev dependency로 설치하지 않고 `npx`로 on-demand 실행한다(ADR-10 — 최소 의존성·로컬 게이트 정책).
+- react-doctor는 dev dependency로 설치하지 않고 `npx`로 on-demand 실행한다(최소 의존성 유지).
