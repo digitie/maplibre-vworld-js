@@ -2,6 +2,23 @@
 
 `maplibre-vworld`의 주목할 만한 변경 사항을 기록한다. 포맷은 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)를 따르고 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)을 느슨하게 준수한다. 1.0.0은 PR #14 머지 후 안정 baseline이다. 표준 헤더(`### Added`/`Changed`/`Removed`/`Fixed`/`Security`)는 Keep-a-Changelog 표준에 따라 영문을 유지하고, 본문 항목은 한글로 적는다.
 
+## [0.1.1] - 2026-05-31
+
+### Added
+
+- react-doctor 정적 점검을 도입하고 `react-doctor.config.json`으로 스캔 범위(`dist/`·`dev/` 제외)와 false positive 룰 억제 정책을 정의 (ADR-18). `npx react-doctor@latest` 100/100 달성.
+
+### Changed
+
+- `puppeteer` devDependency를 `^25.0.4` → `^25.1.0`으로 상향 (의존성 최신화).
+- 마커/레이어 컴포넌트의 인라인 스타일 객체를 모듈 스코프 또는 렌더 외 변수로 추출하고, `transition: all`을 명시적 속성 목록으로 교체. public API·렌더 결과 변화 없음.
+- `VWorldMap`의 init 에러 초기화를 `useEffect` 대신 render-time prev-prop 비교 패턴으로 변경(불필요한 추가 커밋 제거).
+
+### Fixed
+
+- 접근성 개선: 클릭 가능한 `PriceMarker`/`WeatherMarker` 요소에 키보드 인터랙션(`role`/`tabIndex`/`onKeyDown` 또는 `<button>`)과 레이블을 부여하고, 일부 `<button>`에 명시적 `type`을 지정. 가독성을 위해 10·11px 텍스트를 12px로 상향.
+- `MeasureLine`·`PriceMarker`·`WeatherMarker` 리스트의 배열 인덱스 key를 데이터 기반 안정 key로 교체.
+
 ## [0.1.0] - 2026-05-28
 
 ### Added

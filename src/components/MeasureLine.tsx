@@ -56,25 +56,36 @@ export const MeasureLine: React.FC<MeasureLineProps> = ({
 
   const lastPoint = points[points.length - 1];
 
+  const segmentStyle: React.CSSProperties = {
+    backgroundColor: 'white',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    fontSize: '12px',
+    color: '#333',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+    border: `1px solid ${color}`,
+    pointerEvents: 'none',
+    whiteSpace: 'nowrap',
+  };
+  const totalStyle: React.CSSProperties = {
+    backgroundColor: color,
+    padding: '4px 8px',
+    borderRadius: '4px',
+    fontSize: '13px',
+    fontWeight: 'bold',
+    color: 'white',
+    boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
+    pointerEvents: 'none',
+    whiteSpace: 'nowrap',
+  };
+
   return (
     <>
       <RouteLine coordinates={points} color={color} width={width} />
-      
-      {showSegmentDistances && segments.map((seg, i) => (
-        <Marker key={`seg-${i}`} lngLat={seg.midPoint} anchor="center">
-          <div
-            style={{
-              backgroundColor: 'white',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              fontSize: '11px',
-              color: '#333',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
-              border: `1px solid ${color}`,
-              pointerEvents: 'none',
-              whiteSpace: 'nowrap',
-            }}
-          >
+
+      {showSegmentDistances && segments.map((seg) => (
+        <Marker key={`seg-${seg.midPoint[0]},${seg.midPoint[1]}`} lngLat={seg.midPoint} anchor="center">
+          <div style={segmentStyle}>
             {formatDistance(seg.distance)}
           </div>
         </Marker>
@@ -82,19 +93,7 @@ export const MeasureLine: React.FC<MeasureLineProps> = ({
 
       {showTotalDistance && (
         <Marker lngLat={lastPoint} anchor="bottom" offset={[0, -10]}>
-          <div
-            style={{
-              backgroundColor: color,
-              padding: '4px 8px',
-              borderRadius: '4px',
-              fontSize: '13px',
-              fontWeight: 'bold',
-              color: 'white',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
-              pointerEvents: 'none',
-              whiteSpace: 'nowrap',
-            }}
-          >
+          <div style={totalStyle}>
             Total: {formatDistance(totalDistance)}
           </div>
         </Marker>

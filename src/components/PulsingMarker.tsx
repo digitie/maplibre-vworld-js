@@ -32,37 +32,37 @@ export const PulsingMarker: React.FC<PulsingMarkerProps> = ({
   ...props
 }) => {
   ensurePulsingStyle();
+
+  const dotStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: color,
+    borderRadius: '50%',
+    border: '2px solid white',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+    zIndex: 2,
+    boxSizing: 'border-box',
+  };
+  const rippleStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: '-100%',
+    left: '-100%',
+    width: '300%',
+    height: '300%',
+    backgroundColor: color,
+    borderRadius: '50%',
+    zIndex: 1,
+    animation: 'vworld-pulsing-ripple 2s infinite ease-out',
+  };
+
   return (
     <Marker {...props}>
       <div style={{ position: 'relative', width: size, height: size }}>
-        <div
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            backgroundColor: color,
-            borderRadius: '50%',
-            border: '2px solid white',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-            zIndex: 2,
-            boxSizing: 'border-box',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: '-100%',
-            left: '-100%',
-            width: '300%',
-            height: '300%',
-            backgroundColor: color,
-            borderRadius: '50%',
-            zIndex: 1,
-            animation: 'vworld-pulsing-ripple 2s infinite ease-out',
-          }}
-        />
+        <div style={dotStyle} />
+        <div style={rippleStyle} />
       </div>
     </Marker>
   );
