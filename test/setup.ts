@@ -23,6 +23,7 @@ vi.mock('maplibre-gl', () => {
       flyTo: vi.fn(),
       fitBounds: vi.fn(),
       jumpTo: vi.fn(),
+      easeTo: vi.fn(),
       isMoving: vi.fn(() => false),
       isEasing: vi.fn(() => false),
       resize: vi.fn(),

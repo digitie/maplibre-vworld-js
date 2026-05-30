@@ -204,6 +204,7 @@ describe('VWorldMap', () => {
           apiKey="test-key"
           center={[127, 37]}
           zoom={10}
+          cameraTransition="flyOver"
           flyToOptions={{ duration: 500 }}
         />,
       );
@@ -215,6 +216,7 @@ describe('VWorldMap', () => {
           apiKey="test-key"
           center={[128, 38]}
           zoom={10}
+          cameraTransition="flyOver"
           flyToOptions={{ duration: 500 }}
         />,
       );
@@ -233,13 +235,13 @@ describe('VWorldMap', () => {
     it('updates pitch and bearing when camera props change', async () => {
       vi.clearAllMocks();
       const { rerender } = render(
-        <VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} pitch={0} bearing={0} />,
+        <VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} pitch={0} bearing={0} cameraTransition="flyOver" />,
       );
       const map = latestMapMock();
       await waitFor(() => expect(map.getZoom).toHaveBeenCalledTimes(2));
 
       rerender(
-        <VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} pitch={30} bearing={45} />,
+        <VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} pitch={30} bearing={45} cameraTransition="flyOver" />,
       );
 
       await waitFor(() => {
@@ -255,7 +257,7 @@ describe('VWorldMap', () => {
     it('defers camera prop changes while user is panning and re-applies on moveend', async () => {
       vi.clearAllMocks();
       const { rerender } = render(
-        <VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} />,
+        <VWorldMap apiKey="test-key" center={[127, 37]} zoom={10} cameraTransition="flyOver" />,
       );
       const map = latestMapMock();
       await waitFor(() => expect(maplibregl.Map).toHaveBeenCalled());
@@ -263,7 +265,7 @@ describe('VWorldMap', () => {
       // Simulate the user being mid-gesture.
       map.isMoving.mockReturnValue(true);
 
-      rerender(<VWorldMap apiKey="test-key" center={[128, 38]} zoom={10} />);
+      rerender(<VWorldMap apiKey="test-key" center={[128, 38]} zoom={10} cameraTransition="flyOver" />);
 
       // While the gesture is in progress, no camera command runs.
       expect(map.flyTo).not.toHaveBeenCalled();

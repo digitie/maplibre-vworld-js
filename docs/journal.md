@@ -2,6 +2,23 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-05-30 (에이전트별 MCP 설정 고도화 및 고정 worktree 개편)
+
+**작업**: Claude Code, GPT Codex, Antigravity 에이전트의 역량 강화를 위해 Playwright 및 Sequential Thinking MCP 서버 설정을 추가하고, `python-kraddr-geo` 저장소의 운용 방식을 참고하여 에이전트별 고정 worktree 경로(`vw-codex`, `vw-antigravity`, `vw-claude`)를 개편 및 생성하였다. 더불어 기존 로컬 설정 최신화 및 매뉴얼 문서들을 갱신하고, Vitest 모킹 오류를 수정하여 품질 게이트를 완전히 통과시켰다.
+
+**구현 상세**:
+- **설정 파일 생성**: 에이전트별 MCP 설정 파일(`claude.json`, `antigravity.json`, `codex.json`)을 루트 디렉토리에 생성하여 Git으로 관리되도록 추가. 각 에이전트 설정에는 `playwright`와 `sequential-thinking` MCP가 포함되며, `codegraph` MCP의 `cwd` 경로를 해당 에이전트 전용 worktree 경로로 각각 연결함.
+- **기존 로컬 설정 및 매뉴얼 갱신**: 프로젝트 로컬 설정 파일(`.codex/config.toml`, `.gemini/mcp.json`)에 `playwright` 및 `sequential-thinking` 설정을 추가하고 `codegraph` 경로를 갱신함. `AGENTS.md`, `CLAUDE.md`, `SKILL.md` 문서 내의 고정 worktree 경로를 이전 `maplibre-vworld-js-` 계열에서 `vw-` 계열로 단순화하여 반영함.
+- **Git Worktree 구축**: `git worktree add` 명령을 사용하여 `F:\dev\vw-codex`, `F:\dev\vw-antigravity`, `F:\dev\vw-claude` 경로의 고정 worktree 3개를 생성 및 등록함 (detached HEAD 상태로 안전하게 생성).
+- **테스트 결함 수정**: `Map` mock 구현에서 누락되었던 `easeTo` 함수를 `test/setup.ts`에 추가하였으며, `test/VWorldMap.test.tsx`의 카메라 전환 테스트에서 기본 transition(smooth) 하의 `easeTo` 대신 `flyTo` 호출을 명시적으로 검증할 수 있도록 `cameraTransition="flyOver"` prop을 명시하도록 수정함. 이로 인해 전체 57개 테스트 케이스가 100% 통과함.
+
+**검증**:
+- `npm run type-check`, `npm test`, `npm run build`, `git diff --exit-code -- dist/`, `npm run pack:check` 품질 게이트 로컬 검증 완료.
+
+**다음 작업**: PR 생성 및 메인 브랜치 머지 수행.
+
+---
+
 ## 2026-05-28 (MapContextMenu 추가 및 도메인 마커 분리 - T-031)
 
 **작업**: 범용 우클릭 메뉴 추가 및 도메인 마커 예제 분리 (T-031).

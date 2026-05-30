@@ -13,6 +13,7 @@
 - [x] T-037: [Consumer] `EventMarker`, `NoticeMarker` 등 도메인 마커 확장 가이드 및 예제 제공
 
 ## 완료
+- [x] T-038 에이전트별 MCP 설정 고도화 및 고정 worktree 개편 — claude.json, antigravity.json, codex.json을 생성하여 Git으로 관리하고, 기존 로컬 설정(.codex/config.toml, .gemini/mcp.json)과 매뉴얼 문서(AGENTS.md, CLAUDE.md, SKILL.md)를 갱신하였으며, F:\dev\vw-codex, vw-antigravity, vw-claude 경로의 고정 worktree 3개를 생성 및 등록 완료. Vitest mock 결함도 수정함. (2026-05-30)
 - [x] T-032 PlaceMarker, WeatherMarker, PriceMarker 등 도메인 마커를 범용 라이브러리 컴포넌트로 인정하고 복구 (ADR-16). (2026-05-28)
 - [x] T-031 MapContextMenu 컴포넌트 추가 및 도메인 마커(PlaceMarker, WeatherMarker) 예제로 분리 (PriceMarker는 예외 유지). (2026-05-28)
 - [x] T-019 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 동적 도입 검토 결과 ADR-14를 작성하여 성능 및 안정성 이유로 기각(reject)하고 기존 하드코딩 방식 유지. (2026-05-28)
