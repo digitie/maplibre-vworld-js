@@ -2,6 +2,14 @@
 
 `maplibre-vworld`의 주목할 만한 변경 사항을 기록한다. 포맷은 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)를 따르고 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)을 느슨하게 준수한다. 1.0.0은 PR #14 머지 후 안정 baseline이다. 표준 헤더(`### Added`/`Changed`/`Removed`/`Fixed`/`Security`)는 Keep-a-Changelog 표준에 따라 영문을 유지하고, 본문 항목은 한글로 적는다.
 
+## [0.1.2] - 2026-05-31
+
+### Changed
+
+- 문서 정합화 (코드·`dist` 변경 없음, react-doctor 100/100 유지):
+  - ADR-18(react-doctor 도입) 기록의 CI 진술 오류 수정 — "ADR-10과 일관되게 GitHub Actions 미사용"을 ADR-13(CI 제한적 복원) 사실에 맞게 정정 (T-039).
+  - `CLAUDE.md`·`docs/resume.md`의 stale한 현황·백로그·worktree 경로를 실제 완료 상태(T-019는 ADR-14로 기각, T-026~T-029 완료, ADR-13 CI 복원)에 맞게 갱신 (T-040).
+
 ## [0.1.1] - 2026-05-31
 
 ### Added
