@@ -2,6 +2,16 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-05-31 (tasks.md 배치 정정 — T-033~T-037 완료 이동)
+
+**작업**: `docs/tasks.md`에서 T-033~T-037이 `[x]`(완료) 체크되어 있는데도 "## 대기" 섹션 아래에 남아 있어 미완료처럼 보였다. 이들은 2026-05-28 PR #37(`b899e5b`)에서 모두 구현·머지된 상태(`UserLocationMarker`, Marker hover/tooltip prop, `cameraTarget`/`cameraTransition`/`bbox`, `MeasureLine`+`haversine`, `EventMarker`/`NoticeMarker` 예제)다. 다섯 항목을 "## 완료"로 옮기고 "## 대기"를 "(없음)"으로 정리했다.
+
+**검증**: 문서 전용 변경. 코드·테스트 영향 없음.
+
+**다음 작업**: 새 요구사항 대기.
+
+---
+
 ## 2026-05-31 (v0.1.2 릴리즈 — 문서 정합화)
 
 **작업**: T-039(ADR-18 CI 진술 오류 수정)·T-040(stale CLAUDE.md·resume.md 정합화)을 묶어 v0.1.2로 릴리즈했다. 코드·`dist` 변경은 없는 문서 전용 패치 릴리즈다. 릴리즈 전 `npx react-doctor@latest --score`로 100/100 유지를 확인했다.

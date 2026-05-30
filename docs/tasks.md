@@ -6,16 +6,17 @@
 - (없음)
 
 ## 대기 (우선순위 순)
-- [x] T-033: [Consumer] 사용자 위치 마커 검토 (`UserLocationMarker` 필요 여부 및 `PulsingMarker` 활용)
-- [x] T-034: [Consumer] Marker 컴포넌트 범용 프로퍼티(`title`, `description`, `imageUrl`, `selected`) 및 Hover/Tooltip 이벤트 지원 확장
-- [x] T-035: [Consumer] 카메라 및 애니메이션 통합 Prop (`cameraTarget`, `cameraTransition`, `bbox`) 구현
-- [x] T-036: [Consumer] 거리 및 측정 유틸리티 (`MeasureLine` 컴포넌트, `haversine` 함수) 추가
-- [x] T-037: [Consumer] `EventMarker`, `NoticeMarker` 등 도메인 마커 확장 가이드 및 예제 제공
+- (없음)
 
 ## 완료
 - [x] T-040 stale 문서 정합화 — CLAUDE.md(현황·CI 상태·후속 백로그·브랜치 정리)와 resume.md(진척도·다음 작업·worktree 경로)를 `docs/tasks.md` 실제 상태에 맞게 갱신. T-019/T-026~T-029 완료 및 ADR-13 CI 복원, v0.1.1 릴리즈 반영. (2026-05-31)
 - [x] T-039 ADR-18의 CI 진술 오류 수정 — "ADR-10과 일관되게 GitHub Actions 미사용"이라는 잘못된 문구를 ADR-13(CI 제한적 복원, ADR-10 대체) 사실에 맞게 정정. (2026-05-31)
 - [x] T-038 에이전트별 MCP 설정 고도화 및 고정 worktree 개편 — claude.json, antigravity.json, codex.json을 생성하여 Git으로 관리하고, 기존 로컬 설정(.codex/config.toml, .gemini/mcp.json)과 매뉴얼 문서(AGENTS.md, CLAUDE.md, SKILL.md)를 갱신하였으며, F:\dev\vw-codex, vw-antigravity, vw-claude 경로의 고정 worktree 3개를 생성 및 등록 완료. Vitest mock 결함도 수정함. (2026-05-30)
+- [x] T-037 [Consumer] 도메인 마커 확장 가이드·예제 — `EventMarker`, `NoticeMarker` 등 도메인 특화 마커를 라이브러리 primitive 위에서 구성하는 예제를 `dev/examples/markers/`에 제공 (PR #37, b899e5b). (2026-05-28)
+- [x] T-036 [Consumer] 거리·측정 유틸리티 — `MeasureLine` 컴포넌트와 `haversine`/`formatDistance` 유틸 추가 (PR #37). (2026-05-28)
+- [x] T-035 [Consumer] 카메라·애니메이션 통합 Prop — `cameraTarget`/`cameraTransition`/`bbox` 선언적 카메라 제어 구현 (PR #37). (2026-05-28)
+- [x] T-034 [Consumer] Marker 범용 프로퍼티·Hover/Tooltip — `title`/`description`/`imageUrl`/`selected`/`highlighted` 및 `onMouseEnter`/`onMouseLeave` 이벤트 확장 (PR #37). (2026-05-28)
+- [x] T-033 [Consumer] 사용자 위치 마커 — `UserLocationMarker` 추가 및 `PulsingMarker` 활용 (PR #37). (2026-05-28)
 - [x] T-032 PlaceMarker, WeatherMarker, PriceMarker 등 도메인 마커를 범용 라이브러리 컴포넌트로 인정하고 복구 (ADR-16). (2026-05-28)
 - [x] T-031 MapContextMenu 컴포넌트 추가 및 도메인 마커(PlaceMarker, WeatherMarker) 예제로 분리 (PriceMarker는 예외 유지). (2026-05-28)
 - [x] T-019 VWorld `getCapabilities` 응답을 활용한 layer/tile matrix 자동 검증 — 동적 도입 검토 결과 ADR-14를 작성하여 성능 및 안정성 이유로 기각(reject)하고 기존 하드코딩 방식 유지. (2026-05-28)
