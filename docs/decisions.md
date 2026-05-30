@@ -642,3 +642,43 @@ ADR-15를 통해 `PlaceMarker`, `WeatherMarker`를 라이브러리 패키지 밖
 
 - 개발 로드맵(`docs/tasks.md`)에 구체적인 기능 구현 태스크가 추가되어 라이브러리 고도화 방향이 명확해졌습니다.
 - `consumer-feature-catalog.md`의 많은 ❓ 항목들이 구체적인 태스크(T-NNN)로 추적되며 능동적으로 해결될 것입니다.
+
+---
+
+## ADR-18: react-doctor 정적 점검 도입 및 룰 억제 정책
+
+- 상태: accepted
+- 날짜: 2026-05-31
+- 결정자: human, AI agent
+
+### 컨텍스트
+
+`npx react-doctor@latest`(v0.2.14)를 도입해 React 코드 건강도를 점검했다. 초기 점수는 84/100이었고, 141개 진단 중 상당수가 라이브러리 특성·의도된 아키텍처(ADR-8 외부 store/`useEvent`, ADR-11 동적 z-index)와 충돌하는 false positive였다. react-doctor는 단일 진입점 애플리케이션을 가정하므로, 다중 export 라이브러리와 명령형 MapLibre 통합을 오인하는 경향이 있다.
+
+### 결정
+
+루트에 `react-doctor.config.json`을 두고, 다음 두 축으로 100/100을 달성한다.
+
+1. **스캔 범위 한정** — `ignore.files`로 `dist/**`(빌드 산출물, 생성물)와 `dev/**`(비배포 로컬 플레이그라운드, `package.json#files`에서 제외)를 스캔 대상에서 제외한다. 라이브러리 표면은 `src/`다.
+2. **근거 있는 룰 억제** (`ignore.rules`) — 코드를 왜곡해 false positive를 "수정"하지 않는다. 각 억제는 증거 기반이다:
+   - `deslop/unused-file` — 모든 컴포넌트는 `src/index.ts`가 public API로 re-export하므로 미사용이 아님.
+   - `deslop/unused-dev-dependency` — `puppeteer`는 `.gitignore`된 로컬 스크립트(`take_screenshot.js` 등)가 사용. 도구가 gitignore 파일을 못 봄.
+   - `react-doctor/exhaustive-deps`, `no-event-handler`, `advanced-event-handler-refs` — `useEvent`/ref 기반 의도적 dep 관리와 명령형 MapLibre 구독(`map.on/off`). 이미 `eslint-disable` 주석으로 문서화됨 (ADR-8).
+   - `no-cascading-set-state`, `rerender-state-only-in-handlers` — 상태가 effect 재실행을 gating하므로 ref로 대체하면 동작이 깨짐.
+   - `prefer-useReducer`, `no-giant-component` — 외부 store 아키텍처(ADR-8)에 대한 의견성 룰.
+   - `no-z-index-9999` — z-index 값이 마커 z-index 베이스라인(1000)·맵 컨트롤 오버레이와 연동됨 (ADR-11).
+   - `no-long-transition-duration` — `PulsingMarker`의 무한 펄스 `animation`(2s)이며 UI 피드백 transition이 아님.
+   - `no-render-in-render` — `renderCluster`/`renderMarker`는 소비자 render-prop 공개 API로, render 중 호출이 관용적·의도적.
+   - `prefer-tag-over-role` — `PriceMarker`/`WeatherMarker`의 확장형 칩은 블록·중첩 인터랙티브 자식(예: WeatherMarker 칩 내부의 close `<button>`)을 포함하므로 의미론적 `<button>`으로 만들면 잘못된 HTML 중첩이 됨. 컨테이너에는 `role="button"`이 올바름.
+
+   그 외 진단은 **실제 코드 수정**으로 해결했다: 인라인 스타일 객체 추출(`no-inline-exhaustive-style`), 명시적 transition 속성(`no-transition-all`), `<button type>`, 안정 key, `fontSize` ≥12px, 순수 함수 모듈 스코프 이동, SVG 소수 정밀도 축소, 키보드 접근성, prop 변경 시 state 초기화의 render-time 패턴화(`no-adjust-state-on-prop-change`).
+
+### 근거
+
+- ADR-10과 일관되게 GitHub Actions는 사용하지 않으며, react-doctor는 로컬 품질 게이트의 보조 점검 도구로 위치시킨다(필수 게이트는 type-check/test/build/dist drift 유지).
+- 의도된 아키텍처를 린터에 맞춰 리팩터링하는 것은 문서화된 결정(ADR-8/11)과 58개 테스트가 검증하는 동작을 위협하므로, false positive는 증거와 함께 억제하는 편이 안전하다.
+
+### 결과
+
+- `react-doctor.config.json` 추가, `npx react-doctor@latest` 100/100 ("No issues found!").
+- react-doctor는 dev dependency로 설치하지 않고 `npx`로 on-demand 실행한다(ADR-10 — 최소 의존성·로컬 게이트 정책).

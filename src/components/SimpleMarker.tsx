@@ -42,21 +42,21 @@ export const SimpleMarker: React.FC<SimpleMarkerProps> = ({
     return <PinMarker lngLat={props.lngLat} color={bgColor} size={20} showInnerCircle={false} />;
   }
 
+  const pillStyle: React.CSSProperties = {
+    background: bgColor,
+    color: textColor,
+    padding: '2px 6px',
+    borderRadius: '4px',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    whiteSpace: 'nowrap',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+    pointerEvents: 'none',
+  };
+
   return (
     <Marker {...props}>
-      <div
-        style={{
-          background: bgColor,
-          color: textColor,
-          padding: '2px 6px',
-          borderRadius: '4px',
-          fontSize: '12px',
-          fontWeight: 'bold',
-          whiteSpace: 'nowrap',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-          pointerEvents: 'none',
-        }}
-      >
+      <div style={pillStyle}>
         {label}
       </div>
     </Marker>

@@ -342,10 +342,18 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
   const shouldMountMap = hasApiKey && initError === null && shouldMountLazy;
 
   // Clear init error when the consumer rotates the key or switches layers —
-  // a terminal failure will re-trip immediately, so this is safe.
-  useEffect(() => {
+  // a terminal failure re-trips immediately, so this is safe. Done during
+  // render with a prev-prop comparison (matching the PriceMarker/WeatherMarker
+  // idiom) rather than a useEffect, which would force an extra commit with a
+  // stale UI between the two renders.
+  const prevStyleKeyRef = useRef({ apiKey, layerType });
+  if (
+    prevStyleKeyRef.current.apiKey !== apiKey ||
+    prevStyleKeyRef.current.layerType !== layerType
+  ) {
+    prevStyleKeyRef.current = { apiKey, layerType };
     setInitError(null);
-  }, [apiKey, layerType]);
+  }
 
   // Listen for custom protocol tile errors
   useEffect(() => {
@@ -435,10 +443,12 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
         transformRequest,
       });
     } catch (err) {
+      // eslint-disable-next-line react-doctor/no-adjust-state-on-prop-change -- error handling for a MapLibre constructor throw, not prop-derived state mirroring.
       setInitError(err instanceof Error ? err : new Error(String(err)));
       return;
     }
 
+    // eslint-disable-next-line react-doctor/no-adjust-state-on-prop-change -- resets the load gate for a freshly created map instance (init sequencing), not prop mirroring.
     setMapLoadedForEffects(false);
     appliedStyleRef.current = { apiKey, layerType };
     store.setMap(map);

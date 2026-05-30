@@ -2,6 +2,24 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-05-31 (의존성 최신화 + react-doctor 100/100 + v0.1.1 릴리즈)
+
+**작업**: npm 의존성을 최신화하고(`puppeteer ^25.0.4 → ^25.1.0`, 그 외는 이미 최신), `npx react-doctor@latest`(v0.2.14) 정적 점검을 도입해 점수를 84 → 100/100으로 끌어올린 뒤 v0.1.1로 릴리즈했다.
+
+**구현 상세**:
+- **의존성**: `npm outdated`상 구버전은 puppeteer뿐이어서 상향. type-check/test(58)/build/dist drift 통과.
+- **react-doctor 도입 (ADR-18)**: 루트에 `react-doctor.config.json` 추가. `dist/**`·`dev/**`를 스캔 제외하고, 라이브러리 구조·의도된 아키텍처(ADR-8/11)와 충돌하는 false positive 룰을 증거 기반으로 억제. dev dependency로 설치하지 않고 `npx` on-demand 실행(ADR-10).
+- **실제 코드 수정**: 인라인 스타일 객체 추출(`no-inline-exhaustive-style` ×19), 명시적 transition 속성, `<button type>`, 키보드 접근성(`role`/`tabIndex`/`onKeyDown`, `PriceMarker` 점은 `<button>`으로 전환 + `aria-label`), 데이터 기반 안정 key, `fontSize` ≥12px, `formatPrice` 모듈 스코프 이동, SVG 소수 정밀도 축소, `VWorldMap` init 에러 초기화의 render-time prev-prop 패턴화. public API·렌더 결과 변화 없음.
+- **릴리즈**: `package.json` 0.1.0 → 0.1.1, `CHANGELOG.md` `[0.1.1]` 추가, `dist/` 재빌드.
+
+**결정**: ADR-18 (react-doctor 도입 및 룰 억제 정책).
+
+**검증**: `npm run type-check`, `npm test`(58/58), `npm run build`, `git diff --exit-code -- dist/`, `npx react-doctor@latest` 100/100 ("No issues found!").
+
+**다음 작업**: PR #41 머지 후 `v0.1.1` 태그 푸시.
+
+---
+
 ## 2026-05-30 (에이전트별 MCP 설정 고도화 및 고정 worktree 개편)
 
 **작업**: Claude Code, GPT Codex, Antigravity 에이전트의 역량 강화를 위해 Playwright 및 Sequential Thinking MCP 서버 설정을 추가하고, `python-kraddr-geo` 저장소의 운용 방식을 참고하여 에이전트별 고정 worktree 경로(`vw-codex`, `vw-antigravity`, `vw-claude`)를 개편 및 생성하였다. 더불어 기존 로컬 설정 최신화 및 매뉴얼 문서들을 갱신하고, Vitest 모킹 오류를 수정하여 품질 게이트를 완전히 통과시켰다.

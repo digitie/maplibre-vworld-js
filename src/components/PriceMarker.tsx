@@ -28,6 +28,11 @@ export interface PriceMarkerProps extends Omit<MarkerProps, 'children'> {
   lodThresholds?: [number, number];
 }
 
+function formatPrice(p: string | number): string {
+  if (typeof p === 'number') return p.toLocaleString();
+  return p;
+}
+
 /**
  * Airbnb-style price chip marker.
  */
@@ -57,77 +62,87 @@ export const PriceMarker: React.FC<PriceMarkerProps> = ({
 
   const effectiveStage = isManuallyExpanded ? 1 : stage;
 
-  const formatPrice = (p: string | number) => {
-    if (typeof p === 'number') return p.toLocaleString();
-    return p;
-  };
-
   const isArray = Array.isArray(price);
 
   if (effectiveStage === 3) {
+    const dotStyle: React.CSSProperties = {
+      width: '12px',
+      height: '12px',
+      padding: 0,
+      boxSizing: 'border-box',
+      background: isHovered && isHoverable ? '#222' : 'white',
+      border: '2px solid #222',
+      borderRadius: '50%',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+      cursor: isHoverable ? 'pointer' : 'default',
+      transition: 'background 0.2s ease, transform 0.2s ease',
+      transform: (isHovered && isHoverable) ? 'scale(1.2)' : 'scale(1)',
+    };
     return (
       <Marker {...props}>
-        <div 
+        <button
+          type="button"
+          aria-label="가격 상세 보기"
           onClick={() => {
             setIsManuallyExpanded(true);
           }}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          style={{
-            width: '12px',
-            height: '12px',
-            background: isHovered && isHoverable ? '#222' : 'white',
-            border: '2px solid #222',
-            borderRadius: '50%',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-            cursor: isHoverable ? 'pointer' : 'default',
-            transition: 'all 0.2s ease',
-            transform: (isHovered && isHoverable) ? 'scale(1.2)' : 'scale(1)',
-          }}
+          style={dotStyle}
         />
       </Marker>
     );
   }
 
-  const displayPrice = isArray 
+  const displayPrice = isArray
     ? (effectiveStage === 2 ? (price as PriceItem[]).slice(0, 2) : (price as PriceItem[]))
     : price;
 
+  const chipStyle: React.CSSProperties = {
+    background: isHovered && isHoverable ? '#222' : 'white',
+    color: isHovered && isHoverable ? 'white' : '#222',
+    border: '1px solid #ddd',
+    borderRadius: isArray ? '12px' : '24px',
+    padding: isArray ? '8px 12px' : '6px 12px',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    boxShadow: isHovered && isHoverable
+      ? '0 4px 12px rgba(0,0,0,0.3)'
+      : '0 2px 6px rgba(0,0,0,0.15)',
+    cursor: isHoverable ? 'pointer' : 'default',
+    transition: 'background 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out',
+    transform: (isHovered && isHoverable) ? 'scale(1.05)' : 'scale(1)',
+    display: 'flex',
+    flexDirection: isArray ? 'column' : 'row',
+    alignItems: isArray ? 'stretch' : 'center',
+    gap: isArray ? '4px' : '2px',
+    minWidth: isArray ? '120px' : 'auto',
+  };
+
   return (
     <Marker {...props}>
-      <div 
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => {
           if (isManuallyExpanded) {
              // Clicking an expanded marker toggles it back to simplified (if currently simplified by zoom)
              setIsManuallyExpanded(false);
           }
         }}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && isManuallyExpanded) {
+            e.preventDefault();
+            setIsManuallyExpanded(false);
+          }
+        }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        style={{
-          background: isHovered && isHoverable ? '#222' : 'white',
-          color: isHovered && isHoverable ? 'white' : '#222',
-          border: '1px solid #ddd',
-          borderRadius: isArray ? '12px' : '24px',
-          padding: isArray ? '8px 12px' : '6px 12px',
-          fontSize: '14px',
-          fontWeight: 'bold',
-          boxShadow: isHovered && isHoverable 
-            ? '0 4px 12px rgba(0,0,0,0.3)' 
-            : '0 2px 6px rgba(0,0,0,0.15)',
-          cursor: isHoverable ? 'pointer' : 'default',
-          transition: 'all 0.2s ease-in-out',
-          transform: (isHovered && isHoverable) ? 'scale(1.05)' : 'scale(1)',
-          display: 'flex',
-          flexDirection: isArray ? 'column' : 'row',
-          alignItems: isArray ? 'stretch' : 'center',
-          gap: isArray ? '4px' : '2px',
-          minWidth: isArray ? '120px' : 'auto',
-        }}
+        style={chipStyle}
       >
         {isArray ? (
-          (displayPrice as PriceItem[]).map((p, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+          (displayPrice as PriceItem[]).map((p) => (
+            <div key={`${p.label ?? ''}-${p.price}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
               {p.label && (
                 <span style={{ 
                   color: isHovered && isHoverable ? '#aaa' : '#666', 

@@ -29,6 +29,37 @@ export const PinMarker: React.FC<PinMarkerProps> = ({
   // Total visual height = SVG (size * 1.5) + label (if any).
   const teardropHeight = size * 1.5;
 
+  // Icon centered in the teardrop head (cx=12, cy=12 of viewBox 24x36).
+  const iconStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: teardropHeight * (12 / 36),
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: size * 0.55,
+    height: size * 0.55,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
+    pointerEvents: 'none',
+  };
+  const labelStyle: React.CSSProperties = {
+    position: 'absolute',
+    top: teardropHeight + 4,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    background: 'rgba(255, 255, 255, 0.9)',
+    padding: '2px 6px',
+    borderRadius: '4px',
+    fontSize: '12px',
+    fontWeight: 'bold',
+    color: '#333',
+    whiteSpace: 'nowrap',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+    pointerEvents: 'none',
+    textShadow: '0 0 2px white',
+  };
+
   return (
     <Marker {...props} anchor="bottom">
       <div
@@ -53,49 +84,17 @@ export const PinMarker: React.FC<PinMarkerProps> = ({
         >
           <path
             fill={color}
-            d="M12,0 C5.372583,0 0,5.372583 0,12 C0,21 12,36 12,36 C12,36 24,21 24,12 C24,5.372583 18.627417,0 12,0 Z"
+            d="M12,0 C5.37,0 0,5.37 0,12 C0,21 12,36 12,36 C12,36 24,21 24,12 C24,5.37 18.63,0 12,0 Z"
           />
           {showInnerCircle && <circle cx="12" cy="12" r="8" fill="white" />}
         </svg>
 
-        {/* Icon centered in the teardrop head (cx=12, cy=12 of viewBox 24x36). */}
-        <div
-          style={{
-            position: 'absolute',
-            top: teardropHeight * (12 / 36),
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: size * 0.55,
-            height: size * 0.55,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1,
-            pointerEvents: 'none',
-          }}
-        >
+        <div style={iconStyle}>
           {icon}
         </div>
 
         {label && (
-          <div
-            style={{
-              position: 'absolute',
-              top: teardropHeight + 4,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              background: 'rgba(255, 255, 255, 0.9)',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              color: '#333',
-              whiteSpace: 'nowrap',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-              pointerEvents: 'none',
-              textShadow: '0 0 2px white',
-            }}
-          >
+          <div style={labelStyle}>
             {label}
           </div>
         )}

@@ -46,24 +46,26 @@ export const ClusterMarker: React.FC<ClusterMarkerProps> = ({
     event.currentTarget.style.transform = 'scale(1)';
   }, []);
 
+  const bubbleStyle: React.CSSProperties = {
+    width: clusterSize,
+    height: clusterSize,
+    backgroundColor: clusterColor,
+    color: count > 100 ? '#333' : 'white',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontWeight: 'bold',
+    fontSize: clusterSize * 0.4,
+    boxShadow: '0 0 0 4px rgba(255,255,255,0.5), 0 2px 4px rgba(0,0,0,0.3)',
+    cursor: onClick ? 'pointer' : 'default',
+    transition: 'transform 0.2s ease',
+  };
+
   return (
     <Marker {...props} onClick={markerOnClick} isCluster={true}>
       <div
-        style={{
-          width: clusterSize,
-          height: clusterSize,
-          backgroundColor: clusterColor,
-          color: count > 100 ? '#333' : 'white',
-          borderRadius: '50%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 'bold',
-          fontSize: clusterSize * 0.4,
-          boxShadow: '0 0 0 4px rgba(255,255,255,0.5), 0 2px 4px rgba(0,0,0,0.3)',
-          cursor: onClick ? 'pointer' : 'default',
-          transition: 'transform 0.2s ease',
-        }}
+        style={bubbleStyle}
         onMouseEnter={handleEnter}
         onMouseLeave={handleLeave}
       >

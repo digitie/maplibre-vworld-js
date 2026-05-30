@@ -67,25 +67,23 @@ export const MapContextMenu: React.FC<MapContextMenuProps> = ({
     };
   }, [onClose]);
 
+  const containerStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: y,
+    left: x,
+    zIndex: 9999, // Should be above the map and other map controls
+    background: 'white',
+    border: '1px solid #ccc',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+    borderRadius: '4px',
+    padding: '4px 0',
+    minWidth: '160px',
+    fontFamily: 'sans-serif',
+    ...style,
+  };
+
   const menuElement = (
-    <div
-      ref={containerRef}
-      className={className}
-      style={{
-        position: 'fixed',
-        top: y,
-        left: x,
-        zIndex: 9999, // Should be above the map and other map controls
-        background: 'white',
-        border: '1px solid #ccc',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-        borderRadius: '4px',
-        padding: '4px 0',
-        minWidth: '160px',
-        fontFamily: 'sans-serif',
-        ...style,
-      }}
-    >
+    <div ref={containerRef} className={className} style={containerStyle}>
       {children}
     </div>
   );

@@ -8,6 +8,25 @@ import type { MapInteractionContext } from './VWorldMap';
 
 let globalMarkerZIndex = 1000;
 
+// Hover tooltip container — static, so hoisted out of render to avoid
+// reallocating the object on every render.
+const TOOLTIP_STYLE: React.CSSProperties = {
+  position: 'absolute',
+  bottom: '100%',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  marginBottom: '8px',
+  backgroundColor: 'white',
+  padding: '8px',
+  borderRadius: '4px',
+  boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+  zIndex: 1000,
+  width: 'max-content',
+  maxWidth: '200px',
+  textAlign: 'center',
+  pointerEvents: 'none',
+};
+
 export interface MarkerProps {
   /** Marker position as `[longitude, latitude]`. */
   lngLat: [number, number];
@@ -300,29 +319,12 @@ export const Marker: React.FC<MarkerProps> = ({
       <div ref={elRef} style={{ position: 'relative', cursor: onClick ? 'pointer' : 'default' }}>
         {children}
         {isHovered && (title || description || imageUrl) && (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '100%',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              marginBottom: '8px',
-              backgroundColor: 'white',
-              padding: '8px',
-              borderRadius: '4px',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-              zIndex: 1000,
-              width: 'max-content',
-              maxWidth: '200px',
-              textAlign: 'center',
-              pointerEvents: 'none',
-            }}
-          >
+          <div style={TOOLTIP_STYLE}>
             {imageUrl && (
               <img src={imageUrl} alt={title} style={{ width: '100%', borderRadius: '2px', marginBottom: '4px' }} />
             )}
             {title && <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#333' }}>{title}</div>}
-            {description && <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>{description}</div>}
+            {description && <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>{description}</div>}
           </div>
         )}
       </div>,

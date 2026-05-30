@@ -17,6 +17,47 @@ export interface PlaceMarkerProps extends Omit<MarkerProps, 'children'> {
   simplifyAtZoom?: number;
 }
 
+const CARD_STYLE: React.CSSProperties = {
+  position: 'relative',
+  background: 'white',
+  borderRadius: '8px',
+  overflow: 'visible',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+  width: '200px',
+  fontFamily: 'sans-serif',
+  cursor: 'default',
+};
+const CLOSE_BTN_STYLE: React.CSSProperties = {
+  position: 'absolute',
+  top: '8px',
+  right: '8px',
+  background: 'rgba(0,0,0,0.5)',
+  color: 'white',
+  border: 'none',
+  borderRadius: '50%',
+  width: '20px',
+  height: '20px',
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '12px',
+  zIndex: 10,
+  padding: 0,
+  lineHeight: 1,
+};
+const ARROW_STYLE: React.CSSProperties = {
+  position: 'absolute',
+  bottom: '-8px',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  borderWidth: '8px 8px 0',
+  borderStyle: 'solid',
+  borderColor: 'white transparent transparent transparent',
+  display: 'block',
+  width: 0,
+};
+
 export const PlaceMarker: React.FC<PlaceMarkerProps> = ({
   title,
   description,
@@ -68,61 +109,21 @@ export const PlaceMarker: React.FC<PlaceMarkerProps> = ({
     // tip at the lngLat — use the `bottom` anchor with a small upward
     // offset so the arrow has room to sit above the dot.
     <Marker {...props} anchor="bottom" offset={[0, -8]}>
-      <div
-        style={{
-          position: 'relative',
-          background: 'white',
-          borderRadius: '8px',
-          overflow: 'visible',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          width: '200px',
-          fontFamily: 'sans-serif',
-          cursor: 'default',
-        }}
-      >
+      <div style={CARD_STYLE}>
         {isManuallyExpanded && (
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               setIsManuallyExpanded(false);
             }}
-            style={{
-              position: 'absolute',
-              top: '8px',
-              right: '8px',
-              background: 'rgba(0,0,0,0.5)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '50%',
-              width: '20px',
-              height: '20px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              zIndex: 10,
-              padding: 0,
-              lineHeight: 1,
-            }}
+            style={CLOSE_BTN_STYLE}
             aria-label="Close"
           >
             ✕
           </button>
         )}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '-8px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            borderWidth: '8px 8px 0',
-            borderStyle: 'solid',
-            borderColor: 'white transparent transparent transparent',
-            display: 'block',
-            width: 0,
-          }}
-        />
+        <div style={ARROW_STYLE} />
 
         {photoUrl && (
           <img
@@ -134,7 +135,7 @@ export const PlaceMarker: React.FC<PlaceMarkerProps> = ({
         <div style={{ padding: '12px' }}>
           <div
             style={{
-              fontSize: '10px',
+              fontSize: '12px',
               color: '#888',
               textTransform: 'uppercase',
               letterSpacing: '0.5px',
