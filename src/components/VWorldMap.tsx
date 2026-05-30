@@ -510,15 +510,27 @@ export const VWorldMap: React.FC<VWorldMapProps> = ({
     map.on('contextmenu', handleContextMenu);
     map.on('error', handleError);
 
+    // Coalesce resize callbacks into a single animation frame. Calling
+    // map.resize() synchronously inside the ResizeObserver callback can
+    // retrigger layout in the same frame and re-fire the observer, producing
+    // a "ResizeObserver loop" that pins the main thread and freezes the tab.
+    let resizeFrame = 0;
     const resizeObserver =
       typeof ResizeObserver !== 'undefined'
-        ? new ResizeObserver(() => map.resize())
+        ? new ResizeObserver(() => {
+            if (resizeFrame) return;
+            resizeFrame = requestAnimationFrame(() => {
+              resizeFrame = 0;
+              map.resize();
+            });
+          })
         : null;
     if (resizeObserver && containerRef.current) {
       resizeObserver.observe(containerRef.current);
     }
 
     return () => {
+      if (resizeFrame) cancelAnimationFrame(resizeFrame);
       resizeObserver?.disconnect();
       map.off('load', handleLoad);
       map.off('zoomend', handleZoomEnd);

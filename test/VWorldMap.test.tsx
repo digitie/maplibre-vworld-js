@@ -455,4 +455,53 @@ describe('VWorldMap', () => {
     });
 
   });
+
+  describe('resize handling', () => {
+    it('coalesces ResizeObserver callbacks into a single rAF resize (no sync resize loop)', () => {
+      vi.clearAllMocks();
+      const OriginalRO = globalThis.ResizeObserver;
+      let roCallback: () => void = () => {};
+      globalThis.ResizeObserver = class {
+        constructor(cb: () => void) {
+          roCallback = cb;
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      } as unknown as typeof ResizeObserver;
+
+      const rafCallbacks: FrameRequestCallback[] = [];
+      const rafSpy = vi
+        .spyOn(globalThis, 'requestAnimationFrame')
+        .mockImplementation((cb: FrameRequestCallback) => {
+          rafCallbacks.push(cb);
+          return rafCallbacks.length;
+        });
+
+      try {
+        render(<VWorldMap apiKey="test-key" center={[127, 37]} />);
+        const map = latestMapMock();
+
+        // Several resize notifications arrive in the same frame.
+        roCallback();
+        roCallback();
+        roCallback();
+
+        // resize() must NOT run synchronously inside the observer callback —
+        // that synchronous re-layout is what produced the ResizeObserver loop
+        // freeze. And the burst must collapse into a single scheduled frame.
+        expect(map.resize).not.toHaveBeenCalled();
+        expect(rafCallbacks).toHaveLength(1);
+
+        // Flushing the frame applies exactly one resize.
+        act(() => {
+          rafCallbacks.forEach((cb) => cb(0));
+        });
+        expect(map.resize).toHaveBeenCalledTimes(1);
+      } finally {
+        rafSpy.mockRestore();
+        globalThis.ResizeObserver = OriginalRO;
+      }
+    });
+  });
 });
