@@ -2,7 +2,7 @@
 
 새 에이전트 세션이 시작될 때 "지금 어디까지 했고, 다음은 뭐 하면 되나"를 한 화면에서 답한다.
 
-## 현재 진척도 (2026-05-31 갱신)
+## 현재 진척도 (2026-06-05 갱신)
 
 - ✅ T-001~T-038: 코어 라이브러리 + 보안 패치 + GitHub dependency 패키징 + zod v4 + 디버그 hook + TripMate primitive + 범용 라이브러리 정리 + python-kraddr-geo 문서 구조/한글화 + RouteLine GeoJSON 복구 + supercluster generateId + Marker portal leak 테스트 + 동적 z-index + PriceMarker 다중 가격/LOD/Manual Expand(ADR-11) + 소비자 요구사항/도메인 마커(ADR-16/17) + CodeGraph/worktree 운영 정책(ADR-12) + 에이전트별 MCP 설정
 - ✅ T-019: ADR-14로 동적 `getCapabilities` 검증 도입을 기각하고 하드코딩 표 유지
@@ -10,11 +10,12 @@
 - ✅ T-027: 마커/지도 클릭 구분 interaction context(`source`/`interactionId`/`lngLat`) 비파괴 구현
 - ✅ T-028: 지원되지 않는 타일 fallback(`unsupportedTileFallback`) 구현
 - ✅ T-029: ADR-13으로 ADR-10을 대체해 제한적 CI 복원(`.github/workflows/ci.yml`)
-- ✅ T-039~T-040 + v0.1.1: 의존성 최신화 + react-doctor 100/100(ADR-18) + v0.1.1 릴리즈 + stale 문서 정합화
+- ✅ T-039~T-041 + v0.1.2: 의존성 최신화 + react-doctor 100/100(ADR-18) +
+  v0.1.1/v0.1.2 릴리즈 + stale 문서 정합화 + consumer feature catalog 정합화
 
 ## 다음 한 작업 (1시간 이내 분량)
 
-현재 미완료 기능 백로그는 없다(T-001~T-040 완료). 다음 작업은 새 요구사항이 들어올 때 정해진다. 신규 항목은 `docs/tasks.md`에 `T-041`부터 등록한다.
+현재 미완료 기능 백로그는 없다(T-001~T-041 완료). 다음 작업은 새 요구사항이 들어올 때 정해진다. 신규 항목은 `docs/tasks.md`에 `T-042`부터 등록한다.
 
 ## 작업 시작 전 확인할 것
 

@@ -2,6 +2,29 @@
 
 새 항목은 항상 파일 맨 위에 추가(역시간순). 기존 항목은 절대 수정하지 않는다 — 잘못된 결정조차 기록으로 남는 것이 가치다.
 
+## 2026-06-05 (consumer feature catalog 정합화 — T-041)
+
+**작업**: `docs/consumer-feature-catalog.md`가 T-033~T-037(PR #37) 구현 이후에도
+일부 항목을 `❓`로 남겨 TripMate의 선행 PR 체크리스트와 어긋났다. 실제 코드와
+`docs/tasks.md` 완료 상태에 맞춰 consumer 공통 기능 카탈로그를 정정했다.
+
+**구현 상세**:
+- `UserLocationMarker`, Marker `onContextMenu`/hover tooltip/selection prop,
+  `cameraTarget`/`cameraTransition`/`bbox`, `MeasureLine`/`haversine` 상태를 `✅`로
+  갱신했다.
+- `EventMarker`/`NoticeMarker`는 라이브러리 API가 아니라 `dev/examples/markers/`
+  예제라는 책임 경계를 다시 명시했다.
+- `docs/tasks.md`와 `docs/resume.md`에 T-041 완료 및 다음 작업 번호를 반영했다.
+
+**검증**: `PUPPETEER_SKIP_DOWNLOAD=1 npm ci`, `npm run type-check`, `npm test`
+(58 passed), `npm run build`, `git diff --exit-code -- dist/`, `npm run pack:check`
+통과.
+
+**다음 작업**: TripMate 쪽 T-063 consumer sync 체크리스트를 이 카탈로그 기준으로
+갱신.
+
+---
+
 ## 2026-05-31 (tasks.md 배치 정정 — T-033~T-037 완료 이동)
 
 **작업**: `docs/tasks.md`에서 T-033~T-037이 `[x]`(완료) 체크되어 있는데도 "## 대기" 섹션 아래에 남아 있어 미완료처럼 보였다. 이들은 2026-05-28 PR #37(`b899e5b`)에서 모두 구현·머지된 상태(`UserLocationMarker`, Marker hover/tooltip prop, `cameraTarget`/`cameraTransition`/`bbox`, `MeasureLine`+`haversine`, `EventMarker`/`NoticeMarker` 예제)다. 다섯 항목을 "## 완료"로 옮기고 "## 대기"를 "(없음)"으로 정리했다.
