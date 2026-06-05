@@ -20,6 +20,9 @@
 팔레트 상수는 라이브러리에 박지 않는다 (TripMate ADR-005 mirror — 라이브러리는
 앱 lock-in을 만들지 않는다).
 
+> 2026-06-05 기준: T-033~T-037(PR #37)에서 소비자 공통 기능 백로그가 구현되어
+> §1의 TripMate v0.1.0 게이트 항목은 모두 라이브러리에 제공된다.
+
 ## 1. 공통 기능 카탈로그 (라이브러리 PR 대상)
 
 상태 표기:
@@ -42,26 +45,26 @@ debounce는 소비자 측에서 (예: 250ms + AbortController). 라이브러리�
 
 | 기능 | 상태 | 비고 |
 |------|------|------|
-| `<UserLocationMarker lngLat accuracy_m />` | ❓ | `<PulsingMarker>`로 대체 가능 여부 확인 |
+| `<UserLocationMarker lngLat accuracy_m />` | ✅ | `PulsingMarker` 합성 + 정확도 원 표시 |
 | `flyToUserLocation` prop pattern | ✅ | 선언형 `center` prop 변경 또는 `flyToOptions` |
 
-소비자가 사용 시 발견되면 PR 후보.
+위치 권한 요청, 동의 문구, 감사 로그는 소비자 앱 책임이다.
 
 ### 1.3 우클릭 메뉴
 
 | 기능 | 상태 | 비고 |
 |------|------|------|
 | `onContextMenu(e)` 지도 우클릭 | ✅ | raw `MapMouseEvent` |
-| `<Marker onContextMenu>` 마커 우클릭 | ❓ | 확인 후 PR 가능 |
+| `<Marker onContextMenu>` 마커 우클릭 | ✅ | `MarkerProps.onContextMenu` |
 
 ### 1.4 Marker generic props
 
 | Prop | 상태 | 비고 |
 |------|------|------|
 | `lngLat` / `color` / `icon` / `size` | ✅ | 기본 SDK 영역 |
-| `title` / `description` / `imageUrl` | ❓ | tooltip 데이터로 활용 |
-| `onClick` / `onHover` / `onContextMenu` | ✅ / ❓ / ❓ | hover / contextmenu 확인 |
-| `selected` boolean | ❓ | 양방향 selection (목록 ↔ 마커) 강조 |
+| `title` / `description` / `imageUrl` | ✅ | `Marker` hover tooltip |
+| `onClick` / `onMouseEnter` / `onMouseLeave` / `onContextMenu` | ✅ | raw DOM event + `MapInteractionContext` |
+| `selected` / `highlighted` boolean | ✅ | 양방향 selection (목록 ↔ 마커) 강조 |
 
 소비자별 marker (Event / Notice) 는 본 라이브러리에 박지
 않는다 (`§2` 참고). marker prop 자체의 generic 확장만 라이브러리 영역.
@@ -71,7 +74,7 @@ debounce는 소비자 측에서 (예: 250ms + AbortController). 라이브러리�
 | 기능 | 상태 | 비고 |
 |------|------|------|
 | `<Popup>` 컴포넌트 (마커 click) | ✅ | 이전 `<MapPopup>`에서 이름 변경 |
-| 마커 hover tooltip | ❓ | 별 컴포넌트 또는 marker prop 옵션 |
+| 마커 hover tooltip | ✅ | `Marker`의 `title` / `description` / `imageUrl` prop |
 | Popup `offset` / `anchor` / `maxWidth` | ✅ | 일반 SDK |
 
 ### 1.6 카메라 / 애니메이션
@@ -79,16 +82,16 @@ debounce는 소비자 측에서 (예: 250ms + AbortController). 라이브러리�
 | 기능 | 상태 | 비고 |
 |------|------|------|
 | `center` / `zoom` 선언형 prop | ✅ | rerender 시 자동 transition |
-| `cameraTarget={center, zoom, bearing, pitch}` | ❓ | 통합 prop으로 정리 PR 후보 |
-| `cameraTransition: 'instant' / 'smooth' / 'flyOver'` | ❓ | 애니메이션 종류 prop |
-| `bbox` prop (= `fitBounds`) | ❓ | viewport reset |
+| `cameraTarget` (`center`, `zoom`, `bearing`, `pitch`) | ✅ | 통합 카메라 prop |
+| `cameraTransition: 'instant' / 'smooth' / 'flyOver'` | ✅ | 애니메이션 종류 prop |
+| `bbox` prop (= `fitBounds`) | ✅ | viewport reset |
 
 ### 1.7 거리 / 측정
 
 | 기능 | 상태 | 비고 |
 |------|------|------|
-| `<MeasureLine points={...}>` | ❓ | 사용자 측정 도구 — PR 후보 |
-| `haversine(a, b)` utility export | ❓ | 클라이언트 직선 거리 |
+| `<MeasureLine points={...}>` | ✅ | 사용자 측정 도구 |
+| `haversine(a, b)` utility export | ✅ | 클라이언트 직선 거리 |
 
 ### 1.8 좌표 / 검증
 
@@ -127,7 +130,7 @@ debounce는 소비자 측에서 (예: 250ms + AbortController). 라이브러리�
 - **POI / 마커 D&D 비즈니스 룰** — LexoRank reorder / optimistic lock / 동시편집
   conflict 등 — 소비자 도메인
 - **도메인 marker 컴포넌트** (`EventMarker` / `NoticeMarker`) — 소비자가 `<Marker>` generic primitive 위에
-  도메인 props로 wrap
+  도메인 props로 wrap. 라이브러리 저장소에는 예제만 둔다(`dev/examples/markers/`).
   *(단, `PriceMarker`, `PlaceMarker`, `WeatherMarker`는 범용적인 패턴을 인정받아 본 라이브러리의 기본 컴포넌트로 유지됨 - T-032)*
 - **Notice / Plan / Trip 도메인 다이얼로그** — 소비자 도메인
 - **사용자 동의 기반 위치 권한 흐름** — 소비자 법규 (한국 LBS, GDPR 등)

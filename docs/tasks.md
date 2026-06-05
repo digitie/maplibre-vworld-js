@@ -9,6 +9,10 @@
 - (없음)
 
 ## 완료
+- [x] T-041 consumer feature catalog 정합화 — T-033~T-037(PR #37)로 이미 구현된
+  `UserLocationMarker`, Marker hover/contextmenu prop, `cameraTarget`/`bbox`,
+  `MeasureLine`/`haversine` 상태를 `docs/consumer-feature-catalog.md`에 반영.
+  (2026-06-05)
 - [x] T-040 stale 문서 정합화 — CLAUDE.md(현황·CI 상태·후속 백로그·브랜치 정리)와 resume.md(진척도·다음 작업·worktree 경로)를 `docs/tasks.md` 실제 상태에 맞게 갱신. T-019/T-026~T-029 완료 및 ADR-13 CI 복원, v0.1.1 릴리즈 반영. (2026-05-31)
 - [x] T-039 ADR-18의 CI 진술 오류 수정 — "ADR-10과 일관되게 GitHub Actions 미사용"이라는 잘못된 문구를 ADR-13(CI 제한적 복원, ADR-10 대체) 사실에 맞게 정정. (2026-05-31)
 - [x] T-038 에이전트별 MCP 설정 고도화 및 고정 worktree 개편 — claude.json, antigravity.json, codex.json을 생성하여 Git으로 관리하고, 기존 로컬 설정(.codex/config.toml, .gemini/mcp.json)과 매뉴얼 문서(AGENTS.md, CLAUDE.md, SKILL.md)를 갱신하였으며, F:\dev\vw-codex, vw-antigravity, vw-claude 경로의 고정 worktree 3개를 생성 및 등록 완료. Vitest mock 결함도 수정함. (2026-05-30)
