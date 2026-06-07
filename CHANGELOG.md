@@ -2,6 +2,15 @@
 
 `maplibre-vworld`의 주목할 만한 변경 사항을 기록한다. 포맷은 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)를 따르고 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)을 느슨하게 준수한다. 1.0.0은 PR #14 머지 후 안정 baseline이다. 표준 헤더(`### Added`/`Changed`/`Removed`/`Fixed`/`Security`)는 Keep-a-Changelog 표준에 따라 영문을 유지하고, 본문 항목은 한글로 적는다.
 
+## [0.1.3] - 2026-06-07
+
+### Changed
+
+- 문서 정합화 (코드·`dist` 변경 없음 — `src/`·public API·`dist` 모두 v0.1.2와 동일):
+  - consumer feature catalog를 현행 export 표면에 맞게 동기화 (#46).
+  - `tasks.md` T-033~T-037을 대기→완료로 이동 (#45).
+- 소비자(`python-krtour-map` frontend) "최신 버전 핀" 요청에 따라 v0.1.2 이후 docs 커밋을 포함하는 patch 릴리스를 cut. 기능 변경이 없으므로 소비자 코드 수정은 불필요하다.
+
 ## [0.1.2] - 2026-05-31
 
 ### Changed
